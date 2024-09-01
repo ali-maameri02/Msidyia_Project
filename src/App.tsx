@@ -1,32 +1,24 @@
+import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-//importing react slick slider
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-
 import { animateScroll } from "react-scroll";
-
-import NavBar from "./components/organs/NavBar"
 import Home from "./components/pages/Home";
-import { useEffect } from "react";
-import Footer from "./components/organs/Footer";
+import DashboardRoutes from "./components/dashboard/teacher/Dashboardroutes";
 
 function App() {
-  const directory = useLocation();
+  const location = useLocation();
+
   useEffect(() => {
-    animateScroll.scrollToTop({
-      duration: 0,
-    });
-  }, [directory.pathname]);
+    animateScroll.scrollToTop({ duration: 0 });
+  }, [location.pathname]);
 
   return (
     <div className="w-full bg-white text-gray-950 font-poppins">
-      <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="dashboard/*" element={<DashboardRoutes />} />
       </Routes>
-      <Footer />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

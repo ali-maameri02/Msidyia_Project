@@ -1,10 +1,13 @@
 import { Image } from "../atoms/Image"
 import bgImage from "../../assets/HeroVector.png"
-import heroImage from "../../assets/hero-img.png"
+// import heroImage from "../../assets/hero-img.png"
+import heroImage2 from "../../assets/hero-img (2).png"
 import { Text } from "../atoms/Text"
 import { HeroTexts } from "../particles/DataLists"
 import { Button } from "../atoms/Button"
 import { Play } from "@phosphor-icons/react"
+import SearchBar from "material-ui-search-bar";
+
 import { Fade, Slide } from "react-awesome-reveal"
 
 
@@ -20,9 +23,9 @@ const HeroSection = () => {
                     <Text as="h1" className=" text-color3 lg:text-7xl md:text-5xl text-3xl font-medium">
                         <Fade>{HeroTexts.secondText}</Fade>
                     </Text>
-                    <Text as="p" className="text-color3 md:text-base text-sm text-justify font-light">
+                    {/* <Text as="p" className="text-color3 md:text-base text-sm text-justify font-light">
                         <Fade>{HeroTexts.thirdText}</Fade>
-                    </Text>
+                    </Text> */}
                     <div className="w-full flex md:justify-start justify-between items-center lg:gap-12 md:gap-6 gap-0">
                         <Button type="button" className="outline-none border-none lg:px-7 px-5 py-3 bg-color2 text-white font-extralight rounded-lg">
                             {HeroTexts.firstButton}
@@ -40,10 +43,14 @@ const HeroSection = () => {
                         </div>
 
                     </div>
+                    <div className="searchbar flex ml-14" style={{width:'80vw',justifyContent:'center'}}>
+                    <SearchBar className="z-40  border-0 shadow-none "  style={{width:'70vw'}} />
+                    </div>
+
                 </div>
                 <div className="flex flex-col items-center justify-end md:order-2 order-1">
                     <Slide direction="right">
-                        <Image image={heroImage} alt="Hero Image" className=" lg:h-[85%] lg:w-[90%] md:h-[100%] md:w-full w-[90%] h-[50vh]" />
+                        <Image image={heroImage2} alt="Hero Image" className=" top:0 lg:h-[100%] lg:w-[100%] md:h-[100%] md:w-full w-[100%] h-[100vh]" />
                     </Slide>
 
                 </div>

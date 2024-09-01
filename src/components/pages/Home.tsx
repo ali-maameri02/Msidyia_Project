@@ -1,24 +1,31 @@
-import BookingSteps from "../organs/BookingSteps"
-import HeroSection from "../organs/HeroSection"
-import NewsLetter from "../organs/NewsLetter"
-import Partners from "../organs/Partners"
-import Services from "../organs/Services"
-import Testimonials from "../organs/Testimonials"
-import TopDestination from "../organs/TopDestination"
+import React from 'react';
+import BookingSteps from '../Landing/BookingSteps';
+import HeroSection from '../Landing/HeroSection';
+import NewsLetter from '../Landing/NewsLetter';
+import TeachersList from '../Landing/TeachersList';
+import Services from '../Landing/Services';
+import Testimonials from '../Landing/Testimonials';
+import CoursesGrid from '../Landing/CourseGrid';
+import Footer from "../Landing/Footer";
+import NavBar from "../Landing/NavBar"
 
 
-const Home = () => {
-    return (
-        <>
-            <HeroSection />
-            <Services />
-            <TopDestination />
-            <BookingSteps />
-            <Testimonials />
-            <Partners />
-            <NewsLetter />
-        </>
-    )
-}
+const Home: React.FC = () => {
+  return (
+    <>
+     <NavBar />
+      <HeroSection />
+      <Services />
+      <CoursesGrid />
+      {/* <BookingSteps /> */}
+     
+      <TeachersList />
+      
+      <Testimonials />
+      {/* <NewsLetter /> */}
+      <Footer />
+    </>
+  );
+};
 
-export default Home
+export default Home;

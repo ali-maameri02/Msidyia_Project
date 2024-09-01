@@ -9,7 +9,66 @@
         @apply relative z-10 before: absolute before:-z-10 before:content-[''];
     }
 } */
+.shadow_nav{
+    box-shadow: 0 5px 10px 2px rgba(0, 0, 0, 0.146);
+}
+.navbar-container {
+  overflow: hidden; /* Prevents the navbar from scrolling */
+}
+/* Ensure horizontal overflow is hidden for parent container */
+/* Ensure horizontal overflow is hidden for parent container */
+.scroll-container {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    width: 80vw; /* Adjust as needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin:0 5vw;
+  }
+  
+  .scroll-content {
+    display: flex;
+    gap: 1rem; /* Space between cards */
+    will-change: transform;
+    transition: transform 1s linear; /* Smooth scrolling effect */
+  }
+  
+/* .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge 
+    scrollbar-width: none; 
+  }
+  /* Custom scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #22D3EE transparent; /* For Firefox */
+}
 
+/* For WebKit-based browsers like Chrome and Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #22D3EE; /* Use Tailwind's color1 */
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tw-color1); /* Darker on hover */
+}
+
+   */
 .cardPseudo {
     position: relative;
     /* z-index: 5; */
@@ -31,3 +90,191 @@
     bottom: -1.5rem;
     left: -1.5rem;
 }
+
+
+.footer {
+  background-color: #fff;
+  color: #000;
+  padding: 20px 0;
+  text-align: center;
+  box-shadow: 0px 3px 10px 5px #0d0e0e16;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 250px;
+  margin: 10px;
+}
+
+.footer-section h2,
+.footer-section h3 {
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.footer-section p {
+  margin-bottom: 15px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+}
+
+.register-btn {
+  background-color: #0AA2A4;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+/* Common styles */
+.form-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Animation for fading */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+/* Animation for sliding */
+.slide-enter {
+  transform: translateX(100%);
+}
+.slide-enter-active {
+  transform: translateX(0);
+  transition: transform 0.5s;
+}
+.slide-exit {
+  transform: translateX(0);
+}
+.slide-exit-active {
+  transform: translateX(-100%);
+  transition: transform 0.5s;
+}
+
+
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.social-icons i {
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.social-icons i:hover {
+  color: #0AA2A4;
+  
+}
+
+.footer-bottom {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+
+/* .balimg{
+  background: #000;
+} */
+
+
+.user-profile {
+  display: flex;
+}
+
+.sidebar {
+  width: 300px;
+  padding: 20px;
+  background: #fff;
+  border-right: 1px solid #e0e0e0;
+}
+
+.profile-pic {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.stats {
+  margin: 20px 0;
+}
+
+.stats p {
+  margin: 5px 0;
+}
+
+.view-profile {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.account-settings {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.cover-photo {
+  position: relative;
+  height: 100px;
+  background-color: #f0f0f0;
+}
+
+.change-cover {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+form {
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+

@@ -1,18 +1,22 @@
 export const NavLinks = [
     {
-        name: "Destination",
+        name: "Home",
         url: "/"
     },
     {
-        name: "Hotels",
+        name: "Tutors",
         url: "/"
     },
     {
-        name: "Flights",
+        name: "Group Classes",
         url: "/"
     },
     {
-        name: "Bookings",
+        name: "Courses",
+        url: "/"
+    },
+    {
+        name: "How Its Works?",
         url: "/"
     }
 
@@ -32,9 +36,8 @@ export const NavButtons = [
 
 
 export const HeroTexts = {
-    firstText: "BEST DESITNATIONS AROUND THE WORLD",
-    secondText: "Travel, enjoy and live a new and full life.",
-    thirdText: "Built Wicket longer admire do barton vantity itself do in it. Preferred to sportsmen it engrossed listening. Park gate sell they west hard for the.",
+    firstText: "BEST E-learning Platform ",
+    secondText: "Find Your Group Class Or Tutor And Start Learning Now!",
     firstButton: "Find out more",
     secondButton: 'Play Demo'
 }
@@ -42,18 +45,18 @@ export const HeroTexts = {
 
 export const ServiceTexts = {
     firstText: "CATEGORY",
-    secondText: "We Offer Best Services",
+    secondText: "We Offer This Categories",
     cards: [
         {
-            firstText: "Calculated Weather",
+            firstText: "Programming",
             secondText: "Built Wicket longer admire do barton vantity itself do in it."
         },
         {
-            firstText: "Best Flight",
+            firstText: "Languages",
             secondText: "engrossed listening. Park gate sell they west hard for the."
         },
         {
-            firstText: "Local Events",
+            firstText: "Matemathics",
             secondText: "barton vantity itself do in it.Preferred to men it engrossed listening."
         },
         {
