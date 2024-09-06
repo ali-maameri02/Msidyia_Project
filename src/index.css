@@ -278,3 +278,54 @@ form {
   margin-bottom: 15px;
 }
 
+/* cards Offer section*/
+.cards-container .cards {
+  padding: 30px;
+}
+.cards-container  .cards-li{
+  list-style:none;
+}
+.cards-container .cards{
+  background-color: #fff;
+  box-shadow: 0 5px 10px 2px rgba(0, 0, 0, 0.146);
+  margin-bottom: 20px;
+}
+.cards-container .cards .card-Title {
+    font-size: 3.2rem;
+    padding: 20px 0px 10px;
+    font-weight: bold;
+}
+.cards-container .cards .card-button{
+    background-color: #22D3EE;width: 100%;font-size: 1.5rem; color: #fff; font-weight: bold;border-radius: 40px;padding: 10px 0 10px 0;
+    margin-top:100px;
+    margin-bottom:70px;
+}
+.cards-container .cards .card-button:hover {
+  background-color: #fff;
+  color: #22D3EE;
+  transition: .5s;
+  box-shadow: 0 5px 10px 2px rgba(0, 0, 0, 0.146);
+}
+
+.cards-container .cards .cards-price{
+  font-size: 4rem;
+  margin: 18px 0;
+}
+.cards-container .cards .cards-listing li{
+  list-style: disc;
+  margin: 10px 0;
+}
+
+
+
+/* fixe-test */
+.fixe-test {
+  height: 216px;
+  overflow: hidden;
+}
+.fixe-test-margin {
+  margin-bottom:200px ;
+}
+
+/* fixe ends here */
+

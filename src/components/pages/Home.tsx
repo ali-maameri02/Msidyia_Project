@@ -8,6 +8,7 @@ import Testimonials from '../Landing/Testimonials';
 import CoursesGrid from '../Landing/CourseGrid';
 import Footer from "../Landing/Footer";
 import NavBar from "../Landing/NavBar"
+import OfferCards from '../Landing/OfferCards ';
 
 
 const Home: React.FC = () => {
@@ -20,7 +21,7 @@ const Home: React.FC = () => {
       {/* <BookingSteps /> */}
      
       <TeachersList />
-      
+      <OfferCards />
       <Testimonials />
       {/* <NewsLetter /> */}
       <Footer />

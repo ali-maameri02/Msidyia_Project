@@ -15,7 +15,7 @@ interface CourseCardProps {
 
 const CourseCard: React.FC<CourseCardProps> = ({ category, image, author, authorAvatar, title, learners, price, rating, reviewCount }) => {
   return (
-    <div className="max-w-xs bg-white shadow-md rounded-lg overflow-hidden transform transition-transform hover:scale-105">
+    <div className="max-w-xs bg-white shadow-md rounded-lg overflow-hidden transform transition-transform hover:scale-105 course-card-responsive">
       <div className="relative">
         <img className="w-full h-48 object-cover" src={image} alt={title} />
         <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">

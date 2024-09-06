@@ -53,7 +53,7 @@ const Testimonials = () => {
     }, [])
 
     return (
-        <section className="w-full h-auto flex flex-col items-start justify-center relative lg:px-24 md:px-10 px-6 mt-36 gap-5">
+        <section className="w-full h-auto flex flex-col items-start justify-center relative lg:px-24 md:px-10 px-6 mt-36 gap-5 fixe-test-margin">
             <main className='w-full grid md:grid-cols-2 lg:gap-0 gap-8 md:gap-5'>
                 {/* Text and Steps Container  */}
                 <div className='w-full flex flex-col gap-6'>
@@ -65,7 +65,7 @@ const Testimonials = () => {
                     </Text>
                 </div>
                 {/* Testimonial Slides Container  */}
-                <div className="w-full lg:h-[400px] flex justify-center gap-4 items-center">
+                <div className="w-full  flex justify-center gap-4 items-center fixe-test">
                     <div className="lg:h-[250px] w-[90%]">
                         <Slider ref={(slider) => (sliderRef.current = slider)} {...settings}>
                             {

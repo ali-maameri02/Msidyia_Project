@@ -63,16 +63,16 @@ const courses: Course[] = [
 
 const CoursesGrid: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 course responsive-course-grid">
       <h1 className="text-3xl font-bold mb-6 flex justify-between align-middle"><span>Browse Trending Courses</span><button className='btn btn-info bg-color1 text-white d-flex flex-row justify-around align-middle
        p-1 rounded-xl hover:bg-red-500 hover:transition-all-2s hover:ease-in-out' style={{fontSize:"20px", fontWeight:"500"}}>
         <a href="">       
          <FontAwesomeIcon icon={faEye} width={'30px'}/>
          View All
          </a></button></h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 Grid-course-card">
         {courses.map((course, index) => (
-          <CourseCard key={index} {...course} />
+          <CourseCard   key={index} {...course} />
         ))}
       </div>
     </div>
