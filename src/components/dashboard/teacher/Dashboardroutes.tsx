@@ -15,6 +15,7 @@ const DashboardRoutes: React.FC = () => {
           <Routes>
             <Route path="teacher" element={<Teacher />} />
             <Route path="teacher/profile" element={<UserProfile />} />
+
             {/* Uncomment these as needed */}
             {/* <Route path="teacher/set-price" element={<SetPrice />} />
             <Route path="teacher/group-classes" element={<GroupClasses />} />
