@@ -1,0 +1,271 @@
+
+.first-column .btn {
+    padding: 20px;
+    
+    font-weight: bold;
+}
+.first-column .btn:focus{
+    transition: .2s;
+    color: #22D3EE;
+    border-bottom: 2px solid #22D3EE;
+}
+.second-column {
+    box-shadow: 0 0 0px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 20px;
+}
+.second-column .feild-form {
+    width: 40%;
+    color:grey;
+    padding: 10px 30px;
+    border: 1px solid #eee;
+    border-radius: 7px;
+}
+.second-column .searching {
+    width: 40%;
+    margin-left: 10px;
+    padding: 10px 30px;
+    border: 1px solid#eee;
+    border-radius: 7px;
+}
+.third-column {
+    box-shadow: 0 0 0px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.third-column .my-table-shadow {
+    box-shadow: 0 0 0px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.third-column .popUp{
+    position: relative;
+    width: 700px;
+    top: -70%;
+    left: 20%;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+}
+
+
+
+
+/* F A V O R I T E    T U T O R    S E C T I O N     S T A R T   */
+
+.favoriteTutor .image-section {
+    height: 140px;
+   background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+   align-items: center;
+   justify-content: center;
+   display: flex;
+   
+}
+.favoriteTutor .raduis-border{
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+.favoriteTutor .image-section .inner {
+    width: 150px;
+    height: 150px;
+    border:  5px solid rgb(10 103 255);
+    border-radius: 50%;
+    position: relative;
+    margin-top: 100px;
+}
+.favoriteTutor .image-section .inner-inner{
+    border: 2px solid #fff;
+    width: 141px;
+    height: 141px;
+    background-color: #fff;
+    background-size: cover;
+    border: 5px solid white;
+    border-radius: 50%;
+     
+}
+
+ .favoriteTutor .image-1 .inner-inner{
+     background-image:  url(../../../assets/teacher1.png);
+    background-size: cover;
+}
+.favoriteTutor .image-2 .inner-inner{
+    background-image: url(../../../assets/teacher5.png);
+    background-size: cover;
+}
+.favoriteTutor .image-3 .inner-inner{
+    background-image: url(../../../assets/teacher1.png);
+    background-size: cover;
+}
+.favoriteTutor .image-4 .inner-inner{
+    background-image: url(../../../assets/teacher5.png);
+    background-size: cover;
+} 
+
+.favoriteTutor .name-section {
+    margin-top: 60px;
+}
+.favoriteTutor .review-section p{
+    font-weight: bold;
+    margin-top: 20px;
+}
+.favoriteTutor .review-section .stars-container{
+    margin-top: 7px;
+}
+.favoriteTutor .trial-btn {
+    background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+    width: 80%;
+    border-radius: 40px;
+    padding: 10px;
+    color: #fff;
+    margin: 20px 0;
+    font-weight: bold;
+}
+.favoriteTutor .trial-btn:hover{
+    background-color: #fff;
+    color: rgb(59 130 246 / var(--tw-bg-opacity));
+    box-shadow:   0 0 0px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.19);  
+    transition: .2s;
+}
+
+/* F A V O R I T E    T U T O R    S E C T I O N     E N D  */
+
+
+/* F A V O R I T E    G R O U P E    C L A SS   S T A R T   */
+.cards-father {
+    margin: 40px;
+}
+.course-card-container:hover{
+    scale: 1.1;
+    transition: .5s;
+    position: relative;
+    z-index: 1000;
+}
+
+.course-card-container .course-image{
+    height: 200px;
+    background-image: url(../../../assets/course1.png);
+    background-size: cover;
+    z-index: 1;
+}
+.course-card-container .teacher-picture{
+    position: relative;
+    display: flex;
+    align-items: center;
+    top: -20px;
+    left: 10px;
+}
+.course-card-container .teacher-picture .teacher-name{
+    font-weight: bold;
+    font-size: 20px;
+    margin-left: 20px;
+    position: relative;
+    top: 10px;
+}
+.course-card-container .teacher-picture .teacher-image {
+    border:1px solid #fff; 
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    background-image: url(../../../assets/teacher1.png);
+    background-size: cover;
+}   
+.course-card-container .date-section p {
+    color: gray;
+    margin: 20px 0 12px;
+} 
+.course-card-container .review-container .how-much-star p{
+    font-weight: bold;
+}
+.course-card-container .course-description .title p{
+    font-weight: bold;
+    font-size: 20px;
+    float: left;
+    margin-bottom: 5px;
+}
+.course-card-container .course-description{
+    padding: 0 10px;
+}
+.course-card-container .course-description .description p{
+    font-size: 0.8rem;
+}
+.course-card-container .booking-section {
+    display: flex;
+    align-items: center;
+    justify-content:flex-start;
+}
+.course-card-container .booking-section .btn-book-now{
+     padding: 10px 20px;
+     border-radius: 12px;
+     color: #fff;  
+}
+
+.course-card-container .booking-section{
+    margin: 10px 0;
+    padding: 0 10px;
+}
+.course-card-container .booking-section .btn-book-now:hover{
+    color: rgb(59 130 246 / var(--tw-bg-opacity));
+    font-weight: bold;
+    transition: .2s;
+    background-color: #fff;
+    box-shadow: 0 0 0px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.course-card-container .booking-section .price {
+    color:rgb(59 130 246 / var(--tw-bg-opacity)); 
+    font-weight: bolder;
+    position: relative;
+    left: 20%;
+}
+
+
+/*  M Y    C O U R S E S    S T A R T  */
+
+
+.view-course-content-container .video-container {
+    height: 380px;
+    background-color: black;
+}
+.content-detail .the-progress-container {
+   
+}
+.content-detail .progress-bar-container{
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content-detail .progress-bar-container .progress-bar{
+    width: 80%;
+    height: 20px;
+    border: 1px solid black;
+}
+.content-detail .progress-bar-container .progress-bar .inner-progress{
+    width: 80%;
+    background-color: orange;
+    height: 100%;
+}
+.main-course-title{
+    margin: 0px 0 20px;
+}
+.review-section .course-cards-review-container{
+    height: 100px;
+    display: grid;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.review-section .course-cards-review-container .image-container{
+    width: 50px;
+    height: 50px;
+    border: 1px solid white;
+    border-radius: 50%;
+    background-image: url(../../../assets/teacher1.png);
+    background-size: cover;
+    position: relative;
+    left: 40%;
+}
+
+/* msg container */
+
+.msg-container .the-msg-photo-cover {
+    background-image: url(../../../assets/teacher1.png);
+    background-size: cover;
+} 
