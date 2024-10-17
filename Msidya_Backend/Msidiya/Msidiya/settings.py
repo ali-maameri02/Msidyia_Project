@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'Msidiya.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Msidiya',
+        'USER': 'postgres',
+        'PASSWORD': '40603010',
+        'HOST': 'localhost',  # or the IP address of your PostgreSQL server
+        'PORT': '5432',       # default PostgreSQL port
     }
 }
 
