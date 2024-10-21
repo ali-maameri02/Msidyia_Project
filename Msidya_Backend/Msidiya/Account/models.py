@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser 
+from django.contrib.auth.hashers import make_password
 
 
 class User(AbstractUser):
@@ -21,7 +22,12 @@ class User(AbstractUser):
     Address = models.CharField(max_length=300,null=True)
     Zip_code = models.DecimalField(null=True,max_digits=5, decimal_places=5)
     Picture = models.ImageField( upload_to='Profiles/', height_field=None, width_field=None, max_length=None)
-
+    def save(self, *args, **kwargs):
+        if self.pk is None:  # Only hash the password when creating a new user
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+    def __str__(self):
+        return self.username
 
 
 
