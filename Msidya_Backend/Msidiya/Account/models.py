@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser 
 from django.contrib.auth.hashers import make_password
-
+from django.utils.crypto import get_random_string
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class User(AbstractUser):
     # You can add fields that you want in your form not included in the Abstract User here
@@ -32,23 +34,38 @@ class User(AbstractUser):
 
 
 class Tutor (models.Model):
-    User = models.ForeignKey(User,  on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE , null=True , default=None)  # One-to-one relation with User
     Cover = models.ImageField(upload_to='Cover/', height_field=None, width_field=None, max_length=None)    
     Description = models.CharField(null=True, max_length=50)
     Intro_video = models.FileField( upload_to='Intro_Videos/', max_length=None )
     Verification_Id = models.BooleanField(default=False)
-    
+    def __str__(self):
+         return self.user
 
 class Student (models.Model):
-    User = models.ForeignKey(User,  on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE , null=True , default=None)  # One-to-one relation with User
     Grade  = models.CharField(null=True, max_length=50)
     
 class Ms_Seller (models.Model):
-    User = models.ForeignKey(User,  on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True , default=None)  # One-to-one relation with User
     Description = models.CharField(null=True, max_length=50)
     Intro_video = models.FileField( upload_to='Intro_Videos/', max_length=None )
     Verification_Id = models.BooleanField(default=False)
-    
+
+
+
+# Signal to create corresponding role objects based on the role selected
+@receiver(post_save, sender=User)
+def create_role_instance(sender, instance, created, **kwargs):
+    if created:
+        if instance.Role == 'Tutor':
+            Tutor.objects.create(user=instance)
+        elif instance.Role == 'Student':
+            Student.objects.create(user=instance)
+        elif instance.Role == 'Ms_seller':
+            Ms_Seller.objects.create(user=instance)
+            
+            
 class Transaction (models.Model):
     
        TRANSACTION_METHODS = (
