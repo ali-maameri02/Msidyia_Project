@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__' # Add the fields
+        fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         # Call the parent constructor

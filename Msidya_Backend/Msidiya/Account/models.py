@@ -22,7 +22,7 @@ class User(AbstractUser):
     Phone_number = models.CharField( max_length=11, null=True , default=None)
     Paypal_Email = models.EmailField(max_length=254,null=True)
     Address = models.CharField(max_length=300,null=True)
-    Zip_code = models.DecimalField(null=True,max_digits=5, decimal_places=5)
+    Zip_code = models.IntegerField(null=True)
     Picture = models.ImageField( upload_to='Profiles/', height_field=None, width_field=None, max_length=None)
     def save(self, *args, **kwargs):
         if self.pk is None:  # Only hash the password when creating a new user
@@ -101,7 +101,4 @@ class Chat(models.Model):
 class Ms_wallet (models.Model):
     User = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
     Amount = models.DecimalField(max_digits=10, decimal_places=5)
-    
-    
-    
     

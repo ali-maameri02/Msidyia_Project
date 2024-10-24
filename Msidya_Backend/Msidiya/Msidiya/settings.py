@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-tir$wa786fanu%cfw#o+y8zd4-an1bo0qwqb&gvw%6f%ajl&m9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -147,6 +148,6 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  
-        'allauth.account.auth_backends.AuthenticationBackend',# Default ModelBackend
+    'allauth.account.auth_backends.AuthenticationBackend',# Default ModelBackend
     # Add any custom backends if needed
 ]
