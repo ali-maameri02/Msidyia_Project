@@ -8,6 +8,8 @@ from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from .models import User
 from .serializers import * 
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
@@ -69,36 +71,20 @@ def user_login(request):
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    
-class TutorUpdate(generics.RetrieveUpdateAPIView):
-    queryset = Tutor.objects.all()
-    serializer_class = TutorSerializer
-
-    def get_object(self):
-        # Fetching the tutor object based on the user ID from the URL
-        user_id = self.kwargs.get('id')
-        return Tutor.objects.get(user_id=user_id)  # Fetch Tutor by related user's ID
-    
-class StudentUpdate(generics.RetrieveUpdateAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-
-    def get_object(self):
-        # Fetching the tutor object based on the user ID from the URL
-        user_id = self.kwargs.get('id')
-        return Student.objects.get(user_id=user_id)  # Fetch Tutor by related user's ID
-    
-class Ms_SellerUpdate(generics.RetrieveUpdateAPIView):
-    queryset = Ms_Seller.objects.all()
-    serializer_class = Ms_SellerSerializer
-
-    def get_object(self):
-        # Fetching the tutor object based on the user ID from the URL
-        user_id = self.kwargs.get('id')
-        return Ms_Seller.objects.get(user_id=user_id)  # Fetch Tutor by related user's ID
 
 class Users(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
         return User.objects.all()  # Add parentheses here
+    
+class UserUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'pk'
+
+    def get_serializer(self, *args, **kwargs):
+        # Let DRF handle 'partial' automatically; no need to pass it manually
+        return super().get_serializer(*args, **kwargs)
+
+       

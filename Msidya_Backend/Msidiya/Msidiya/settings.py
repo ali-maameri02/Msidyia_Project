@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'Account',
     'rest_framework',
     'rest_framework.authtoken',
+     'allauth',
 ]
 
 MIDDLEWARE = [
@@ -139,6 +140,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
 
     ],
+    
 
 }
 
