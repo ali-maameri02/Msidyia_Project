@@ -18,7 +18,9 @@ class User(AbstractUser):
         ('Female', 'Female'),
         
     )
+    
     Role = models.CharField(max_length=20, choices=USER_ROLE)
+    Gender = models.CharField(max_length=20, choices=Gender, null=True , default=None )
     Phone_number = models.CharField( max_length=11, null=True , default=None)
     Paypal_Email = models.EmailField(max_length=254,null=True)
     Address = models.CharField(max_length=300,null=True)

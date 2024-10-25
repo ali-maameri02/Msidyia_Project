@@ -125,6 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -151,3 +152,54 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',# Default ModelBackend
     # Add any custom backends if needed
 ]
+
+
+
+
+JAZZMIN_SETTINGS = {
+    # "language_chooser":            True,
+    # "site_logo": get_dynamic_site_logo,
+    #  "site": "your_project_name.admin.custom_admin_site",  # Use the custom admin site
+    "site_title":                  "Msidiya",
+    "related_modal_active":        False,
+    # "custom_css":                  "/static/css/custom_admin.css",
+    # "search_model":                ["SchoolManage.CustomUser", "SchoolManage.Course"],
+    # "search_app":                  ["SchoolManage"],
+    # "topmenu_links":               [
+
+    #     # Url that gets reversed (Permissions can be added)
+    #     {"name": "Home", "url": "admin:index", },
+
+    #     # external url that opens in a new window (Permissions can be added)
+
+    #     # model admin to link to (Permissions checked against model)
+    #     {"model": "SchoolManage.CustomUser"},
+
+    #     # App with dropdown menu to all its models pages (Permissions checked against models)
+    #     {"app": "SchoolManage"},
+    # ],
+    # "usermenu_links":              [
+
+    #     {"model": "CustomUser"}
+    # ],
+    "show_sidebar":                True,
+    "navigation_expanded":         True,
+    "related_modal_active":        False,
+    "site_title":                  "Msidiya",
+    "site_header":                 "Msidiya",
+    "site_brand":                  "Msidiya",
+    "changeform_format":           "single",
+
+    # "site_logo": "images/photo_2023-11-11_10-56-40.jpg",
+    "navigation_expanded":         True,
+    "copyright":                   "Msidiya@2024",
+    "changeform_format":           "horizontal_tabs",
+    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+    "hide_apps":                   ["Auth", "authtoken"],
+    
+      "icons":                       {
+        "auth":                          "fas fa-users-cog",  # Icon for the authentication app
+        "Account.user":                     "fas fa-user",  # Icon for the User model
+        "Account.Chat":                     "fas fa-comment",  # Icon for the User model
+      }
+}
