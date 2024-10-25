@@ -1,3 +1,4 @@
+import requests
 from rest_framework.response import Response
 from rest_framework import generics
 from django.contrib.auth import authenticate
@@ -27,7 +28,6 @@ class RegisterUserView(generics.CreateAPIView):
             # print("Serializer errors:")
             # print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 def user_login(request):
@@ -70,14 +70,11 @@ def user_login(request):
             }, status=status.HTTP_200_OK)
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-    
-
 class Users(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return User.objects.all()  # Add parentheses here
-    
+        return User.objects.all()  # Add parentheses here 
 class UserUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -85,6 +82,43 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
 
     def get_serializer(self, *args, **kwargs):
         # Let DRF handle 'partial' automatically; no need to pass it manually
-        return super().get_serializer(*args, **kwargs)
+        return super().get_serializer(*args, **kwargs)  
+class NotificationListView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        user = self.request.user  # Assuming you have user authentication
+        return Notification.objects.filter(User=user)  
+class NotificationUpdateView(generics.UpdateAPIView):
+    serializer_class = NotificationSerializer
+    queryset = Notification.objects.all()
+
+    def get_object(self):
+        return self.get_queryset().filter(User=self.request.user).first()      
+class SentMessageView(generics.ListCreateAPIView):
+    serializer_class = ChatSerializer
+
+    def get_user(self):
+        return self.request.data.get('user')
+
+    def get_queryset(self):
+        user = self.get_user()
+        return Chat.objects.filter(Sender=user) if user else Chat.objects.none()
+    
+    def perform_create(self, serializer):
+        chat_instance = serializer.save()
+
+        Notification.objects.create(
+            User=chat_instance.Receiver,
+            Message=f"New message from {chat_instance.Sender.username}: {chat_instance.Content}",
+            Status=False
+        )
+
+        return Response(
+            {"detail": "Message sent and notification created."},
+            status=status.HTTP_201_CREATED
+        )
+    
+    
 
        

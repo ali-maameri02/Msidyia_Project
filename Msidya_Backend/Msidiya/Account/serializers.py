@@ -1,29 +1,19 @@
 from rest_framework import serializers
 from .models import Chat, Notification, Transaction, User, Tutor, Student, Ms_Seller
 
-
-# TutorSerializer 
 class TutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tutor
         # fields = '__all__'
-        exclude = ('user',)
-        
-      
-
-
-# Student Serializer
+        exclude = ('user',)      
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [ 'Grade']
-
-# Ms_Seller Serializer
 class MsSellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ms_Seller
-        fields = [ 'Description', 'Intro_video', 'Verification_Id']
-        
+        fields = [ 'Description', 'Intro_video', 'Verification_Id']      
 class UserSerializer(serializers.ModelSerializer):
     student = StudentSerializer(required=False)
     tutor = TutorSerializer(required=False)
@@ -108,25 +98,6 @@ class UserSerializer(serializers.ModelSerializer):
             representation.pop('tutor', None)
 
         return representation
-
-
-
-    # def to_representation(self, instance):
-    #     representation = super().to_representation(instance)
-
-    #     # Only include relevant roles in the representation
-    #     if hasattr(instance, 'student') and instance.student:
-    #         representation['tutor'] = None
-    #         representation['ms_seller'] = None
-    #     elif hasattr(instance, 'tutor') and instance.tutor:
-    #         representation['student'] = None
-    #         representation['ms_seller'] = None
-    #     elif hasattr(instance, 'ms_seller') and instance.ms_seller:
-    #         representation['student'] = None
-    #         representation['tutor'] = None
-
-    #     return representation
-
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
