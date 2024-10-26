@@ -71,18 +71,24 @@ def user_login(request):
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 class Users(generics.ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = UserUpdateSerializer
 
     def get_queryset(self):
         return User.objects.all()  # Add parentheses here 
 class UserUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserUpdateSerializer
     lookup_field = 'pk'
 
     def get_serializer(self, *args, **kwargs):
         # Let DRF handle 'partial' automatically; no need to pass it manually
         return super().get_serializer(*args, **kwargs)  
+class UserDelete(generics.RetrieveDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'pk'
+    
+    
 class NotificationListView(generics.ListAPIView):
     serializer_class = NotificationSerializer
 
@@ -118,7 +124,7 @@ class SentMessageView(generics.ListCreateAPIView):
             {"detail": "Message sent and notification created."},
             status=status.HTTP_201_CREATED
         )
-    
+
     
 
        

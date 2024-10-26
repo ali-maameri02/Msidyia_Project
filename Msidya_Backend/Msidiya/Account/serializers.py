@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import Chat, Notification, Transaction, User, Tutor, Student, Ms_Seller
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username','password','Role']
 class TutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tutor
@@ -14,7 +19,7 @@ class MsSellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ms_Seller
         fields = [ 'Description', 'Intro_video', 'Verification_Id']      
-class UserSerializer(serializers.ModelSerializer):
+class UserUpdateSerializer(serializers.ModelSerializer):
     student = StudentSerializer(required=False)
     tutor = TutorSerializer(required=False)
     ms_seller = MsSellerSerializer(required=False)
