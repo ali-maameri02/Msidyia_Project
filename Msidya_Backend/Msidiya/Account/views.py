@@ -71,7 +71,7 @@ def user_login(request):
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 class Users(generics.ListAPIView):
-    serializer_class = UserUpdateSerializer
+    serializer_class = UserSerializer
 
     def get_queryset(self):
         return User.objects.all()  # Add parentheses here 
