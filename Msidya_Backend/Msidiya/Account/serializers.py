@@ -30,7 +30,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         # Call the parent constructor
-        super(UserSerializer, self).__init__(*args, **kwargs)
+        super(UserUpdateSerializer, self).__init__(*args, **kwargs)
         
         # Get the role of the user if available
         if 'data' in kwargs:
@@ -103,6 +103,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             representation.pop('tutor', None)
 
         return representation
+
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
