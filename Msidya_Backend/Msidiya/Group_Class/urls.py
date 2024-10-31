@@ -14,8 +14,11 @@ urlpatterns = [
     path('group-class-reviews/<int:pk>/', views.GroupClassReviewDetailView.as_view(), name='group-class-review-detail'),
     path('reports/', views.ReportListCreateView.as_view(), name='report-list-create'),
     path('reports/<int:pk>/', views.ReportDetailView.as_view(), name='report-detail'),
-    path('schedules/', views.ScheduleListCreateView.as_view(), name='schedule-list-create'),
-    path('schedules/<int:pk>/', views.ScheduleDetailView.as_view(), name='schedule-detail'),
+    
     path('discounts/', views.DiscountListCreateView.as_view(), name='discount-list-create'),
     path('discounts/<int:pk>/', views.DiscountDetailView.as_view(), name='discount-detail'),
+    
+    path('schedules/', views.ScheduleListCreateView.as_view(), name='schedule-list-create'),
+    path('schedules/<int:pk>/', views.ScheduleDetailView.as_view(), name='schedule-detail'),
+
 ]

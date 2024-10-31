@@ -1,5 +1,6 @@
 from django.db import models
 from Account.models import User
+from .lessonspace_api import create_lessonspace_room
 
 # Topic Model
 class Topic(models.Model):
@@ -44,7 +45,19 @@ class Schedule(models.Model):
     group_class = models.ForeignKey(GroupClass, related_name='schedules', on_delete=models.CASCADE)
     date = models.DateTimeField()
     duration = models.DurationField()
-    session_link = models.URLField()
+    session_link = models.URLField(blank=True, null=True)  # Automatically generated
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="schedules_created")
+
+    def save(self, *args, **kwargs):
+        # Automatically generate a session link if it doesn't already exist
+        if not self.session_link:
+            try:
+                # Use GroupClass title or a unique name for each session
+                space_name = f"{self.group_class.title} - Session"
+                self.session_link = create_lessonspace_room(space_name=space_name)
+            except Exception as e:
+                print(f"Error creating Lessonspace room: {e}")
+        super().save(*args, **kwargs)
 
 # File Model
 class File(models.Model):

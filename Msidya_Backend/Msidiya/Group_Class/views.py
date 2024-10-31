@@ -65,16 +65,19 @@ class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     permission_classes = [permissions.AllowAny]
+# Schedule Views
 class ScheduleListCreateView(generics.ListCreateAPIView):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
-    permission_classes = [permissions.AllowAny]
 
+    def perform_create(self, serializer):
+        # Calls the `save()` method on the instance, which will trigger Lessonspace room creation
+        serializer.save()
 
 class ScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
-    permission_classes = [permissions.AllowAny]
+    
 class DiscountListCreateView(generics.ListCreateAPIView):
     queryset = Discount.objects.all()
     serializer_class = DiscountSerializer

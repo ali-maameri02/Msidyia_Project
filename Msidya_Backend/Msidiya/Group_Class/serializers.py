@@ -44,9 +44,13 @@ class ReportSerializer(serializers.ModelSerializer):
 
 # Schedule Serializer
 class ScheduleSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    session_link = serializers.ReadOnlyField()  # Display the session link but make it read-only
+
     class Meta:
         model = Schedule
-        fields = '__all__'
+        fields = ['id', 'group_class', 'date', 'duration', 'session_link', 'created_by']
+        read_only_fields = ['session_link']
 
 
 # Discount Serializer
