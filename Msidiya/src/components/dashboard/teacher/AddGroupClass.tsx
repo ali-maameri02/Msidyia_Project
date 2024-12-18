@@ -199,6 +199,16 @@ const AddGroupClass: React.FC = () => {
             className="border border-gray-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+        <div className="flex flex-col">
+          <label htmlFor="Coupon" className="font-medium mb-2">
+           Coupon
+          </label>
+          <input
+            id="Coupon"
+            type="text"
+            className="border border-gray-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
         {/* Main Image */}
         <div className="col-span-2 flex flex-col items-center justify-center border-dashed border-2 border-gray-400 rounded-lg p-4">
