@@ -44,7 +44,7 @@ const Services = () => {
                     {
                         ServiceTexts.cards.map((card, index) => (
 
-                            <Card cardClass=" w-full bg-white flex flex-col items-center justify-center py-6 cursor-pointer transition duration-300 hover:shadow-xl px-5 rounded-xl cardPseudo after:bg-color1" imageWrapperClass="w-28 h-28 relative z-10 before:content-[''] before:absolute before:top-3 before:right-3 before:w-16 before:h-16 before:bg-color2/30 before:-z-10 before:rounded-tl-3xl before:rounded-br-3xl" cover="object-cover" imageAlt={card.firstText}
+                            <Card cardClass=" w-full bg-white flex flex-col items-center justify-center py-6 cursor-pointer transition duration-300 hover:shadow-xl px-5 rounded-xl  after:bg-color1" imageWrapperClass="w-28 h-28 relative z-10 before:content-[''] before:absolute before:top-3 before:right-3 before:w-16 before:h-16 before:bg-color2/30 before:-z-10 before:rounded-tl-3xl before:rounded-br-3xl" cover="object-cover" imageAlt={card.firstText}
                              imageSrc={renderServiceIcon(index)} textWrapperClass="w-full flex flex-col items-center gap-2" key={index} >
                                 <Text as="h4" className="text-base rounded font-medium text-color3">
                                     {card.firstText}

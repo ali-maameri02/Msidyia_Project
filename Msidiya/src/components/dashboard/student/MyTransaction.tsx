@@ -3,6 +3,7 @@ import * as React from 'react';
 import { TableContainer, Table , TableHead,TableBody , TableRow ,TableCell , Paper} from "@mui/material";
 import { Margin } from "@mui/icons-material";
 import PreviewIcon from '@mui/icons-material/Preview';
+import EditIcon from "@mui/icons-material/Edit";
 
 
 
@@ -75,7 +76,7 @@ const tableData = [
       "Price": "$30",
       "Created On": "Sep 5, 2024",
       "Status": "Payment Completed / Booked",
-      "action": <PreviewIcon/>
+      "action": [<PreviewIcon/> , <EditIcon/>]
     },
     {
       "Tutor Name": "Tutor G",
@@ -87,7 +88,7 @@ const tableData = [
       "Price": "$22",
       "Created On": "Sep 10, 2024",
       "Status": "Payment Pending",
-      "action": <PreviewIcon/>
+      "action": [<PreviewIcon/> , <EditIcon/>]
     },
     {
       "Tutor Name": "Tutor H",
@@ -99,7 +100,7 @@ const tableData = [
       "Price": "$18",
       "Created On": "Sep 12, 2024",
       "Status": "Cancelled",
-      "action":<PreviewIcon/>
+      "action": [<PreviewIcon/> , <EditIcon/>]
     },
     {
       "Tutor Name": "Tutor I",
@@ -111,7 +112,7 @@ const tableData = [
       "Price": "$25",
       "Created On": "Sep 18, 2024",
       "Status": "Payment Completed / Booked",
-      "action": <PreviewIcon/>
+      "action": [<PreviewIcon/> , <EditIcon/>]
     }
 ];
 
