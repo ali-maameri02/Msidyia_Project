@@ -6,7 +6,7 @@ import { FaChalkboardTeacher, FaBookOpen, FaTasks, FaMoneyCheckAlt } from 'react
 
 const Teacher: React.FC = () => {
   return (
-    <div className="pl-20 w-100">
+    <div className="pl-12 ml-5 w-100">
     
 
       {/* Main Content */}
@@ -69,9 +69,9 @@ const Teacher: React.FC = () => {
           </div>
 
           {/* Traffic Source */}
-          <div className="bg-white p-4 rounded-3xl shadow-2xl">
+          <div className="bg-white p-4 h-full w-full rounded-3xl shadow-2xl">
             <h2 className="text-xl font-bold mb-4">Course Enrollments</h2>
-            <div className="h-48 z-10 rounded-lg">
+            <div className=" z-10 rounded-lg">
               <PieChart />
             </div>
           </div>

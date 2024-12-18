@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import environ
 import os
 from pathlib import Path
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
@@ -147,8 +151,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = 'static'
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -179,73 +185,99 @@ AUTHENTICATION_BACKENDS = [
 
 
 
-# JAZZMIN_SETTINGS = {
-#     # "language_chooser":            True,
-#     # "site_logo": get_dynamic_site_logo,
-#     #  "site": "your_project_name.admin.custom_admin_site",  # Use the custom admin site
-#     "site_title":                  "Msidiya",
-#     "related_modal_active":        False,
-#     # "custom_css":                  "/static/css/custom_admin.css",
-#     # "search_model":                ["SchoolManage.CustomUser", "SchoolManage.Course"],
-#     # "search_app":                  ["SchoolManage"],
-#     # "topmenu_links":               [
-
-#     #     # Url that gets reversed (Permissions can be added)
-#     #     {"name": "Home", "url": "admin:index", },
-
-#     #     # external url that opens in a new window (Permissions can be added)
-
-#     #     # model admin to link to (Permissions checked against model)
-#     #     {"model": "SchoolManage.CustomUser"},
-
-#     #     # App with dropdown menu to all its models pages (Permissions checked against models)
-#     #     {"app": "SchoolManage"},
-#     # ],
-#     # "usermenu_links":              [
-
-#     #     {"model": "CustomUser"}
-#     # ],
-#     "show_sidebar":                True,
-#     "navigation_expanded":         True,
-#     "related_modal_active":        False,
-#     "site_title":                  "Msidiya",
-#     "site_header":                 "Msidiya",
-#     "site_brand":                  "Msidiya",
-#     "changeform_format":           "single",
-
-#     # "site_logo": "images/photo_2023-11-11_10-56-40.jpg",
-#     "navigation_expanded":         True,
-#     "copyright":                   "Msidiya@2024",
-#     "changeform_format":           "horizontal_tabs",
-#     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
-#     "hide_apps":                   ["Auth", "authtoken"],
-    
-#       "icons":                       {
-#         "auth":                          "fas fa-users-cog",  # Icon for the authentication app
-#         "Account.user":                     "fas fa-user",  # Icon for the User model
-#         "Account.Chat":                     "fas fa-comment",  # Icon for the User model
-#       }
-# }
-
 
 UNFOLD = {
     "SITE_TITLE": "Msidiya",
     "SITE_HEADER": "Msidiya",
+    "LOGIN": {
+        "image": lambda request: static("images/msidiya.png"),
+        # "redirect_after": lambda request: reverse_lazy("admin:APP_MODEL_changelist"),
+    },
     "SIDEBAR": {
         "show_search": False,
         "show_all_applications": False,
-        # "navigation": [
-        #     {
-        #         "label": "Account Management",
-        #         "models": [
-        #             {"label": "Users", "url": "admin:Account_User_changelist"},
-        #             {"label": "Tutors", "url": "admin:Account_Tutor_changelist"},
-        #             {"label": "Students", "url": "admin:Account_Student_changelist"},
-        #         ],
-        #     },
-        # ],
+     
     },
+      "SITE_ICON": {
+        "light": lambda _ : static("/images/111.png"),  # light mode
+        "dark": lambda _: static("/images/111.png"),  # dark mode
+    },
+         "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/png",
+            "href": lambda _: static("images/111.png"),
+        },
+    ],
+          "SHOW_HISTORY": True, # show/hide "History" button, default: True
     "TABS": [],
+     "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "en": "🇬🇧",
+                "fr": "🇫🇷",
+                "nl": "🇧🇪",
+            },
+        },
+    },
+     
+      "SIDEBAR": {
+        "show_search": False,  # Search in applications and models names
+        "show_all_applications": False,  # Dropdown with all applications and models
+        "navigation": [
+            {
+                "title": _("Navigation"),
+                "separator": True,  # Top border
+                "collapsible": True,  # Collapsible group of links
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",  # Supported icon set: https://fonts.google.com/icons
+                        "link": reverse_lazy("admin:index"),
+                        "badge": "Account.badge_callback",
+                        "permission": lambda request: request.user.is_superuser,
+                    },],
+                     
+            },
+            {
+                  "title": _("Accounts"),
+                "separator": True,  # Top border
+                "collapsible": True,  # Collapsible group of links
+                "items": [
+                    {
+                        "title": _("Accounts"),
+                        "icon": "group",  # Supported icon set: https://fonts.google.com/icons
+                        "link": reverse_lazy("admin:Account_user_changelist"),
+
+                        "badge": "Account.utils.badge_callback",
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": _("Notifications"),
+                        "icon": "notifications",  # Supported icon set: https://fonts.google.com/icons
+                        "link": reverse_lazy("admin:Account_notification_changelist"),
+
+                        "badge": "Account.utils.notification_badge_callback",
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": _("Chats"),
+                        "icon": "chat",  # Supported icon set: https://fonts.google.com/icons
+                        "link": reverse_lazy("admin:Account_chat_changelist"),
+
+                      
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    # {
+                    #     "title": _("Users"),
+                    #     "icon": "people",
+                    #     # "link": reverse_lazy("admin:users_user_changelist"),
+                    # },
+                ],
+                },
+        ],
+    },
 }
 
 ADMIN_REORDER  = [

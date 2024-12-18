@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import SidebarApp from "./SideBar";
 import Student from "./Student";
@@ -14,13 +14,21 @@ import RefundRequest from "./RefundRequest";
 import Notification from "./Notification";
 import Messages from "./Messages";
 const DashboardRoutes: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   return (
     <div className="flex flex-col lg:flex-row h-screen">
-      <SidebarApp />
-      <div className="flex-1 flex flex-col">
-        <Navbar />
-        <main className="flex-1 p-4 ml-56 px-14 lg: transition-all duration-300">
-          <Routes>
+    <SidebarApp isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+    <div
+      className={`flex-1 flex flex-col transition-all duration-300 ${
+        isSidebarOpen ? "ml-64" : "ml-0"
+      }`}
+    >
+      <Navbar />
+      <main className="flex-1 p-4 overflow-y-scroll w-100"> <Routes>
             <Route path="student" element={<Student />} />
             <Route path="student/profile" element={<UserProfile />} />
             <Route path="student/Upcoming-Appointments" element={<UpcomingAppointments />} />

@@ -23,7 +23,7 @@ const UpcomingAppointments: React.FC = () => {
        setPopUp(!popUp);
     }
   return(
-    <main className="flex flex-col   mt-20 bg-transparent main ">
+    <main className=" mt-16 ml-16 ">
       
         <div className="grid grid-cols-1  gap-y-6">
              <div className="first-column border-b-2">

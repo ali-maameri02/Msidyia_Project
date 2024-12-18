@@ -6,7 +6,7 @@ import PreviewIcon from '@mui/icons-material/Preview';
 
 function RefundRequest () {
     return (
-        <main className="flex flex-col   mt-20 bg-transparent main  ">
+        <main className=" mt-16 ml-16 ">
             <div className="second-column grid  my-11" >
                  <input className='searching sm:my-4' placeholder='Search here' style={{width:"95%"}}></input>
                  

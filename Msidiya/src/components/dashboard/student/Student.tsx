@@ -1,12 +1,20 @@
 import React from 'react';
 // import TrafficSource from './TrafficSource';
-import PieChart from './PieChart';
-import SalesChart from './SalesChart';
 import { FaChalkboardTeacher, FaBookOpen, FaTasks, FaMoneyCheckAlt } from 'react-icons/fa';
+// import axios from "axios";
+import Avatar from '@mui/material/Avatar';
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import { Slide } from "react-awesome-reveal";
+import Alert from '@mui/material/Alert';
+import CardMedia from '@mui/material/CardMedia';
+import picture from '../../../assets/Capture d’écran_25-11-2024_44215_www.instagram.com.jpeg';
+import Card from '@mui/material/Card';
 
 const Student: React.FC = () => {
   return (
-    <div className="flex">
+    <div className="flex mt-16 ml-16 ">
     
 
       {/* Main Content */}
@@ -59,23 +67,34 @@ const Student: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Sales Chart */}
-          <div className="bg-white p-8 rounded-3xl shadow-2xl col-span-2">
-            <h2 className="text-xl font-bold">Monthly Progress</h2>
-            <div className="rounded-lg" style={{ zIndex: '-9999' }}>
-         <SalesChart /> 
-            </div>
-          </div>
+       
+        <Slide direction="left" style={{display:'flex',justifyContent:'center'}}>
+            <div className="user-profile-view h-[15rem]   w-[50rem] bg-[#fff] rounded-[1rem] border-solid border border-[#e5e7eb] relative shadow-[0_4px_4px_0_rgba(174,174,174,0.25)]">
+              <div className="flex flex-row row">
+<div>
+  <img src={picture} style={{height:'15rem',width:'15rem',borderRadius:'1rem'}} />
+  </div>             
+                <div className="column flex justify-evenly flex-col ml-2 w-[100%] px-12">
+                  <span className="Username-tag font-almarai text-textcolor">
+                    Admin
+                  </span>
+                  <span className="w-[100%] flex flex-row justify-between px-2 text-gray-400">
+                   Adresse non encore fournie
+                    <MapOutlinedIcon className="text-gray-400 font-almarai text-sm" />
+                  </span>
+                  <span className="w-[100%] flex flex-row justify-between text-gray-400 px-2">
+                     Téléphone non encore fourni
+                    <LocalPhoneOutlinedIcon className="text-gray-400 font-almarai text-sm" />
+                  </span>
+                  <span className="w-[100%] flex flex-row justify-between items-start text-gray-400 px-2">
+                   Email non encore fourni
+                    <EmailOutlinedIcon className="text-gray-400 font-almarai text-sm" />
 
-          {/* Traffic Source */}
-          <div className="bg-white p-4 rounded-3xl shadow-2xl">
-            <h2 className="text-xl font-bold mb-4">Course Enrollments</h2>
-            <div className="h-48 z-10 rounded-lg">
-               <PieChart /> 
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </Slide>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 bg-transparent">
           {/* Latest Notifications */}

@@ -40,7 +40,7 @@ const DonutChart: React.FC = () => {
   };
 
   return (
-    <div className="w-72 h-56 flex justify-center">
+    <div className="w-full h-72 flex justify-center">
       <Doughnut data={data} options={options} />
     </div>
   );

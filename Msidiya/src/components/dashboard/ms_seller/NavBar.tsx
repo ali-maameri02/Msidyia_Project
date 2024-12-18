@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
               </div>
               <div className="md:space-x-6 justify-end items-center ml-auto flex space-x-3">
                 <div className="relative">
-                  <Link to="/messages" className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
+                  <Link to="/dashboardseller/seller/messages" className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
                     <span className="items-center justify-center flex">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
                   </Link>
                 </div>
                 <div className="relative">
-                  <Link to="/notifications" className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
+                  <Link to="/dashboardseller/seller/notifications" className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
                     <span className="justify-center items-center flex">
                       <svg
                         className="w-6 h-6"

@@ -5,7 +5,7 @@ import StarBorderPurple500OutlinedIcon from '@mui/icons-material/StarBorderPurpl
 
 function FavoriteTutor (){
     return(
-        <main className="flex flex-col   mt-20 bg-transparent main text-center">
+        <main className=" mt-16 ml-16 ">
             <div className='bg-blue-500 align-middle text-center p-5 rounded-2xl m-3  shadow-lg'><p className='text-4xl font-extrabold text-white'>Favorite Tutor </p></div>
             <div className='grid md:grid-cols-3 gap-12 sm:grid-cols-1 favoriteTutor'>
                 <div className='bg-white shadow-lg red-200 grid rounded-2xl' >

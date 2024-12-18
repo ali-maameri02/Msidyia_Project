@@ -30,8 +30,8 @@ function MyCourses() {
   }
 
     return(
-        <main className="flex flex-col   mt-20 bg-transparent main  ">
-          { viewDataVisible &&
+      <main className=" mt-16 ml-16 ">
+      { viewDataVisible &&
             <div className="grid grid-cols-1  gap-y-6">
             <div className="second-column">
                  <input className='searching' placeholder='none'></input>

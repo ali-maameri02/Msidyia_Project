@@ -1,6 +1,6 @@
 import requests
 
-LESSONSPACE_API_KEY = "your_lessonspace_api_key"  # Replace with your actual API key
+LESSONSPACE_API_KEY = "•••••••• •••• •••• •••• ••••••••••••"  # Replace with your actual API key
 LESSONSPACE_API_URL = "https://api.lessonspace.com/v2/spaces"
 
 def create_lessonspace_room():

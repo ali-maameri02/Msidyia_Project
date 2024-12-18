@@ -1,18 +1,25 @@
-import React from "react";
+import React, { useState, useMemo, Suspense, lazy } from "react";
 import { Sidebar, Menu, MenuItem, Logo } from "react-mui-sidebar";
-import { Drawer, IconButton } from "@mui/material";
+import { Drawer, IconButton, List, ListItem, ListItemText, Collapse } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import GroupIcon from "@mui/icons-material/Group";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import BookIcon from "@mui/icons-material/Book";
-import ReceiptIcon from "@mui/icons-material/Receipt";
 import EventIcon from "@mui/icons-material/Event";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import ClassIcon from "@mui/icons-material/Class";
+import EditIcon from "@mui/icons-material/Edit";
+import CategoryIcon from '@mui/icons-material/Category';
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentIcon from "@mui/icons-material/Payment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import msidiyalogo from "../../../assets/msidiya.png";
+import { Link } from "react-router-dom";
+
+// Lazy loading of pages
+const Dashboard = lazy(() => import("../../../components/dashboard/teacher/Teacher"));
+const Profile = lazy(() => import("../../../components/dashboard/teacher/UserProfile"));
+const SetCategories = lazy(() => import("../../../components/dashboard/teacher/Setcategories"));
 
 interface SidebarAppProps {
   isSidebarOpen: boolean;
@@ -20,6 +27,36 @@ interface SidebarAppProps {
 }
 
 const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
+  const [openGroupClasses, setOpenGroupClasses] = useState(false);
+  const [openAppointments, setOpenAppointments] = useState(false);
+  const [openPayements, setOpenPayements] = useState(false);
+
+  const handleGroupClassesClick = () => setOpenGroupClasses(!openGroupClasses);
+  const handleAppointmentsClick = () => setOpenAppointments(!openAppointments);
+  const handlePayementsClick = () => setOpenPayements(!openPayements);
+
+  const menuItems = useMemo(() => [
+    { icon: <DashboardIcon />, link: "/dashboard/teacher", label: "Dashboard" },
+    { icon: <PersonIcon />, link: "/dashboard/teacher/profile", label: "Profile" },
+   
+  ], []);
+
+  const groupClassesItems = useMemo(() => [
+    { icon: <ClassIcon />, link: "/dashboard/teacher/group-classes", label: "My Group Classes" },
+    { icon: <CategoryIcon />, link: "/dashboard/teacher/set-categories", label: "Set Categories" },
+
+  ], []);
+  const PayementItems = useMemo(() => [
+    { icon: <ReceiptLongIcon />, link: "/dashboard/teacher/group-class-transactions", label: "Group Class Transactions" },
+    { icon: <PaymentIcon />, link: "/dashboard/teacher/payment", label: "Payment" },
+    { icon: <MonetizationOnIcon />, link: "/dashboard/teacher/payout", label: "Payout" }
+  ], []);
+
+  const appointmentsItems = useMemo(() => [
+    { link: "/dashboard/teacher/upcoming-appointments", label: "Upcoming Appointments" },
+    { link: "/dashboard/teacher/coupons-manager", label: "Coupons Manager" }
+  ], []);
+
   return (
     <>
       {/* Toggle button for smaller screens */}
@@ -29,146 +66,33 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
         aria-label="menu"
         onClick={toggleSidebar}
         sx={{
-          display: { xs: "block", md: "block" },
+          display: { xs: "block", md: "block" }, // Show only on small screens
           position: "fixed",
           top: 6,
           left: 16,
-          zIndex: 99999,
+          zIndex: 9999999,
         }}
       >
         <MenuIcon />
       </IconButton>
 
-      {/* Drawer for smaller screens */}
-      <Drawer
-        anchor="left"
-        open={isSidebarOpen}
-        onClose={toggleSidebar}
-        BackdropProps={{ invisible: true }}
-        sx={{
-          display: { xs: "block", md: "none" },
-          ".MuiDrawer-paper": {
-            boxShadow: "none",
-            width: 240,
-            overflowY: "auto",
-            scrollbarWidth: "thin",
-            scrollbarColor: "#888 #f0f0f0",
-            '&::-webkit-scrollbar': {
-              width: '12px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: '#f0f0f0',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#888',
-              borderRadius: '6px',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-              background: '#555',
-            },
-          },
-        }}
-      >
-        <Sidebar
-          width="16rem"
-          sx={{
-            height: "100vh",
-            overflowY: "auto",
-            backgroundColor: "#fff",
-            scrollbarWidth: "thin",
-            scrollbarColor: "#888 #f0f0f0",
-            '&::-webkit-scrollbar': {
-              width: '12px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: '#f0f0f0',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#888',
-              borderRadius: '6px',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-              background: '#555',
-            },
-          }}
-        >
-          <Logo img="https://adminmart.com/wp-content/uploads/2024/03/logo-admin-mart-news.png">
-            Msidiya
-          </Logo>
-          <Menu>
-            {isSidebarOpen ? (
-              <>
-                <MenuItem icon={<DashboardIcon />} link="/dashboard/teacher">
-                  Dashboard
-                </MenuItem>
-                <MenuItem icon={<PersonIcon />} link="/dashboard/teacher/profile">
-                  Profile
-                </MenuItem>
-                <MenuItem icon={<AttachMoneyIcon />} link="/dashboard/teacher/set-price">
-                  Set categories
-                </MenuItem>
-                <MenuItem icon={<GroupIcon />} link="/dashboard/teacher/group-classes">
-                  My Group Classes
-                </MenuItem>
-                <MenuItem icon={<CalendarTodayIcon />} link="/dashboard/teacher/set-availability">
-                  Set Availability
-                </MenuItem>
-                <MenuItem icon={<BookIcon />} link="/dashboard/teacher/courses-manager">
-                  Courses Manager
-                </MenuItem>
-                <MenuItem icon={<ReceiptIcon />} link="/dashboard/teacher/course-transactions">
-                  Course Transactions
-                </MenuItem>
-                <MenuItem icon={<EventIcon />} link="/dashboard/teacher/upcoming-appointments">
-                  Upcoming Appointments
-                </MenuItem>
-                <MenuItem icon={<LocalOfferIcon />} link="/dashboard/teacher/coupons-manager">
-                  Coupons manager
-                </MenuItem>
-                <MenuItem icon={<PaymentIcon />} link="/dashboard/teacher/payment">
-                  Payment
-                </MenuItem>
-                <MenuItem icon={<MonetizationOnIcon />} link="/dashboard/teacher/payout">
-                  Payout
-                </MenuItem>
-              </>
-            ) : (
-              <>
-                <MenuItem icon={<DashboardIcon />} link="/dashboard/teacher" />
-                <MenuItem icon={<PersonIcon />} link="/dashboard/teacher/profile" />
-                <MenuItem icon={<AttachMoneyIcon />} link="/dashboard/teacher/set-price" />
-                <MenuItem icon={<GroupIcon />} link="/dashboard/teacher/group-classes" />
-                <MenuItem icon={<CalendarTodayIcon />} link="/dashboard/teacher/set-availability" />
-                <MenuItem icon={<BookIcon />} link="/dashboard/teacher/courses-manager" />
-                <MenuItem icon={<ReceiptIcon />} link="/dashboard/teacher/course-transactions" />
-                <MenuItem icon={<EventIcon />} link="/dashboard/teacher/upcoming-appointments" />
-                <MenuItem icon={<LocalOfferIcon />} link="/dashboard/teacher/coupons-manager" />
-                <MenuItem icon={<PaymentIcon />} link="/dashboard/teacher/payment" />
-                <MenuItem icon={<MonetizationOnIcon />} link="/dashboard/teacher/payout" />
-              </>
-            )}
-          </Menu>
-        </Sidebar>
-      </Drawer>
-
       {/* Sidebar for larger screens */}
-      <div 
-        style={{ 
-          position: 'fixed', 
-          top: 50, 
-          left: 0, 
-          height: '100vh', 
-          zIndex: 1, 
-          width: isSidebarOpen ? '17rem' : '5rem', // Adjust width dynamically
+      <div
+        style={{
+          position: "fixed",
+          top: 50,
+          left: 0,
+          height: "100vh",
+          zIndex: 1,
+          width: isSidebarOpen ? "17rem" : "4rem", // Adjust width dynamically
           overflowY: "auto",
-          transition: 'width 0.3s ease', // Smooth transition for width
+          transition: "width 0.3s ease", // Smooth transition for width
           scrollbarWidth: "thin",
           scrollbarColor: "#22D3EE #f0f0f0",
-          backgroundColor: "white"
+          backgroundColor: "white",
         }}
       >
         <Sidebar
-          width="rem"
           sx={{
             height: "100vh",
             overflowY: "auto",
@@ -176,76 +100,127 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
             display: { xs: "none", md: "block" }, // Hidden on smaller screens
             scrollbarWidth: "thin",
             scrollbarColor: "#888 #f0f0f0",
-            '&::-webkit-scrollbar': {
-              width: '1px',
+            "&::-webkit-scrollbar": {
+              width: "1px",
             },
-            '&::-webkit-scrollbar-track': {
-              background: '#f0f0f0',
+            "&::-webkit-scrollbar-track": {
+              background: "#f0f0f0",
             },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#888',
-              borderRadius: '6px',
+            "&::-webkit-scrollbar-thumb": {
+              background: "#888",
+              borderRadius: "6px",
             },
-            '&::-webkit-scrollbar-thumb:hover': {
-              background: '#555',
+            "&::-webkit-scrollbar-thumb:hover": {
+              background: "#555",
             },
           }}
         >
-          <Logo img="https://adminmart.com/wp-content/uploads/2024/03/logo-admin-mart-news.png">
-            Msidiya
-          </Logo>
+          <Logo img={msidiyalogo}>Msidiya</Logo>
           <Menu>
-            {isSidebarOpen ? (
-              <>
-                <MenuItem icon={<DashboardIcon />} link="/dashboard/teacher">
-                  Dashboard
-                </MenuItem>
-                <MenuItem icon={<PersonIcon />} link="/dashboard/teacher/profile">
-                  Profile
-                </MenuItem>
-                <MenuItem icon={<AttachMoneyIcon />} link="/dashboard/teacher/set-price">
-                  Set categories
-                </MenuItem>
-                <MenuItem icon={<GroupIcon />} link="/dashboard/teacher/group-classes">
-                  My Group Classes
-                </MenuItem>
-                <MenuItem icon={<CalendarTodayIcon />} link="/dashboard/teacher/set-availability">
-                  Set Availability
-                </MenuItem>
-                <MenuItem icon={<BookIcon />} link="/dashboard/teacher/courses-manager">
-                  Courses Manager
-                </MenuItem>
-                <MenuItem icon={<ReceiptIcon />} link="/dashboard/teacher/course-transactions">
-                  Course Transactions
-                </MenuItem>
-                <MenuItem icon={<EventIcon />} link="/dashboard/teacher/upcoming-appointments">
-                  Upcoming Appointments
-                </MenuItem>
-                <MenuItem icon={<LocalOfferIcon />} link="/dashboard/teacher/coupons-manager">
-                  Coupons manager
-                </MenuItem>
-                <MenuItem icon={<PaymentIcon />} link="/dashboard/teacher/payment">
-                  Payment
-                </MenuItem>
-                <MenuItem icon={<MonetizationOnIcon />} link="/dashboard/teacher/payout">
-                  Payout
-                </MenuItem>
-              </>
-            ) : (
-              <>
-                <MenuItem icon={<DashboardIcon />} link="/dashboard/teacher" />
-                <MenuItem icon={<PersonIcon />} link="/dashboard/teacher/profile" />
-                <MenuItem icon={<AttachMoneyIcon />} link="/dashboard/teacher/set-price" />
-                <MenuItem icon={<GroupIcon />} link="/dashboard/teacher/group-classes" />
-                <MenuItem icon={<CalendarTodayIcon />} link="/dashboard/teacher/set-availability" />
-                <MenuItem icon={<BookIcon />} link="/dashboard/teacher/courses-manager" />
-                <MenuItem icon={<ReceiptIcon />} link="/dashboard/teacher/course-transactions" />
-                <MenuItem icon={<EventIcon />} link="/dashboard/teacher/upcoming-appointments" />
-                <MenuItem icon={<LocalOfferIcon />} link="/dashboard/teacher/coupons-manager" />
-                <MenuItem icon={<PaymentIcon />} link="/dashboard/teacher/payment" />
-                <MenuItem icon={<MonetizationOnIcon />} link="/dashboard/teacher/payout" />
-              </>
-            )}
+            {menuItems.map(item => (
+              <MenuItem key={item.link} icon={item.icon} link={item.link}>
+                {item.label}
+              </MenuItem>
+            ))}
+
+            {/* Manage Group Classes Section */}
+            <List>
+            <ListItem
+  button
+  onClick={handleGroupClassesClick}
+  sx={{
+    width: '100%',
+    padding: '0.5rem 0.5rem',
+    display: 'flex',
+    flexDirection: 'row',
+    borderRadius:'0.5rem',
+    flexWrap:'nowrap',
+    justifyContent: 'space-around',
+    ":hover": {
+      backgroundColor: '#5d87ff20',
+      color:'#5d87ff'
+    },
+  }}className=" ml-0"
+>
+
+                <GroupIcon />
+                <ListItemText primary="Manage Group Classes" />
+              </ListItem>
+              <Collapse in={openGroupClasses} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {groupClassesItems.map(item => (
+                    <ListItem key={item.link} button component={Link} to={item.link}>
+                      {item.icon}
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </List>
+
+            {/* Manage Appointments Section */}
+            <List>
+              <ListItem button 
+              onClick={handleAppointmentsClick}  sx={{
+                width: '100%',
+                padding: '0.5rem 0.5rem',
+                display: 'flex',
+                flexDirection: 'row',
+                borderRadius:'0.5rem',
+                flexWrap:'nowrap',
+                justifyContent: 'space-around',
+                ":hover": {
+                  backgroundColor: '#5d87ff20',
+                  color:'#5d87ff'
+                   // Replace with your desired color, e.g., '#f0f0f0'
+                },
+              }}
+              
+               >
+                <EventIcon />
+                <ListItemText primary="Manage Appointments" />
+              </ListItem>
+              <Collapse in={openAppointments} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {appointmentsItems.map(item => (
+                    <ListItem key={item.link} button component={Link} to={item.link}>
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </List>
+
+            <List>
+              <ListItem button onClick={handlePayementsClick} sx={{
+                width: '100%',
+                padding: '0.5rem 0.5rem',
+                display: 'flex',
+                flexDirection: 'row',
+                borderRadius:'0.5rem',
+                flexWrap:'nowrap',
+                justifyContent: 'space-around',
+                ":hover": {
+                  backgroundColor: '#5d87ff20',
+                  color:'#5d87ff'
+                   // Replace with your desired color, e.g., '#f0f0f0'
+                },
+              }}
+  >
+                <AttachMoneyIcon />
+                <ListItemText primary="Manage Payement" />
+              </ListItem>
+              <Collapse in={openPayements} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {PayementItems.map(item => (
+                    <ListItem key={item.link} button component={Link} to={item.link}>
+                      {item.icon}
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </List>
           </Menu>
         </Sidebar>
       </div>

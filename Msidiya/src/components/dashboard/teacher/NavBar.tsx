@@ -1,18 +1,23 @@
 import React from 'react';
-interface NavbarProps {
-  toggleSidebar: () => void;
-}
+import { Link } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   return (
     <div>
       <div className="pt-0 pr-0 pb-0 pl-0 mt-0 mr-0 mb-0 ml-0"></div>
-      <div className="bg-white  " style={{zIndex:'9999'}} >
-        <div className="flex-row flex ">
-          <div className="w-full border-b-2 border-gray-200  ">
-          <div style={{width:'100vw',borderBottom:'0.5px solid' ,borderBottomColor:'',zIndex:'1'}} className=" bg-white right-0 h-16 px-20 fixed  justify-between items-center mx-auto  flex">
-
-          <div className="lg:block mr-auto  hidden relative max-w-xs">
+      <div className="bg-white" style={{ zIndex: '9999' }}>
+        <div className="flex-row flex">
+          <div className="w-full border-b-2 border-gray-200">
+            <div
+              style={{
+                width: '100vw',
+                borderBottom: '0.5px solid',
+                borderBottomColor: '',
+                zIndex: '1',
+              }}
+              className="bg-white right-0 h-16 px-20 fixed justify-between items-center mx-auto flex"
+            >
+              <div className="lg:block mr-auto hidden relative max-w-xs">
                 <p className="pl-3 items-center flex absolute inset-y-0 left-0 pointer-events-none">
                   <span className="justify-center items-center flex">
                     <span className="justify-center items-center flex">
@@ -42,7 +47,7 @@ const Navbar: React.FC = () => {
               </div>
               <div className="md:space-x-6 justify-end items-center ml-auto flex space-x-3">
                 <div className="relative">
-                  <p className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
+                  <Link to="/messages" className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
                     <span className="items-center justify-center flex">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -57,31 +62,27 @@ const Navbar: React.FC = () => {
                         </g>
                       </svg>
                     </span>
-                  </p>
+                  </Link>
                 </div>
                 <div className="relative">
-                  <p className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
+                  <Link to="/notifications" className="pt-1 pr-1 pb-1 pl-1 bg-white text-gray-700 rounded-full transition-all duration-200 hover:text-gray-900 focus:outline-none hover:bg-gray-100">
                     <span className="justify-center items-center flex">
-                      <span className="justify-center items-center flex">
-                        <span className="items-center justify-center flex">
-                          <svg
-                            className="w-6 h-6"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                            />
-                          </svg>
-                        </span>
-                      </span>
+                      <svg
+                        className="w-6 h-6"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                        />
+                      </svg>
                     </span>
-                  </p>
+                  </Link>
                   <p className="px-1.5 py-0.5 font-semibold text-xs items-center bg-color1 text-white rounded-full inline-flex absolute -top-px -right-1">
                     2
                   </p>

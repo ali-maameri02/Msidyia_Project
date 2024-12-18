@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { CameraAlt, Edit } from '@mui/icons-material';
 import { TextField, Button, Box, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
-import Webcam from "react-webcam";
 
 const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('General Information');
@@ -87,7 +86,6 @@ const UserProfile: React.FC = () => {
         </label>
       </div>
 
-
       <div className="flex flex-col lg:flex-row bg-white p-6 rounded-lg shadow-md mt-5">
         <div className="lg:w-1/3 p-4">
           <div className="relative -mt-16">
@@ -110,12 +108,10 @@ const UserProfile: React.FC = () => {
               <CameraAlt className="h-6 w-6" />
             </label>
           </div>
-          
         </div>
 
         <div className="lg:w-2/3 p-4 lg:pl-8">
           <div className="border-b border-gray-200 mb-4">
-            
             <ul className="flex space-x-6">
               <li
                 className={`cursor-pointer ${activeTab === 'General Information' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`}

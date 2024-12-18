@@ -8,7 +8,7 @@ export default function Messages(){
         
     };
     return (
-        <main className=" mt-16 ml-16 ">
+        <main className="flex flex-col   mt-20 bg-transparent main  ">
                 <div className='grid lg:grid-cols-12 md:grid-cols-1 msg-container' style={{height:'80vh'}} >
                     <div className='col-span-4 bg-gray-100 sm:my-2'>
                         <div className='bg-blue-500 py-2 text-center'>

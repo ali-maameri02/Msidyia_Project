@@ -1,30 +1,82 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, lazy } from "react";
+import { IconButton, List, ListItem, ListItemText, Collapse } from "@mui/material";
 import { Sidebar, Menu, MenuItem, Logo } from "react-mui-sidebar";
-import { Drawer, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import GroupIcon from "@mui/icons-material/Group";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import BookIcon from "@mui/icons-material/Book";
-import ReceiptIcon from "@mui/icons-material/Receipt";
 import EventIcon from "@mui/icons-material/Event";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import ClassIcon from "@mui/icons-material/Class";
+import EditIcon from "@mui/icons-material/Edit";
+import CategoryIcon from "@mui/icons-material/Category";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentIcon from "@mui/icons-material/Payment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import '../../../index.css'
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import PaidIcon from '@mui/icons-material/Paid';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import TelegramIcon from '@mui/icons-material/Telegram';
-import { ClassNames } from "@emotion/react";
-const SidebarApp: React.FC = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import TelegramIcon from "@mui/icons-material/Telegram";
+import msidiyalogo from "../../../assets/msidiya.png";
+import { Link } from "react-router-dom";
 
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
+const Dashboard = lazy(() => import("../../../components/dashboard/student/Student"));
+const Profile = lazy(() => import("../../../components/dashboard/student/UserProfile"));
+
+interface SidebarAppProps {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+}
+
+const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
+  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
+
+  const menuItems = useMemo(() => (
+    [
+      {
+        group: "Main",
+        items: [
+          { icon: <DashboardIcon />, text: "Dashboard", link: "/dashboardstudent/student" },
+          { icon: <PersonIcon />, text: "Profile", link: "/dashboardstudent/student/profile" },
+        ],
+      },
+      {
+        group: "Appointments",
+        items: [
+          { icon: <EventIcon />, text: "Upcoming Appointments", link: "/dashboardstudent/student/Upcoming-Appointments" },
+          {
+            icon: <GroupIcon />, text: "Favorite Tutor", link: "/dashboardstudent/student/Favorite-tutor", nested: [
+              { icon: <ClassIcon />, text: "Favorite Group Class", link: "/dashboardstudent/student/Favorite-Groupe-Class" },
+            ]
+          }
+        ],
+      },
+      {
+        group: "Transactions",
+        items: [
+          { icon: <AttachMoneyIcon />, text: "My Transaction", link: "/dashboardstudent/student/My-Transaction" },
+          { icon: <ReceiptLongIcon />, text: "My Courses", link: "/dashboardstudent/student/My-Courses" },
+        ],
+      },
+      {
+        group: "Requests",
+        items: [
+          { icon: <EditIcon />, text: "Refund Request", link: "/dashboardstudent/student/Refund-Request" },
+        ],
+      },
+      {
+        group: "Notifications",
+        items: [
+          { icon: <NotificationsActiveIcon />, text: "Notification", link: "/dashboardstudent/student/Notification" },
+          { icon: <TelegramIcon />, text: "Messages", link: "/dashboardstudent/student/Messages" },
+        ],
+      },
+    ]
+  ), []);
+
+  const handleGroupClick = (group: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [group]: !prev[group],
+    }));
   };
 
   return (
@@ -34,135 +86,74 @@ const SidebarApp: React.FC = () => {
         edge="start"
         color="inherit"
         aria-label="menu"
-        onClick={toggleDrawer}
+        onClick={toggleSidebar}
         sx={{
-          display: { xs: "block", md: "none" },
+          display: { xs: "block", md: "block" }, // Show only on small screens
           position: "fixed",
-          top:16,
+          top: 6,
           left: 16,
-          zIndex: 1200,
+          zIndex: 9999999,
         }}
       >
         <MenuIcon />
       </IconButton>
 
-      {/* Drawer for smaller screens */}
-      <Drawer
-        anchor="left"
-        open={isDrawerOpen}
-        onClose={toggleDrawer}
-        sx={{ display: { xs: "block", md: "none" } }}
-      >
-        <Sidebar
-          width="16rem"
-          className="custom-scrollbar"
-          style={{
-            height: "100vh",
-            overflowY: "auto",
-            backgroundColor: "#fff",
-         
-          }}
-        >
-          <Logo img="https://adminmart.com/wp-content/uploads/2024/03/logo-admin-mart-news.png">
-            Msidiya
-          </Logo>
-          <Menu>
-            <MenuItem icon={<DashboardIcon />}  link="/dashboardstudent/student">
-              Dashboard
-            </MenuItem>
-            <MenuItem icon={<PersonIcon />}  className="" link="/dashboardstudent/student/profile">
-              Profile
-            </MenuItem>
-            <MenuItem icon={<DateRangeIcon />} link="/dashboardstudent/student/Upcoming-Appointments">
-              Upcoming Appointment
-            </MenuItem>
-            <MenuItem icon={<GroupIcon />} className="side-bar-checked" link="/dashboardstudent/student/Favorite-tutor">
-              Favorite tutor
-            </MenuItem>
-            <MenuItem icon={<CalendarTodayIcon />} link="/dashboardstudent/student/Favorite-Groupe-Class">
-              Favorite Groupe Class
-            </MenuItem>
-            <MenuItem icon={<BookIcon />} link="/dashboardstudent/student/Favorite-Course">
-             Favorite Course
-            </MenuItem>
-            <MenuItem icon={<ReceiptIcon />} link="/dashboardstudent/student/My-Courses">
-               My Courses
-            </MenuItem>
-            <MenuItem icon={<CreditCardIcon />} className="active:bg-blue-400" link="/dashboardstudent/student/My-Transaction">
-              My Transaction
-            </MenuItem>
-            <MenuItem icon={<PaidIcon />} link="/dashboardstudent/student/Refund-Request">
-               Refund Request
-            </MenuItem>
-            <MenuItem icon={<NotificationsActiveIcon />} link="/dashboardstudent/student/Notification">
-              Notification
-            </MenuItem>
-            <MenuItem icon={<TelegramIcon />} link="/dashboardstudent/student/Messages">
-              Messages
-            </MenuItem>
-          </Menu>
-        </Sidebar>
-      </Drawer>
-
       {/* Sidebar for larger screens */}
-      <div 
-        style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          height: '100vh', 
-          zIndex: 1000,
-          overflowY: "auto" 
+      <div
+        style={{
+          position: "fixed",
+          top: 50,
+          left: 0,
+          height: "100vh",
+          zIndex: 99999,
+          width: isSidebarOpen ? "17rem" : "4rem", // Adjust width dynamically
+          overflowY: "auto",
+          transition: "width 0.3s ease", // Smooth transition for width
+          scrollbarWidth: "thin",
+          scrollbarColor: "#22D3EE #f0f0f0",
+          backgroundColor: "white",
         }}
       >
         <Sidebar
-          width="16rem"
-          className="custom-scrollbar"
-          style={{
+          sx={{
             height: "100vh",
             overflowY: "auto",
             backgroundColor: "#fff",
-            display: { xs: "none", md: "block" }, // Hidden on smaller screens
           }}
         >
-          <Logo img="https://adminmart.com/wp-content/uploads/2024/03/logo-admin-mart-news.png">
-            Msidiya
-          </Logo>
-          <Menu>
-            <MenuItem icon={<DashboardIcon />} link="/dashboardstudent/student">
-              Dashboard
-            </MenuItem>
-            <MenuItem icon={<PersonIcon />} link="/dashboardstudent/student/profile">
-              Profile
-            </MenuItem>
-            <MenuItem icon={<DateRangeIcon />} link="/dashboardstudent/student/Upcoming-Appointments">
-              Upcoming Appointments
-            </MenuItem>
-            <MenuItem icon={<GroupIcon />} link="/dashboardstudent/student/Favorite-tutor">
-              Favorite tutor
-            </MenuItem>
-            <MenuItem icon={<CalendarTodayIcon />} link="/dashboardstudent/student/Favorite-Groupe-Class">
-              Favorite Groupe Class
-            </MenuItem>
-            <MenuItem icon={<BookIcon />} link="/dashboardstudent/student/Favorite-Course">
-              Favorite Course
-            </MenuItem>
-            <MenuItem icon={<ReceiptIcon />} link="/dashboardstudent/student/My-Courses">
-              My Courses
-            </MenuItem>
-            <MenuItem icon={<CreditCardIcon /> }  link="/dashboardstudent/student/My-Transaction">
-             My Transaction
-            </MenuItem>
-            <MenuItem icon={<PaidIcon /> } link="/dashboardstudent/student/Refund-Request">
-              Refund Request
-            </MenuItem>
-            <MenuItem icon={<NotificationsActiveIcon />} link="/dashboardstudent/student/Notification">
-              Notification
-            </MenuItem>
-            <MenuItem icon={<TelegramIcon />} link="/dashboardstudent/student/Messages">
-              Messages
-            </MenuItem>
-          </Menu>
+          <Logo img={msidiyalogo}>Msidiya</Logo>
+          {menuItems.map((group, index) => (
+            <div key={index}>
+              <Menu>
+                <h3
+                  style={{ marginLeft: 16, marginBottom: 8, cursor: "pointer" }}
+                  onClick={() => handleGroupClick(group.group)}
+                >
+                  {group.group}
+                </h3>
+                {openGroups[group.group] && (
+                  <List>
+                    {group.items.map((item, itemIndex) => (
+                      <React.Fragment key={itemIndex}>
+                        <MenuItem icon={item.icon} link={item.link}>
+                          {item.text}
+                        </MenuItem>
+                        {item.nested && (
+                          <Collapse in={openGroups[group.group]} timeout="auto" unmountOnExit>
+                            {item.nested.map((nestedItem, nestedIndex) => (
+                              <MenuItem key={nestedIndex} icon={nestedItem.icon} link={nestedItem.link}>
+                                {nestedItem.text}
+                              </MenuItem>
+                            ))}
+                          </Collapse>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                )}
+              </Menu>
+            </div>
+          ))}
         </Sidebar>
       </div>
     </>

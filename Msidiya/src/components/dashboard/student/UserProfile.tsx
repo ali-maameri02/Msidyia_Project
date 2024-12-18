@@ -64,8 +64,8 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="user-profile flex flex-col justify-around ml-8 mt-16">
-      <div className="relative w-full flex flex-col lg:flex-row bg-white h-full rounded-lg shadow-md">
+    <div className=" mt-16 ml-16 ">
+    <div className="relative w-full flex flex-col lg:flex-row bg-white h-full rounded-lg shadow-md">
         <img
           src={coverImage}
           alt="Cover"

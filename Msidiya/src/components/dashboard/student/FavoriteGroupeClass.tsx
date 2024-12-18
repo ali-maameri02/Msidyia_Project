@@ -6,9 +6,9 @@ import './style.css';
 function FavoriteGroupeClass() { 
 
     return (
-        <main className="flex flex-col   mt-20 bg-transparent main text-center">
-            <div className="bg-blue-500 p-5 rounded-2xl shadow-2xl">
-                <p className="text-2xl font-extrabold text-white">Favorite Groupe Class</p>
+        <main className=" mt-16 ml-16 ">
+        <div className=" p-5 ">
+                <p className="text-2xl font-extrabold text-dark">Favorite Groupe Class</p>
             </div>
             <div className="grid   gap-5 cards-father sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <div className=" course-card-container shadow-xl">
