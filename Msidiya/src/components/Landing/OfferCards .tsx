@@ -3,7 +3,7 @@ import "../../index.css";
 function OfferCards() {
     return (
         <div className="container mx-auto px-4 py-8 flex flex-col items-center">
-            <div className=" gap-x-12 sm:grid-cols-5 lg:grid-cols md:grid-cols-2 flex flex-row justify-between ">
+            <div className=" gap-x-12 sm:grid-cols-5 lg:grid-cols md:grid-cols-2 flex flex-row justify-between flex-wrap">
                 {/* Card 1 */}
                 <li className="shadow-xl rounded-lg overflow-hidden bg-white p-12 cards-li list-none">
                     <div className="cards card1 flex flex-col items-center">
