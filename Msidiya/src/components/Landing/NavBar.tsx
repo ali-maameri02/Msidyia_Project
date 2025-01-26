@@ -14,7 +14,7 @@ import FR from "../../assets/icons8-france-48.png";
 import AR from "../../assets/icons8-saudi-arabia-48.png";
 import Login from "./Login";
 import Signup from "./Signup"; // Import Signup component
-
+import LOGO from "../../assets/msidiya.png"
 const NavBar: React.FC = () => {
     const navigate = useNavigate();
 
@@ -93,7 +93,9 @@ const NavBar: React.FC = () => {
         <header className="w-full h-auto bg-transparent overflow-visible fixed z-50 top-0 left-0">
             <Slide direction="down">
                 <nav className={`w-full md:h-16 h-14 ${navBarColor ? "bg-white shadow_nav" : "bg-transparent"} lg:px-24 md:px-12 px-8 flex justify-between items-center`}>
-                    <a href="/" className="text-cyan-400 bold" style={{ fontSize: "2rem" }}>Msidiya</a>
+                    <a href="/" className="text-cyan-400 bold p-2 m-2 mr-5" style={{ fontSize: "2rem" }}>
+                        <img src={LOGO} alt="" />
+                    </a>
                     <div className="lg:flex hidden items-center gap-6">
                         <ul className="flex items-center justify-center gap-10">
                             {NavLinks.map((navlink, index) => (

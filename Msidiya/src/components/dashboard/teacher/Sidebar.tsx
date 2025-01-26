@@ -14,7 +14,8 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentIcon from "@mui/icons-material/Payment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import msidiyalogo from "../../../assets/msidiya.png";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 // Lazy loading of pages
 const Dashboard = lazy(() => import("../../../components/dashboard/teacher/Teacher"));
@@ -34,7 +35,13 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
   const handleGroupClassesClick = () => setOpenGroupClasses(!openGroupClasses);
   const handleAppointmentsClick = () => setOpenAppointments(!openAppointments);
   const handlePayementsClick = () => setOpenPayements(!openPayements);
+  const navigate = useNavigate(); // For navigation
 
+  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
   const menuItems = useMemo(() => [
     { icon: <DashboardIcon />, link: "/dashboard/teacher", label: "Dashboard" },
     { icon: <PersonIcon />, link: "/dashboard/teacher/profile", label: "Profile" },
@@ -93,6 +100,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
         }}
       >
         <Sidebar
+        showProfile={false}
           sx={{
             height: "100vh",
             overflowY: "auto",
@@ -222,7 +230,12 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
               </Collapse>
             </List>
           </Menu>
+          <div className=" flex flex-row justify-center align-middle px-5 p-3 m-2 rounded-lg w-full hover:bg-red-500 hover:text-white " >
+           <button onClick={handleLogout}>Logout</button>
+                                       <LogoutOutlinedIcon/>
+                                       </div>
         </Sidebar>
+        
       </div>
     </>
   );

@@ -9,6 +9,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import EventIcon from "@mui/icons-material/Event";
 import ClassIcon from "@mui/icons-material/Class";
 import EditIcon from "@mui/icons-material/Edit";
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import CategoryIcon from "@mui/icons-material/Category";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -16,8 +17,8 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import msidiyalogo from "../../../assets/msidiya.png";
-import { Link } from "react-router-dom";
-
+import { Link,useNavigate } from "react-router-dom";
+import axios from "axios";
 const Dashboard = lazy(() => import("../../../components/dashboard/student/Student"));
 const Profile = lazy(() => import("../../../components/dashboard/student/UserProfile"));
 
@@ -26,9 +27,17 @@ interface SidebarAppProps {
   toggleSidebar: () => void;
 }
 
-const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
-  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
+ 
 
+const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
+  const navigate = useNavigate(); // For navigation
+
+  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+  
   const menuItems = useMemo(() => (
     [
       {
@@ -115,6 +124,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
         }}
       >
         <Sidebar
+        showProfile={false}
           sx={{
             height: "100vh",
             overflowY: "auto",
@@ -151,9 +161,16 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
                     ))}
                   </List>
                 )}
+
               </Menu>
+
             </div>
+            
           ))}
+          <div className=" flex flex-row justify-center align-middle px-5 p-3 m-2 rounded-lg w-full hover:bg-red-500 hover:text-white " >
+           <button onClick={handleLogout}>Logout</button>
+                                       <LogoutOutlinedIcon/>
+                                       </div>
         </Sidebar>
       </div>
     </>

@@ -3,9 +3,9 @@ import "../../index.css";
 function OfferCards() {
     return (
         <div className="container mx-auto px-4 py-8 flex flex-col items-center">
-            <div className=" gap-x-12 sm:grid-cols-5 lg:grid-cols md:grid-cols-2 flex flex-row justify-between flex-wrap">
+            <div className=" gap-x-12 sm:grid-cols-5 lg:grid-cols md:grid-cols-2 flex flex-row justify-between flex-wrap ">
                 {/* Card 1 */}
-                <li className="shadow-xl rounded-lg overflow-hidden bg-white p-12 cards-li list-none">
+                <li className="shadow-xl rounded-lg overflow-hidden bg-white p-12 cards-li list-none mb-5">
                     <div className="cards card1 flex flex-col items-center">
                         <p className="card-title text-xl font-bold text-center mb-2">Small Groups</p>
                         <p className="card-description text-center mb-4 text-gray-700">Real-world practice in groups</p>

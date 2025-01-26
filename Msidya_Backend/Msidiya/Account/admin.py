@@ -3,7 +3,13 @@ from django.utils.html import format_html
 from django.forms.widgets import Widget
 from .models import User, Chat, Notification
 from unfold.admin import ModelAdmin
+from Payment.models import *
+from Group_Class.models import *
 
+from Payment.models import *
+# admin.site.register(Schedule)
+
+# admin.site.register(StudentPayment)
 class WebPImageWidget(Widget):
     def render(self, name, value, attrs=None, renderer=None):
         if value:
@@ -50,7 +56,13 @@ class NotificationAdmin(ModelAdmin):
     search_fields = ('User__username', 'Message')
 
 
+class StudentPayementAdmin(ModelAdmin):
+    list_display = ('student', 'group_class', 'amount','status')
+    list_filter = ('status','group_class')
+
+
 # Register models with the custom admin site
+admin.site.register(StudentPayment, StudentPayementAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Chat, MessagesAdmin)
 admin.site.register(Notification, NotificationAdmin)

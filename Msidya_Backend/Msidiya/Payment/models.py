@@ -3,6 +3,7 @@ from Account.models import User
 from django.conf import settings  # Assuming user is the Django User model
 from chargily_pay import ChargilyClient
 from chargily_pay.entity import Checkout, Price
+import requests
 
 from Group_Class.models import GroupClass
 class Currency(models.Model):
@@ -131,3 +132,30 @@ class StudentPayment(models.Model):
         self.checkout_url = response.get("checkout_url")
         self.save()
         return response
+    def update_payment_status(self):
+        """
+        Query the Chargily API to get the current status of this payment
+        and update the status field accordingly.
+        """
+        url = f"https://pay.chargily.net/api/v2/status/{self.id}"
+        headers = {
+            "Authorization": "Bearer test_sk_qSQ8o3Aa1HRlU5pWrO6lOUT1RnoqG7JyQ629mRRV",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                payment_status = data.get("status")
+                if payment_status == "completed":
+                    self.status = "Completed"
+                elif payment_status == "failed":
+                    self.status = "Failed"
+                else:
+                    self.status = "Pending"
+                self.save()
+            else:
+                print(f"Failed to fetch payment status. Status code: {response.status_code}")
+        except requests.RequestException as e:
+            print(f"Error fetching payment status: {e}")

@@ -5,7 +5,7 @@ export const NavLinks = [
     },
     {
         name: "Tutors",
-        url: "/"
+        url: "/Tutors"
     },
     {
         name: "Group Classes",

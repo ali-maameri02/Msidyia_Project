@@ -39,12 +39,15 @@ SECRET_KEY = 'django-insecure-tir$wa786fanu%cfw#o+y8zd4-an1bo0qwqb&gvw%6f%ajl&m9
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+]
 
-SESSION_COOKIE_SECURE = False  # Set to True only in production
-CSRF_COOKIE_SECURE = False     # Set to True only in production
-
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = False  # Set to True only in production
 # Application definition
 
 INSTALLED_APPS = [
@@ -64,20 +67,26 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'allauth',
     'admin_reorder',
+        "corsheaders",
+
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'admin_reorder.middleware.ModelAdminReorder',
-
 ]
+
+
+
+
 
 ROOT_URLCONF = 'Msidiya.urls'
 
@@ -110,7 +119,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Msidiya',
         'USER': 'postgres',
-        'PASSWORD': '40603010',
+        'PASSWORD': 'imeddevloper',
         'HOST': 'localhost',  # or the IP address of your PostgreSQL server
         'PORT': '5432',       # default PostgreSQL port
     }

@@ -49,15 +49,15 @@ class Schedule(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="schedules_created")
 
     def save(self, *args, **kwargs):
-        # Automatically generate a session link if it doesn't already exist
-        if not self.session_link:
-            try:
-                # Use GroupClass title or a unique name for each session
-                space_name = f"{self.group_class.title} - Session"
-                self.session_link = create_lessonspace_room(space_name=space_name)
-            except Exception as e:
-                print(f"Error creating Lessonspace room: {e}")
+     if not self.session_link:
+        try:
+            space_name = f"{self.group_class.title} - Session"
+            self.session_link = create_lessonspace_room(space_name=space_name)
+        except Exception as e:
+            print(f"Error creating Lessonspace room: {e}")
+            # Optionally: Log the error or notify an admin
         super().save(*args, **kwargs)
+
 
 # File Model
 class File(models.Model):

@@ -26,9 +26,9 @@ const TeacherCard: React.FC<TeacherCardProps> = ({ image, name, rating, reviews,
         <div className="flex justify-center items-center my-2">
           {/* Rating stars */}
           <span className="text-gray-500">
-            {Array.from({ length: 5 }, (_, i) => (
-              <FontAwesomeIcon key={i} icon="star" className={`mx-1 ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`} />
-            ))}
+            {/* {Array.from({ length: 5 }, (_, i) => (
+              // <FontAwesomeIcon key={i} icon="star" className={`mx-1 ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`} />
+            ))} */}
           </span>
           <span className="text-sm text-gray-600 ml-2">({reviews})</span>
         </div>
