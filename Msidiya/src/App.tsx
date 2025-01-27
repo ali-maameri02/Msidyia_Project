@@ -6,6 +6,7 @@ import DashboardRoutes from "./components/dashboard/teacher/Dashboardroutes";
 import DashboardStudentRoutes from "./components/dashboard/student/DashboardStudentRoutes";
 import DashboardSellerRoutes from "./components/dashboard/ms_seller/Dashboardseller";
 import Tutors from "./components/pages/Tutors_home";
+import TutorDetails from "./components/pages/Tutor_detailes";
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Home />} />
         
         <Route path="/Tutors" element={<Tutors />} />
+        <Route path="/Tutors/TutorDetails" element={<TutorDetails />} />
         
         <Route path="dashboard/*" element={<DashboardRoutes />} />
         <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />
