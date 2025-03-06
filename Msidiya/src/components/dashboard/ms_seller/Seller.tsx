@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // import TrafficSource from './TrafficSource';
 import { FaChalkboardTeacher, FaBookOpen, FaTasks, FaMoneyCheckAlt } from 'react-icons/fa';
 // import axios from "axios";
@@ -14,7 +14,16 @@ import msidiyalogo from '../../../assets/msidiya.png';
 import Card from '@mui/material/Card';
 import SalesChart from './SalesChart';
 import { motion } from "framer-motion";import msidiyalogo_M from '../../../assets/msidiya-m-logo.png'
+// import { User } from '@phosphor-icons/react';
+import { fetchUserData, User } from '../../../utils/userData'; // Adjust the import path if needed
+
+
+
+
 const Seller: React.FC = () => {
+
+  const [user, setUser] = useState<User | null>(null);
+
     const [cardNumber, setCardNumber] = useState("#### #### #### ####");
   const [cardHolder, setCardHolder] = useState("FULL NAME");
   const [expiryDate, setExpiryDate] = useState("MM/YY");
@@ -24,6 +33,15 @@ const Seller: React.FC = () => {
   ) => {
     setState(e.target.value.toUpperCase());
   };
+
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const userData = await fetchUserData();
+      setUser(userData);
+    };
+    getUserData();
+  }, []);
   return (
     <div className="flex mt-16 ml-16 ">
     
@@ -87,26 +105,26 @@ const Seller: React.FC = () => {
     </div>
 
         <Slide direction="left" className='w-96' style={{display:'flex',justifyContent:'center'}}>
-            <div className="user-profile-view h-[15rem]   bg-[#fff] rounded-[1rem] border-solid border border-[#e5e7eb] relative shadow-[0_4px_4px_0_rgba(174,174,174,0.25)]">
-              <div className="flex flex-col justify-content-around items-center">
-<div>
-  <img src={picture} className='rounded-full' style={{height:'8rem',width:'8rem'}} />
+            <div className="user-profile-view    bg-[#fff] rounded-[1rem] border-solid border border-[#e5e7eb] relative shadow-[0_4px_4px_0_rgba(174,174,174,0.25)]">
+              <div className="flex flex-col justify-content-around items-center py-2">
+<div className='p-2'>
+  <img src={user?.Picture} className='rounded-full' style={{height:'8rem',width:'8rem'}} />
   </div>             
                 <div className="column flex justify-evenly items-center flex-col ml-2 w-[100%] px-12">
                   <span className="Username-tag font-almarai text-textcolor">
-                    Seller
-                  </span>
+                  {user?.username}                
+                    </span>
                   <span className="w-[100%] flex flex-row justify-between px-2 text-gray-400">
-                   Adresse non encore fournie
-                    <MapOutlinedIcon className="text-gray-400 font-almarai text-sm" />
+                  {user?.Address}        
+                                      <MapOutlinedIcon className="text-gray-400 font-almarai text-sm" />
                   </span>
                   <span className="w-[100%] flex flex-row justify-between text-gray-400 px-2">
-                     Téléphone non encore fourni
-                    <LocalPhoneOutlinedIcon className="text-gray-400 font-almarai text-sm" />
+                  {user?.Phone_number}        
+                                      <LocalPhoneOutlinedIcon className="text-gray-400 font-almarai text-sm" />
                   </span>
                   <span className="w-[100%] flex flex-row justify-between items-start text-gray-400 px-2">
-                   Email non encore fourni
-                    <EmailOutlinedIcon className="text-gray-400 font-almarai text-sm" />
+                  {user?.email}   
+                                      <EmailOutlinedIcon className="text-gray-400 font-almarai text-sm" />
 
                   </span>
                 </div>

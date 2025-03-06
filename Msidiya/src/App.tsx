@@ -7,7 +7,7 @@ import DashboardStudentRoutes from "./components/dashboard/student/DashboardStud
 import DashboardSellerRoutes from "./components/dashboard/ms_seller/Dashboardseller";
 import Tutors from "./components/pages/Tutors_home";
 import TutorDetails from "./components/pages/Tutor_detailes";
-
+import TutorOneToOne from "./components/pages/TutorOneToOne";
 
 function App() {
   const location = useLocation();
@@ -23,6 +23,7 @@ function App() {
         
         <Route path="/Tutors" element={<Tutors />} />
         <Route path="/Tutors/TutorDetails" element={<TutorDetails />} />
+        <Route path="/Tutors/TutorDetails/TutorOneToOne" element={<TutorOneToOne/>} />
         
         <Route path="dashboard/*" element={<DashboardRoutes />} />
         <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />

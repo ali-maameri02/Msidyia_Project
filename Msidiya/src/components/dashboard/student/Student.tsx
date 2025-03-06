@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 // import TrafficSource from './TrafficSource';
 import { FaChalkboardTeacher, FaBookOpen, FaTasks, FaMoneyCheckAlt } from 'react-icons/fa';
 // import axios from "axios";
@@ -11,8 +11,19 @@ import Alert from '@mui/material/Alert';
 import CardMedia from '@mui/material/CardMedia';
 import picture from '../../../assets/Capture d’écran_25-11-2024_44215_www.instagram.com.jpeg';
 import Card from '@mui/material/Card';
+import axios from 'axios';
+import { fetchUserData, User } from '../../../utils/userData'; // Adjust the import path if needed
 
 const Student: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const userData = await fetchUserData();
+      setUser(userData);
+    };
+    getUserData();
+  }, []);
   return (
     <div className="flex mt-16 ml-16 ">
     
@@ -25,7 +36,7 @@ const Student: React.FC = () => {
               <FaChalkboardTeacher className="text-purple-500 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-gray-600">Progress</p>
+              <p className="text-gray-600">Slots Progress</p>
               <p className="text-2xl font-bold">12</p>
               <p className="text-sm text-green-500">↑ 8% Since last month</p>
             </div>
@@ -36,7 +47,7 @@ const Student: React.FC = () => {
               <FaBookOpen className="text-green-500 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-gray-600">Total Students</p>
+              <p className="text-gray-600">Total Classes</p>
               <p className="text-2xl font-bold">150</p>
               <p className="text-sm text-red-500">↓ 2% Since last month</p>
             </div>
@@ -47,12 +58,11 @@ const Student: React.FC = () => {
               <FaTasks className="text-orange-500 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-gray-600">Groupe Number</p>
-              <p className="text-2xl font-bold">75.5%</p>
+              <p className="text-gray-600">Messages</p>
+              <p className="text-2xl font-bold">75</p>
               <div className="h-2 bg-gray-200 rounded-full mt-2">
                 <div className="h-2 bg-purple-500 rounded-full" style={{ width: '75.5%' }}></div>
               </div>
-              <p className="text-sm text-green-500">↑ 5% Since last month</p>
             </div>
           </div>
 
@@ -62,39 +72,32 @@ const Student: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Wallet</p>
-              <p className="text-2xl font-bold">$15k</p>
+              <p className="text-2xl font-bold">MS 15k</p>
               <p className="text-sm text-green-500">↑ 12% Since last month</p>
             </div>
           </div>
         </div>
        
-        <Slide direction="left" style={{display:'flex',justifyContent:'center'}}>
-            <div className="user-profile-view h-[15rem]   w-[50rem] bg-[#fff] rounded-[1rem] border-solid border border-[#e5e7eb] relative shadow-[0_4px_4px_0_rgba(174,174,174,0.25)]">
-              <div className="flex flex-row row">
-<div>
-  <img src={picture} style={{height:'15rem',width:'15rem',borderRadius:'1rem'}} />
-  </div>             
-                <div className="column flex justify-evenly flex-col ml-2 w-[100%] px-12">
-                  <span className="Username-tag font-almarai text-textcolor">
-                    Admin
-                  </span>
-                  <span className="w-[100%] flex flex-row justify-between px-2 text-gray-400">
-                   Adresse non encore fournie
-                    <MapOutlinedIcon className="text-gray-400 font-almarai text-sm" />
-                  </span>
-                  <span className="w-[100%] flex flex-row justify-between text-gray-400 px-2">
-                     Téléphone non encore fourni
-                    <LocalPhoneOutlinedIcon className="text-gray-400 font-almarai text-sm" />
-                  </span>
-                  <span className="w-[100%] flex flex-row justify-between items-start text-gray-400 px-2">
-                   Email non encore fourni
-                    <EmailOutlinedIcon className="text-gray-400 font-almarai text-sm" />
-
-                  </span>
-                </div>
-              </div>
+        <Slide direction="left" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="user-profile-view h-[15rem]  w-[50rem] bg-[#fff] rounded-[1rem] border border-[#e5e7eb] shadow-lg flex">
+            <img src={user?.Picture || 'default-profile.png'} className="h-[15rem] w-[15rem] rounded-[1rem] p-2" alt="User" />
+            <div className="flex flex-col justify-evenly ml-2 w-full px-12">
+              <span className="Username-tag font-almarai text-textcolor">{user?.username || 'Utilisateur inconnu'}</span>
+              <span className="w-full flex flex-row justify-between px-2 text-gray-400">
+                {user?.Address || 'Adresse non encore fournie'}
+                <MapOutlinedIcon className="text-gray-400" />
+              </span>
+              <span className="w-full flex flex-row justify-between px-2 text-gray-400">
+                {user?.Phone_number || 'Téléphone non encore fourni'}
+                <LocalPhoneOutlinedIcon className="text-gray-400" />
+              </span>
+              <span className="w-full flex flex-row justify-between px-2 text-gray-400">
+                {user?.email || 'Email non encore fourni'}
+                <EmailOutlinedIcon className="text-gray-400" />
+              </span>
             </div>
-          </Slide>
+          </div>
+        </Slide>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 bg-transparent">
           {/* Latest Notifications */}

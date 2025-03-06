@@ -5,6 +5,12 @@ from .models import Chat, Notification, Transaction, User, Tutor, Student, Ms_Se
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = '__all__'
+        
+        
+class UserregisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = ['username','password','Role']
 class TutorSerializer(serializers.ModelSerializer):
     class Meta:

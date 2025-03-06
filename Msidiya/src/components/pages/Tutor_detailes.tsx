@@ -1,11 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  Box,
+ 
   Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
+
   Card,
   CardContent,
   CardMedia,
@@ -14,8 +11,8 @@ import {
   CardActions,
   Rating,
   Avatar,
-  Input,
   TextField,
+  MenuItem,
 } from "@mui/material";
 import { Slide } from "react-awesome-reveal";
 import NavBar from "../Landing/NavBar";
@@ -31,12 +28,39 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import TodayIcon from '@mui/icons-material/Today';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import SendIcon from '@mui/icons-material/Send';
+import { Outlet, useNavigate } from "react-router-dom";
 const TutorDetails = () => {
+  const navigate = useNavigate();
+  const handleviewOne_TO_One = () => {
+    navigate(`/Tutors/TutorDetails/TutorOneToOne`); // Redirect to the update route with the class ID
+  };
+
+  const [filters, setFilters] = useState({
+    availability: "",
+    grade: "",
+    category: "",
+    subject: "",
+    topic: "",
+    country: "",
+  });
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+  const filterOptions = {
+    grades: ["Grade 1", "Grade 2", "Grade 3"],
+    categories: ["Math", "Science", "English"],
+    subjects: ["Algebra", "Physics", "Grammar"],
+    topics: ["Equations", "Thermodynamics", "Sentence Structure"],
+    countries: ["USA", "Canada", "France"],
+  };
   return (
     <>
       <NavBar />
       <div className="tutordetails p-10  mt-20 ml-20">
         <div className="flex flex-row justify-between gap-10">
+          <div className="leftside flex flex-col ">
+
+
           <Card sx={{ maxWidth: 345 , maxHeight:500 }}>
             <CardActionArea>
               <CardMedia
@@ -80,6 +104,94 @@ const TutorDetails = () => {
               <div className="flex flex-row"></div>
             </CardActions>
           </Card>
+                 {/* Filter Section */}
+          <div className="filter-section p-4 bg-gray-100 rounded-md mb-6">
+            <h2 className="font-bold mb-4">Filter</h2>
+            <div className="grid grid-cols-1 gap-4">
+              {/* Availability */}
+              <TextField
+                label="Availability"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={filters.availability}
+                onChange={(e) => handleFilterChange("availability", e.target.value)}
+                fullWidth
+              />
+              {/* Grades */}
+              <TextField
+                select
+                label="Grades"
+                value={filters.grade}
+                onChange={(e) => handleFilterChange("grade", e.target.value)}
+                fullWidth
+              >
+                {filterOptions.grades.map((grade) => (
+                  <MenuItem key={grade} value={grade}>
+                    {grade}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {/* Categories */}
+              <TextField
+                select
+                label="Categories"
+                value={filters.category}
+                onChange={(e) => handleFilterChange("category", e.target.value)}
+                fullWidth
+              >
+                {filterOptions.categories.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {/* Subjects */}
+              <TextField
+                select
+                label="Subjects"
+                value={filters.subject}
+                onChange={(e) => handleFilterChange("subject", e.target.value)}
+                fullWidth
+              >
+                {filterOptions.subjects.map((subject) => (
+                  <MenuItem key={subject} value={subject}>
+                    {subject}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {/* Topics */}
+              <TextField
+                select
+                label="Topics"
+                value={filters.topic}
+                onChange={(e) => handleFilterChange("topic", e.target.value)}
+                fullWidth
+              >
+                {filterOptions.topics.map((topic) => (
+                  <MenuItem key={topic} value={topic}>
+                    {topic}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {/* Countries */}
+              <TextField
+                select
+                label="Countries"
+                value={filters.country}
+                onChange={(e) => handleFilterChange("country", e.target.value)}
+                fullWidth
+              >
+                {filterOptions.countries.map((country) => (
+                  <MenuItem key={country} value={country}>
+                    {country}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
+          </div>
+          </div>
+          
+          <div className="filter"></div>
           <div className="about_teacher w-full flex flex-col justify-around items-start">
             <video controls className="w-[59rem]">
               <source src={video} type="video/mp4" />
@@ -89,6 +201,7 @@ const TutorDetails = () => {
               <Button
                 variant="contained"
                 className="flex flex-row items-center font-bold p-0 col-3  justify-evenly"
+                onClick={handleviewOne_TO_One}
               >
                 <InterpreterModeIcon />
                 <h3 className="w-52">One To One</h3>
@@ -125,51 +238,51 @@ const TutorDetails = () => {
               </div>
             </div>
             <Card className="bg-white">
-              <CardActionArea>
-                <CardContent className="flex flex-row justify-between items-center p-2">
-                  <CardMedia
-                    component="img"
-                    height=""
-                    className="h-36"
-                    image={math}
-                    alt="math"
-                  ></CardMedia>
-                  <div className="group_details flex flex-col w-full flex-nowrap items-start ">
-                    <h2 className="font-bold">Group Class</h2>
-                    <div className="rating flex flex-row items-end">
-                      <Rating
-                        name="size-meduim"
-                        defaultValue={2}
-                        size="medium"
-                        readOnly
-                      />
-                      <span>1(1)</span>
-                    </div>
-                    <div className="date_time flex flex-row justify-between w-full gap-5">
-                        <div className="date flex flex-row  items-center w-32 flex-nowrap">
-                         <TodayIcon/>
-                         <h3>
-                         Apr 12,2024
-                         </h3>
-                        </div>
-                        <div className="Time flex flex-row  items-center w-32">
-                         <WatchLaterIcon/>
-                         <h3>
-                         Apr 12,2024
-                         </h3>
-                        </div>
-                    </div>
-                    <div className="price">
-                        <h3 className="text-red-600">
-                        500 DA
-                            </h3> 
-                    </div>
-                    
-                  </div>
-                  <Button variant="contained" className="w-full p-0 h-10" > Book Now</Button>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+      <CardActionArea>
+        <CardContent className="flex flex-col p-4">
+     
+
+          {/* Card Content Section */}
+          <div className="flex flex-row justify-between items-center">
+            <CardMedia
+              component="img"
+              height=""
+              className="h-36"
+              image={math}
+              alt="math"
+            />
+            <div className="group_details flex flex-col w-full flex-nowrap items-start">
+              <h2 className="font-bold">Group Class</h2>
+              <div className="rating flex flex-row items-end">
+                <Rating
+                  name="size-medium"
+                  defaultValue={2}
+                  size="medium"
+                  readOnly
+                />
+                <span>1(1)</span>
+              </div>
+              <div className="date_time flex flex-row justify-between w-full gap-5">
+                <div className="date flex flex-row items-center w-32 flex-nowrap">
+                  <TodayIcon />
+                  <h3>Apr 12, 2024</h3>
+                </div>
+                <div className="time flex flex-row items-center w-32">
+                  <WatchLaterIcon />
+                  <h3>Apr 12, 2024</h3>
+                </div>
+              </div>
+              <div className="price">
+                <h3 className="text-red-600">500 DA</h3>
+              </div>
+            </div>
+            <Button variant="contained" className="w-full p-0 h-10">
+              Book Now
+            </Button>
+          </div>
+        </CardContent>
+      </CardActionArea>
+    </Card>
             <div className="tutor_rating flex flex-col w-full items-start mt-10">
                 <Card className="w-full p-2 border-b-gray-500 mb-1">
 
@@ -265,7 +378,10 @@ const TutorDetails = () => {
           </div>
         </div>
       </div>
+      <Outlet /> {/* This renders nested routes */}
+
       <Footer />
+
     </>
   );
 };

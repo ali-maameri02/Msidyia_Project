@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 // import TrafficSource from './TrafficSource';
 import PieChart from './PieChart';
 import SalesChart from './SalesChart';
 import { FaChalkboardTeacher, FaBookOpen, FaTasks, FaMoneyCheckAlt } from 'react-icons/fa';
+import { User, fetchUserData } from '../../../utils/userData';
 
 const Teacher: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const userData = await fetchUserData();
+      setUser(userData);
+    };
+    getUserData();
+  }, []);
   return (
     <div className="pl-12 ml-5 w-100">
     

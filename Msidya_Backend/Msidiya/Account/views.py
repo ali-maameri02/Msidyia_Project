@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 
 class RegisterUserView(generics.CreateAPIView):
-    serializer_class = UserSerializer
+    serializer_class = UserregisterSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -62,6 +62,7 @@ def user_login(request):
             user_role = serializer.data.get('Role', None)
 
             return Response({
+                'id':user.id,
                 'token': token.key,
                 'message': 'successful login',
                 'profile_picture': profile_picture_url,
@@ -75,6 +76,12 @@ class Users(generics.ListAPIView):
 
     def get_queryset(self):
         return User.objects.all()  # Add parentheses here 
+    
+class Userretreive(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'pk'
+
 class UserUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserUpdateSerializer

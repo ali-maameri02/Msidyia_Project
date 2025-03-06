@@ -18,13 +18,21 @@ import PersonIcon from "@mui/icons-material/Person";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import msidiyalogo from "../../../assets/msidiya.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+
 interface SidebarAppProps {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
 const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
+  const navigate = useNavigate(); // For navigation
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
   const menuItems = useMemo(
     () => [
       {
@@ -100,6 +108,10 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
               </MenuItem>
             ))}
           </Menu>
+          <div className=" flex flex-row justify-center align-middle px-5 p-3 m-2 rounded-lg w-full hover:bg-red-500 hover:text-white " >
+           <button onClick={handleLogout}>Logout</button>
+                                       <LogoutOutlinedIcon/>
+                                       </div>
         </Sidebar>
       </div>
     </>
