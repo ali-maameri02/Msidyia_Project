@@ -5,9 +5,15 @@ urlpatterns = [
     path('categories/', views.CategoryListCreateView.as_view(), name='category-list-create'),
     path('categories/<int:pk>/', views.CategoryDetailView.as_view(), name='category-detail'),
     path('subjects/', views.SubjectListCreateView.as_view(), name='subject-list-create'),
+    path("categories/<int:category_id>/create_subject/", views.CreateSubjectForCategoryView.as_view(), name="create-subject-for-category"),
+
     path('subjects/<int:pk>/', views.SubjectDetailView.as_view(), name='subject-detail'),
     path('topics/', views.TopicListCreateView.as_view(), name='topic-list-create'),
+    path("subjects/<int:subject_id>/add_topic/", views.AddTopicToSubjectView.as_view(), name="add-topic-to-subject"),
+
     path('topics/<int:pk>/', views.TopicDetailView.as_view(), name='topic-detail'),
+     path('categories/<int:category_id>/subjects/', views.get_category_subjects, name='category-subjects'),
+     path('subjects/<int:subject_id>/topics/', views.get_subject_topics, name='subject-topics'),
     path('group-classes/', views.GroupClassListCreateView.as_view(), name='group-class-list-create'),
     path('group-classes/<int:pk>/', views.GroupClassDetailView.as_view(), name='group-class-detail'),
     path('group-class-reviews/', views.GroupClassReviewListCreateView.as_view(), name='group-class-review-list-create'),

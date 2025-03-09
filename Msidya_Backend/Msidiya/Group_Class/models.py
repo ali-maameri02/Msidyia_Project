@@ -18,7 +18,7 @@ class Subject(models.Model):
 # Category Model
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    status = models.CharField(max_length=20, choices=[('accepted', 'Accepted'), ('refused', 'Refused'), ('in_progress', 'In Progress')])
+    status = models.CharField(max_length=20, choices=[('accepted', 'Accepted'), ('refused', 'Refused'), ('in_progress', 'In Progress')] , default='In Progress')
     subjects = models.ManyToManyField(Subject,blank=True)
     
     def __str__(self) :

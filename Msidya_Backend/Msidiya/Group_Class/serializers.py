@@ -1,26 +1,27 @@
 from rest_framework import serializers
 from .models import Category, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 
-# Category Serializer
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
 
-
-# Subject Serializer
-class SubjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subject
-        fields = '__all__'
-
-
-# Topic Serializer
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
         fields = '__all__'
 
+class SubjectSerializer(serializers.ModelSerializer):
+    topics = TopicSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Subject
+        fields = '__all__'
+class CategorySerializer(serializers.ModelSerializer):
+    subjects = serializers.PrimaryKeyRelatedField(many=True, queryset=Subject.objects.all(), required=False)
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+        extra_kwargs = {
+            'status': {'required': False} 
+        }
 
 # Group Class Serializer
 class GroupClassSerializer(serializers.ModelSerializer):

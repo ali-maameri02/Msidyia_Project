@@ -22,83 +22,29 @@ import AddIcon from '@mui/icons-material/Add';
 import ListIcon from '@mui/icons-material/List';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+interface Topic {
+  id: number;
+  name: string;
+}
 // Define interfaces for row data
 interface Subject {
   id: number;
   name: string;
-  topics: string[];
+  topics: Topic[]; // Change from string[] to Topic[]
 }
 
 interface CategoryRow {
-  [x: string]: any;
+  
   id: number;
-  categoryName: string;
-  activeStatus: boolean;
+  name: string;
+  status: boolean;
   subjects?: Subject[];
 }
 
-// Define the columns for the DataGrid
-const columns: GridColDef<CategoryRow>[] = [
-  { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'categoryName', headerName: 'Category Name', width: 200 },
-  {
-    field: 'activeStatus',
-    headerName: 'Active Status',
-    width: 150,
-    renderCell: (params) =>
-      params.value ? (
-        <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span>
-      ) : (
-        <span style={{ color: 'red', fontWeight: 'bold' }}>Inactive</span>
-      ),
-  },
-  {
-    field: 'actions',
-    headerName: 'Actions',
-    width: 200,
-    sortable: false,
-    renderCell: (params) => (
-      <div>
-        <IconButton
-          color="primary"
-          title="List Subjects"
-          onClick={() => params.row.onListSubjects?.(params.row)}
-        >
-          <ListIcon />
-        </IconButton>
-        <IconButton color="secondary" title="Modify">
-          <EditIcon />
-        </IconButton>
-        <IconButton color="error" title="Delete">
-          <DeleteIcon />
-        </IconButton>
-      </div>
-    ),
-  },
-];
 
-// Rows data
-const rows: CategoryRow[] = [
-  {
-    id: 1,
-    categoryName: 'Mathematics',
-    activeStatus: true,
-    subjects: [
-      { id: 1, name: 'Algebra', topics: ['Equations', 'Inequalities'] },
-      { id: 2, name: 'Geometry', topics: ['Shapes', 'Angles'] },
-    ],
-  },
-  {
-    id: 2,
-    categoryName: 'Science',
-    activeStatus: true,
-    subjects: [
-      { id: 1, name: 'Physics', topics: ['Forces', 'Motion'] },
-      { id: 2, name: 'Chemistry', topics: ['Atoms', 'Reactions'] },
-    ],
-  },
-];
+
 
 export default function Setcategories() {
   const [open, setOpen] = React.useState(false);
@@ -106,19 +52,43 @@ export default function Setcategories() {
   const [isAddingSubject, setIsAddingSubject] = React.useState(false);
   const [newValue, setNewValue] = React.useState('');
   const [selectedSubjects, setSelectedSubjects] = React.useState<Subject[]>([]);
-  const [selectedTopics, setSelectedTopics] = React.useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = React.useState<Topic[]>([]);
   const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(
     null
   );
   const [openAddCategoryModal, setOpenAddCategoryModal] = React.useState(false);
   const [newCategory, setNewCategory] = React.useState('');
-  const [categories, setCategories] = React.useState<string[]>([]);
+  const [categories, setCategories] = React.useState<CategoryRow[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<number | null>(null);
+  const [editValue, setEditValue] = useState('');
 
+ // Fetch categories from API
+ const fetchCategories = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+    setCategories(response.data);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+};
+
+useEffect(() => {
+  fetchCategories();
+}, []);
+
+  
+  
   const handleOpen = (row: CategoryRow) => {
-    setSelectedSubjects(row.subjects || []);
-    setSelectedTopics([]);
-    setOpen(true);
+    setSelectedCategoryId(row.id); // Store the category ID
+    axios.get(`http://127.0.0.1:8000/api/categories/${row.id}/subjects/`)
+      .then(response => {
+        setSelectedSubjects(response.data);
+        setOpen(true);
+      })
+      .catch(error => console.error("Error fetching subjects:", error));
   };
+  
+  
 
   const handleClose = () => {
     setOpen(false);
@@ -138,33 +108,210 @@ export default function Setcategories() {
     setNewValue('');
   };
 
-  const handleAdd = () => {
-    if (newValue.trim()) {
-      if (isAddingSubject) {
-        setSelectedSubjects([
-          ...selectedSubjects,
-          { id: Date.now(), name: newValue.trim(), topics: [] },
-        ]);
-      } else if (selectedSubject) {
-        const updatedSubjects = selectedSubjects.map((subject) =>
-          subject.id === selectedSubject.id
-            ? { ...subject, topics: [...subject.topics, newValue.trim()] }
-            : subject
-        );
-        setSelectedSubjects(updatedSubjects);
-        setSelectedTopics([...selectedTopics, newValue.trim()]);
-      }
-    }
-    setAddModalOpen(false);
-  };
+ // Add a new subject to the selected category
+ const handleAddSubject = async () => {
+  if (!selectedCategoryId || !newValue.trim()) {
+    alert('Please select a category and enter a subject name.');
+    return;
+  }
 
-  const handleAddCategory = () => {
-    if (newCategory.trim()) {
-      setCategories((prev) => [...prev, newCategory.trim()]);
+  try {
+    await axios.post(
+      `http://127.0.0.1:8000/api/categories/${selectedCategoryId}/create_subject/`,
+      { name: newValue, category_id: selectedCategoryId },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    // Fetch the updated subjects list immediately
+    const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+    setSelectedSubjects(response.data);
+
+    setNewValue('');
+    setAddModalOpen(false);
+  } catch (error) {
+    console.error("Error adding subject:", error);
+  }
+};
+// Update a subject (for example, update its name)
+const handleUpdateSubject = async (subjectId: number, updatedName: string) => {
+  try {
+    await axios.patch(
+      `http://127.0.0.1:8000/api/subjects/${subjectId}/`,
+      { name: updatedName },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    // Re-fetch updated subjects list
+    const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+    setSelectedSubjects(response.data);
+  } catch (error) {
+    console.error("Error updating subject:", error);
+  }
+};
+
+// Delete a subject
+const handleDeleteSubject = async (subjectId: number) => {
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/subjects/${subjectId}/`);
+    // Re-fetch updated subjects list
+    const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+    setSelectedSubjects(response.data);
+  } catch (error) {
+    console.error("Error deleting subject:", error);
+  }
+};
+const handleAddCategory = async () => {
+  if (newCategory.trim()) {
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/categories/',
+        { name: newCategory.trim() },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      setCategories([...categories, response.data]);
       setNewCategory('');
       setOpenAddCategoryModal(false);
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  }
+};
+ // Update category (e.g. update its name)
+ const handleUpdateCategory = async (categoryId: number, updatedName: string) => {
+  try {
+    await axios.patch(
+      `http://127.0.0.1:8000/api/categories/${categoryId}/`,
+      { name: updatedName },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    await fetchCategories();
+  } catch (error) {
+    console.error("Error updating category:", error);
+  }
+};
+
+// Delete a category
+const handleDeleteCategory = async (categoryId: number) => {
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/categories/${categoryId}/`);
+    await fetchCategories();
+  } catch (error) {
+    console.error("Error deleting category:", error);
+  }
+};
+
+
+  const handleAddTopic = async () => {
+    if (!selectedSubject?.id || !newValue.trim()) {
+      alert('Please select a subject and enter a topic name.');
+      return;
+    }
+  
+    try {
+      await axios.post(
+        `http://127.0.0.1:8000/api/subjects/${selectedSubject.id}/add_topic/`,
+        { name: newValue },
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      // Fetch updated topics immediately
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/subjects/${selectedSubject.id}/`
+      );
+      setSelectedTopics(response.data.topics);
+  
+      setNewValue('');
+      setAddModalOpen(false);
+    } catch (error) {
+      console.error("Error adding topic:", error);
     }
   };
+   // Update a topic
+   const handleUpdateTopic = async (topicId: number, updatedName: string) => {
+    try {
+      await axios.patch(
+        `http://127.0.0.1:8000/api/topics/${topicId}/`,
+        { name: updatedName },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      // Re-fetch updated topics for the selected subject
+      const response = await axios.get(`http://127.0.0.1:8000/api/subjects/${selectedSubject?.id}/`);
+      setSelectedTopics(response.data.topics);
+    } catch (error) {
+      console.error("Error updating topic:", error);
+    }
+  };
+
+  // Delete a topic
+  const handleDeleteTopic = async (topicId: number) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/topics/${topicId}/`);
+      // Re-fetch updated topics for the selected subject
+      const response = await axios.get(`http://127.0.0.1:8000/api/subjects/${selectedSubject?.id}/`);
+      setSelectedTopics(response.data.topics);
+    } catch (error) {
+      console.error("Error deleting topic:", error);
+    }
+  };
+  
+const columns: GridColDef[] = [
+  
+  { field: 'name', headerName: 'Category Name', width: 200 },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 150,
+    renderCell: (params) => {
+      let color = 'black'; // Default color
+      let statusText = params.value; // Status from API
+
+      if (statusText === 'in progress') {
+        color = 'blue';
+      } else if (statusText === 'accepted') {
+        color = 'green';
+      } else if (statusText === 'refused') {
+        color = 'red';
+      }
+
+      return <span style={{ color, fontWeight: 'bold' }}>{statusText}</span>;
+    },
+  },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    width: 200,
+    sortable: false,
+    renderCell: (params) => (
+      <div>
+        <IconButton
+          color="primary"
+          title="List Subjects"
+          onClick={() => params.row.onListSubjects?.(params.row)}
+        >
+          <ListIcon />
+        </IconButton>
+        <IconButton
+            color="secondary"
+            title="Modify"
+            onClick={() => {
+              const updatedName = prompt("Enter new category name", params.row.name);
+              if (updatedName) {
+                handleUpdateCategory(params.row.id, updatedName);
+              }
+            }}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            title="Delete"
+            onClick={() => handleDeleteCategory(params.row.id)}
+          >
+            <DeleteIcon />
+          </IconButton>
+      </div>
+    ),
+  },
+];
 
   return (
     <div className="ml-16 mt-16">
@@ -178,19 +325,20 @@ export default function Setcategories() {
         </Button>
       </div>
       <Paper sx={{ height: 400, width: '95%' }}>
-        <DataGrid
-          rows={rows.map((row) => ({
-            ...row,
-            onListSubjects: handleOpen,
-          }))}
-          columns={columns}
-          initialState={{
-            pagination: { paginationModel: { page: 0, pageSize: 5 } },
-          }}
-          pageSizeOptions={[5, 10]}
-          checkboxSelection
-          sx={{ border: 0 }}
-        />
+      <DataGrid
+  rows={categories.map((row) => ({
+    id: row.id, 
+    name: row.name.toString(), // Ensure name is a string
+    status: row.status.toString(), // Ensure status is a string
+    onListSubjects: () => handleOpen(row),
+  }))}
+  columns={columns}
+  pageSizeOptions={[5, 10]}
+  checkboxSelection
+  sx={{ border: 0  }}
+/>
+
+
       </Paper>
 
       <Modal open={open} onClose={handleClose}>
@@ -219,38 +367,47 @@ export default function Setcategories() {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<AddIcon />}
-                        onClick={() => handleAddModalOpen(true)}
-                      >
-                        Add Subject
-                      </Button>
+                    <Button variant='contained' onClick={() => { setIsAddingSubject(true); setAddModalOpen(true); selectedCategoryId}}>
+  Add Subject
+</Button>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {selectedSubjects.map((subject) => (
-                    <TableRow
-                      key={subject.id}
-                      hover
-                      selected={subject.id === selectedSubject?.id}
-                      onClick={() => handleSubjectClick(subject)}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <TableCell>{subject.name}</TableCell>
-                      <TableCell align="right">
-                        <IconButton color="secondary" title="Modify">
+  {selectedSubjects.map((subject, index) => (
+    <TableRow
+      key={subject.id || `subject-${index}`} // Fallback to index if id is missing
+      hover
+      selected={subject.id === selectedSubject?.id}
+      onClick={() => handleSubjectClick(subject)}
+      sx={{ cursor: 'pointer' }}
+    >
+      <TableCell>{subject.name}</TableCell>
+      <TableCell align="right">
+                        <IconButton
+                          color="secondary"
+                          title="Modify"
+                          onClick={() => {
+                            const updatedName = prompt("Enter new subject name", subject.name);
+                            if (updatedName) {
+                              handleUpdateSubject(subject.id, updatedName);
+                            }
+                          }}
+                        >
                           <EditIcon />
                         </IconButton>
-                        <IconButton color="error" title="Delete">
+                        <IconButton
+                          color="error"
+                          title="Delete"
+                          onClick={() => handleDeleteSubject(subject.id)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+    </TableRow>
+  ))}
+</TableBody>
+
               </Table>
             </TableContainer>
 
@@ -277,14 +434,27 @@ export default function Setcategories() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {selectedTopics.map((topic, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{topic}</TableCell>
+                  {selectedTopics.map((topic) => (
+                    <TableRow key={topic.id}>
+                      <TableCell>{topic.name}</TableCell>
                       <TableCell align="right">
-                        <IconButton color="secondary" title="Modify">
+                        <IconButton
+                          color="secondary"
+                          title="Modify"
+                          onClick={() => {
+                            const updatedName = prompt("Enter new topic name", topic.name);
+                            if (updatedName) {
+                              handleUpdateTopic(topic.id, updatedName);
+                            }
+                          }}
+                        >
                           <EditIcon />
                         </IconButton>
-                        <IconButton color="error" title="Delete">
+                        <IconButton
+                          color="error"
+                          title="Delete"
+                          onClick={() => handleDeleteTopic(topic.id)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
@@ -293,6 +463,7 @@ export default function Setcategories() {
                 </TableBody>
               </Table>
             </TableContainer>
+
           </div>
           <div className="flex justify-end mt-4">
             <Button variant="contained" color="primary" onClick={handleClose}>
@@ -330,9 +501,13 @@ export default function Setcategories() {
             <Button variant="outlined" onClick={() => setAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" onClick={handleAdd}>
-              Add
-            </Button>
+            <Button
+  variant="contained"
+  color="primary"
+  onClick={isAddingSubject ? handleAddSubject : handleAddTopic}
+>
+  {isAddingSubject ? "Add Subject" : "Add Topic"}
+</Button>
           </div>
         </Box>
       </Modal>
