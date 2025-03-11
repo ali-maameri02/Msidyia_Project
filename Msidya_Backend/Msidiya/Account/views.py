@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404
 
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = UserregisterSerializer
-
+    
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -28,7 +28,6 @@ class RegisterUserView(generics.CreateAPIView):
             # print("Serializer errors:")
             # print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 @api_view(['POST'])
 def user_login(request):
     if request.method == 'POST':
@@ -55,22 +54,29 @@ def user_login(request):
 
         if user:
             token, _ = Token.objects.get_or_create(user=user)
-
             serializer = UserSerializer(user)
-            profile_picture_url = serializer.data.get('profile_picture', None)
-            username = serializer.data.get('username', None)
-            user_role = serializer.data.get('Role', None)
+
+            # Check if the user is a Tutor
+            tutor_data = None
+            try:
+                tutor = Tutor.objects.get(user=user)
+                tutor_data = TutorSerializer(tutor).data  # Serialize Tutor data
+            except Tutor.DoesNotExist:
+                print("User is not a tutor.")
 
             return Response({
-                'id':user.id,
+                'id': user.id,
                 'token': token.key,
                 'message': 'successful login',
-                'profile_picture': profile_picture_url,
-                'username': username,
-                'user_role': user_role,
+                'profile_picture': serializer.data.get('Picture', None),
+                'username': serializer.data.get('username', None),
+                'user_role': serializer.data.get('Role', None),
+                'is_tutor': tutor_data is not None,  # Boolean flag to indicate tutor status
+                'tutor_details': tutor_data  # Return tutor details if they exist
             }, status=status.HTTP_200_OK)
 
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
 class Users(generics.ListAPIView):
     serializer_class = UserSerializer
 

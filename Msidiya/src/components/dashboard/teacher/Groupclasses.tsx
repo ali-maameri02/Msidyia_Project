@@ -1,270 +1,155 @@
-import React, { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Box,
-  TextField,
-  Typography,
-  Button,
-  Avatar,
-  IconButton,
-  Modal,
-  Fade,
-  Backdrop,
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Paper, Box, Typography, Button, Avatar, IconButton } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Outlet } from "react-router-dom";
-
-interface ClassData {
+import axios from 'axios';
+import { GridValueGetter } from '@mui/x-data-grid';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { useNavigate } from 'react-router-dom';
+import AddGroupClass from './AddGroupClass';
+interface GroupClass {
   id: number;
-  mainImage: string;
-  name: string;
-  maxLearners: number;
-  category: string;
-  lastTime: string;
-  active: boolean;
-  createdOn: string;
+  title: string;
+  age_range: string;
+  grade: string;
+  price: number;
+  category: {
+    id: number;
+    name: string;
+  };
+  max_book: number;
+  class_type: string;
+  main_image: string;
+  date_created: string;
+  status: string;
+  last_time: string;
 }
 
-const initialRows: ClassData[] = [
-  {
-    id: 1,
-    mainImage: '/images/class1.jpg',
-    name: 'Pinlearn Team',
-    maxLearners: 3,
-    category: 'Dance',
-    lastTime: 'Oct 7, 2024',
-    active: true,
-    createdOn: 'Mar 26, 2024',
-  },
-  {
-    id: 2,
-    mainImage: '/images/class2.jpg',
-    name: 'New group class',
-    maxLearners: 2,
-    category: 'Management',
-    lastTime: 'Mar 30, 2024',
-    active: true,
-    createdOn: 'Mar 26, 2024',
-  },
-];
-import { useNavigate } from "react-router-dom";
 
 const Groupclasses: React.FC = () => {
-  const [rows, setRows] = useState(initialRows);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newClass, setNewClass] = useState<ClassData>({
-    id: rows.length + 1,
-    mainImage: "",
-    name: "",
-    maxLearners: 0,
-    category: "",
-    lastTime: "",
-    active: false,
-    createdOn: new Date().toLocaleDateString(),
-  });
-
+  const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
   const navigate = useNavigate();
-
-  const handleModalOpen = () => {
-    setIsModalOpen(true);
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  
+  if (user?.is_tutor) {
+      console.log("Tutor details:", user.tutor_details);
+  } else {
+      console.log("User is not a tutor.");
+  }
+  
+  // Fetch group classes from your backend
+  const fetchGroupClasses = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/group-classes/');
+      setGroupClasses(response.data);
+    } catch (error) {
+      console.error('Error fetching group classes:', error);
+    }
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setNewClass({
-      id: rows.length + 1,
-      mainImage: "",
-      name: "",
-      maxLearners: 0,
-      category: "",
-      lastTime: "",
-      active: false,
-      createdOn: new Date().toLocaleDateString(),
-    });
-  };
-
-  const handleAddClass = () => {
-    setRows([...rows, newClass]);
-    handleModalClose();
-  };
-
-  const handleEditClass = (id: number) => {
-    navigate(`update/${id}`); // Redirect to the update route with the class ID
-  };
-
-  const handleDeleteClass = (id: number) => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
-
+  useEffect(() => {
+    fetchGroupClasses();
+  }, []);
+// Delete group class
+const handleDelete = async (id: number) => {
+  if (window.confirm('Are you sure you want to delete this class?')) {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/group-classes/${id}/`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      setGroupClasses(groupClasses.filter(cls => cls.id !== id));
+    } catch (error) {
+      console.error('Error deleting group class:', error);
+    }
+  }
+};
+const columns: GridColDef[] = [
+  {
+    field: 'main_image',
+    headerName: 'Main Image',
+    width: 100,
+  
+    renderCell: (params) => <Avatar src={params.value} alt="Class Image" className='w-[50rem] h-full' />,
+  },
+  { field: 'title', headerName: 'Title', width: 300 },
+  { field: 'age_range', headerName: 'Age Range', width: 100 },
+  { field: 'grade', headerName: 'Grade', width: 150 },
+  { field: 'price', headerName: 'Price', width: 100 },
+  {
+    field: 'category',
+    headerName: 'Category',
+    width: 150,
+   
+  },
+  { field: 'max_book', headerName: 'Max Book', width: 100 },
+  { field: 'class_type', headerName: 'Class Type', width: 100 },
+  { field: 'last_time', headerName: 'Last Time', width: 150 },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 100,
+    renderCell: (params: any) => (
+      params.value === 'Visible' ? (
+        <CheckCircleIcon style={{ color: 'green' }} />
+      ) : (
+        <CancelIcon style={{ color: 'red' }} />
+      )
+    ),
+  },
+  { field: 'date_created', headerName: 'Created On', width: 150 },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    width: 150,
+    sortable: false,
+    renderCell: (params) => (
+      <div>
+      <IconButton 
+  color="secondary" 
+  title="Edit" 
+  onClick={() => navigate(`/dashboard/teacher/group-classes/update/${params.id}`)}
+>
+  <EditIcon />
+</IconButton>
+        <IconButton color="error" title="Delete" onClick={() => handleDelete(params.id as number)}>
+            <DeleteIcon />
+          </IconButton>
+      </div>
+    ),
+  },
+];
 
   return (
-    <div className=" mt-16 ml-12">
-      <Box sx={{ padding: '' }}>
+    <div className="mt-16 ml-12  ">
+      <Box sx={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',paddingLeft:'2rem', }}>
         <Typography variant="h4" sx={{ marginBottom: '20px' }}>
           Group Classes
         </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px',
-          }}
+        <Button
+          variant="contained"
+          startIcon={<AddCircleOutlineIcon />}
+          onClick={() => { /* navigate to add group class form */ }}
         >
-          <TextField
-            variant="outlined"
-            placeholder="Search"
-            size="small"
-            sx={{ width: '300px' }}
-          />
-<Button
-  variant="contained"
-  // color="secondary"
-  startIcon={<AddCircleOutlineIcon />}
-  onClick={() => navigate('add')} // Path matches the route
->
-  Add
-</Button>
-
-
-        </Box>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Main Image</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Maximum Learners</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Last Time</TableCell>
-                <TableCell>Active</TableCell>
-                <TableCell>Created On</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <Avatar src={row.mainImage} alt="Class Image" />
-                  </TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.maxLearners}</TableCell>
-                  <TableCell>{row.category}</TableCell>
-                  <TableCell>{row.lastTime}</TableCell>
-                  <TableCell>
-                    {row.active ? (
-                      <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>✔</span>
-                    ) : (
-                      <span style={{ color: '#f44336', fontWeight: 'bold' }}>✘</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{row.createdOn}</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEditClass(row.id)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDeleteClass(row.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* Add Class Modal */}
-        <Modal
-          open={isModalOpen}
-          onClose={handleModalClose}
-          closeAfterTransition
-          BackdropComponent={Backdrop}
-          BackdropProps={{ timeout: 500 }}
-        >
-          <Fade in={isModalOpen}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 400,
-                bgcolor: 'background.paper',
-                boxShadow: 24,
-                p: 4,
-                borderRadius: 2,
-              }}
-            >
-              <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                Add New Class
-              </Typography>
-              <TextField
-                label="Class Name"
-                variant="outlined"
-                fullWidth
-                sx={{ marginBottom: 2 }}
-                value={newClass.name}
-                onChange={(e) =>
-                  setNewClass({ ...newClass, name: e.target.value })
-                }
-              />
-              <TextField
-                label="Maximum Learners"
-                type="number"
-                variant="outlined"
-                fullWidth
-                sx={{ marginBottom: 2 }}
-                value={newClass.maxLearners}
-                onChange={(e) =>
-                  setNewClass({
-                    ...newClass,
-                    maxLearners: Number(e.target.value),
-                  })
-                }
-              />
-              <TextField
-                label="Category"
-                variant="outlined"
-                fullWidth
-                sx={{ marginBottom: 2 }}
-                value={newClass.category}
-                onChange={(e) =>
-                  setNewClass({ ...newClass, category: e.target.value })
-                }
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                  variant="outlined"
-                  onClick={handleModalClose}
-                  sx={{ marginRight: 1 }}
-                >
-                  Cancel
-                </Button>
-                <Button variant="contained" onClick={handleAddClass}>
-                  Add
-                </Button>
-              </Box>
-            </Box>
-          </Fade>
-        </Modal>
+          Add
+        </Button>
       </Box>
-      <Outlet /> {/* This renders nested routes */}
-
+      <Paper sx={{ width: '40rem', height: 500 ,paddingLeft:'2rem', }}>
+        <DataGrid
+          rows={groupClasses.map((cls) => ({
+            ...cls,
+            id: cls.id, // Ensure id exists for each row
+          }))}
+          columns={columns}
+          autoHeight
+          pageSizeOptions={[5, 10]}
+          // rowsPerPageOptions={[5, 10]}
+          checkboxSelection
+        />
+      </Paper>
     </div>
   );
 };
