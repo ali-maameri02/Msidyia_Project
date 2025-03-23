@@ -42,17 +42,24 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = '__all__'
 
-
-# Schedule Serializer
 class ScheduleSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
-    session_link = serializers.ReadOnlyField()  # Display the session link but make it read-only
+    session_link = serializers.ReadOnlyField()
+    group_class = GroupClassSerializer()  # Include full group class details
+    category_name = serializers.CharField(source='group_class.category.name', read_only=True)
+
+    class Meta:
+        model = Schedule
+        fields = ['id', 'group_class', 'category_name', 'date', 'duration', 'session_link', 'created_by']
+        read_only_fields = ['session_link']
+class ScheduleCreateSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    session_link = serializers.ReadOnlyField()
 
     class Meta:
         model = Schedule
         fields = ['id', 'group_class', 'date', 'duration', 'session_link', 'created_by']
         read_only_fields = ['session_link']
-
 
 # Discount Serializer
 class DiscountSerializer(serializers.ModelSerializer):

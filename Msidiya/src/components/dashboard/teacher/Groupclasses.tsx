@@ -26,6 +26,8 @@ interface GroupClass {
   date_created: string;
   status: string;
   last_time: string;
+  tutor: number;
+
 }
 
 
@@ -40,18 +42,24 @@ const Groupclasses: React.FC = () => {
   } else {
       console.log("User is not a tutor.");
   }
-  
-  // Fetch group classes from your backend
-  const fetchGroupClasses = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/group-classes/');
-      setGroupClasses(response.data);
-    } catch (error) {
-      console.error('Error fetching group classes:', error);
-    }
-  };
-
   useEffect(() => {
+    const fetchGroupClasses = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) return;
+
+        const loggedInUser = JSON.parse(storedUser);
+        const tutorId = loggedInUser?.id;
+
+        const response = await axios.get('http://127.0.0.1:8000/api/group-classes/');
+        const filteredClasses = response.data.filter((cls: GroupClass) => cls.tutor === tutorId);
+
+        setGroupClasses(filteredClasses);
+      } catch (error) {
+        console.error('Error fetching group classes:', error);
+      }
+    };
+
     fetchGroupClasses();
   }, []);
 // Delete group class
@@ -71,28 +79,29 @@ const columns: GridColDef[] = [
   {
     field: 'main_image',
     headerName: 'Main Image',
-    width: 100,
-  
-    renderCell: (params) => <Avatar src={params.value} alt="Class Image" className='w-[50rem] h-full' />,
+    width: 80,
+    renderCell: (params) => (
+      <img 
+        src={params.value} 
+        alt="Class" 
+        loading="lazy"
+        style={{ width: 50, height: 50, borderRadius: "50%" }}
+      />
+    ),
   },
-  { field: 'title', headerName: 'Title', width: 300 },
+  { field: 'title', headerName: 'Title', width: 250 },
   { field: 'age_range', headerName: 'Age Range', width: 100 },
-  { field: 'grade', headerName: 'Grade', width: 150 },
-  { field: 'price', headerName: 'Price', width: 100 },
-  {
-    field: 'category',
-    headerName: 'Category',
-    width: 150,
-   
-  },
+  { field: 'grade', headerName: 'Grade', width: 120 },
+  { field: 'price', headerName: 'Price', width: 80 },
+  { field: 'category', headerName: 'Category', width: 130 },
   { field: 'max_book', headerName: 'Max Book', width: 100 },
-  { field: 'class_type', headerName: 'Class Type', width: 100 },
-  { field: 'last_time', headerName: 'Last Time', width: 150 },
+  { field: 'class_type', headerName: 'Class Type', width: 120 },
+  { field: 'last_time', headerName: 'Last Time', width: 130 },
   {
     field: 'status',
     headerName: 'Status',
     width: 100,
-    renderCell: (params: any) => (
+    renderCell: (params) => (
       params.value === 'Visible' ? (
         <CheckCircleIcon style={{ color: 'green' }} />
       ) : (
@@ -100,31 +109,27 @@ const columns: GridColDef[] = [
       )
     ),
   },
-  { field: 'date_created', headerName: 'Created On', width: 150 },
+  { field: 'date_created', headerName: 'Created On', width: 130 },
   {
     field: 'actions',
     headerName: 'Actions',
-    width: 150,
+    width: 130,
     sortable: false,
     renderCell: (params) => (
       <div>
-      <IconButton 
-  color="secondary" 
-  title="Edit" 
-  onClick={() => navigate(`/dashboard/teacher/group-classes/update/${params.id}`)}
->
-  <EditIcon />
-</IconButton>
+        <IconButton color="secondary" title="Edit" onClick={() => navigate(`/dashboard/teacher/group-classes/update/${params.id}`)}>
+          <EditIcon />
+        </IconButton>
         <IconButton color="error" title="Delete" onClick={() => handleDelete(params.id as number)}>
-            <DeleteIcon />
-          </IconButton>
+          <DeleteIcon />
+        </IconButton>
       </div>
     ),
   },
 ];
 
   return (
-    <div className="mt-16 ml-12  ">
+    <div className="mt-16 ml-12 h-full ">
       <Box sx={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',paddingLeft:'2rem', }}>
         <Typography variant="h4" sx={{ marginBottom: '20px' }}>
           Group Classes
@@ -132,22 +137,30 @@ const columns: GridColDef[] = [
         <Button
           variant="contained"
           startIcon={<AddCircleOutlineIcon />}
-          onClick={() => { /* navigate to add group class form */ }}
+          onClick={() => { navigate(`/dashboard/teacher/group-classes/add`) }}
         >
           Add
         </Button>
       </Box>
-      <Paper sx={{ width: '40rem', height: 500 ,paddingLeft:'2rem', }}>
+      <Paper sx={{ width: '60rem', paddingLeft: '2rem' }}>
         <DataGrid
           rows={groupClasses.map((cls) => ({
             ...cls,
-            id: cls.id, // Ensure id exists for each row
+            id: cls.id,
           }))}
           columns={columns}
           autoHeight
-          pageSizeOptions={[5, 10]}
-          // rowsPerPageOptions={[5, 10]}
+          pageSizeOptions={[10, 20, 50]} // Larger page size for faster scrolling
           checkboxSelection
+          disableColumnMenu
+          // disableSelectionOnClick
+          density="compact"
+          getRowId={(row) => row.id}
+          sx={{
+            "& .MuiDataGrid-virtualScroller": {
+              overflow: "auto",
+            },
+          }}
         />
       </Paper>
     </div>

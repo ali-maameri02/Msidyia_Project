@@ -24,7 +24,8 @@ urlpatterns = [
     path('discounts/', views.DiscountListCreateView.as_view(), name='discount-list-create'),
     path('discounts/<int:pk>/', views.DiscountDetailView.as_view(), name='discount-detail'),
     
-    path('schedules/', views.ScheduleListCreateView.as_view(), name='schedule-list-create'),
+    path('schedulescreate/', views.ScheduleListCreateView.as_view(), name='schedule-create'),
+    path('schedules/', views.ScheduleListView.as_view(), name='schedule-create'),
     path('schedules/<int:pk>/', views.ScheduleDetailView.as_view(), name='schedule-detail'),
 
 ]

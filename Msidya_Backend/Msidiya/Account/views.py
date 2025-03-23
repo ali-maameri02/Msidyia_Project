@@ -82,7 +82,9 @@ class Users(generics.ListAPIView):
 
     def get_queryset(self):
         return User.objects.all()  # Add parentheses here 
-    
+class QualificationListcreatview(generics.ListCreateAPIView):
+    serializer_class=QualificationSerializer
+    queryset = Qualification.objects.all()    
 class Userretreive(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -93,9 +95,8 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = UserUpdateSerializer
     lookup_field = 'pk'
 
-    def get_serializer(self, *args, **kwargs):
-        # Let DRF handle 'partial' automatically; no need to pass it manually
-        return super().get_serializer(*args, **kwargs)  
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs) 
 class UserDelete(generics.RetrieveDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

@@ -12,6 +12,8 @@ import Transactions from "./Transactions";
 import UpcomingAppointments from "./UpcomingAppointments";
 import PayoutComponent from "./Payout";
 import GroupClassesTransaction from "./GroupClassesTransaction";
+import Messages from "./Messages";
+import Notification from "./Notification";
 
 const DashboardRoutes: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -47,6 +49,8 @@ const DashboardRoutes: React.FC = () => {
             <Route path="teacher/set-categories" element={<Setcategories />} />
             <Route path="teacher/profile" element={<UserProfile />} />
             <Route path="teacher/payout" element={<PayoutComponent />} />
+            <Route path="teacher/messages" element={<Messages />} />
+            <Route path="teacher/notifications" element={<Notification />} />
             {/* Pass transactions as a prop here */}
             <Route path="teacher/course-transactions" element={<Transactions transactions={mockTransactions} />} />
             <Route path="teacher/upcoming-appointments" element={<UpcomingAppointments />} />

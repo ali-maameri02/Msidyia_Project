@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from .models import Category, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 from .serializers import (
-    CategorySerializer, SubjectSerializer, TopicSerializer,
+    CategorySerializer, ScheduleCreateSerializer, SubjectSerializer, TopicSerializer,
     GroupClassSerializer, GroupClassReviewSerializer, ReportSerializer,
     ScheduleSerializer, DiscountSerializer
 )
@@ -102,6 +102,13 @@ class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.AllowAny]
 # Schedule Views
 class ScheduleListCreateView(generics.ListCreateAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleCreateSerializer
+
+    def perform_create(self, serializer):
+        # Calls the `save()` method on the instance, which will trigger Lessonspace room creation
+        serializer.save()
+class ScheduleListView(generics.ListAPIView):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
 

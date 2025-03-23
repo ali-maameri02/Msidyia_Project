@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Chat, Notification, Transaction, User, Tutor, Student, Ms_Seller
+from .models import Chat, Language, Notification, Qualification, Transaction, User, Tutor, Student, Ms_Seller
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,11 +12,44 @@ class UserregisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username','password','Role']
+class QualificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Qualification
+        fields = '__all__'
+
+
+class LanguageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Language
+        fields = '__all__'
+
+
 class TutorSerializer(serializers.ModelSerializer):
+    qualifications = QualificationSerializer(many=True, read_only=True)  # Correct field names
+    languages = LanguageSerializer(many=True, read_only=True)  # Correct field names
+
     class Meta:
         model = Tutor
-        # fields = '__all__'
-        exclude = ('user',)      
+        exclude = ('user',)
+
+    def update(self, instance, validated_data):
+        # Extract ManyToMany fields separately
+        qualifications_data = validated_data.pop('qualifications', None)
+        languages_data = validated_data.pop('languages', None)
+
+        # Update the tutor instance
+        instance = super().update(instance, validated_data)
+
+        # Update ManyToMany relationships using .set()
+        if qualifications_data:
+            instance.qualifications.set(qualifications_data)  # Use .set() for ManyToMany fields
+
+        if languages_data:
+            instance.languages.set(languages_data)  # Use .set() for ManyToMany fields
+
+        return instance
+
+
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
@@ -65,7 +98,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
         instance.Phone_number = validated_data.get('Phone_number', instance.Phone_number)
-
+        instance.Picture = validated_data.get('Picture', instance.Picture)  # Add this line
+        instance.Paypal_Email = validated_data.get('Paypal_Email', instance.Paypal_Email)
+        instance.Address = validated_data.get('Address', instance.Address)
+        instance.Zip_code = validated_data.get('Zip_code', instance.Zip_code)
+        instance.Gender = validated_data.get('Gender', instance.Gender)
         # Extract data for related entities
         student_data = validated_data.pop('student', None)
         tutor_data = validated_data.pop('tutor', None)

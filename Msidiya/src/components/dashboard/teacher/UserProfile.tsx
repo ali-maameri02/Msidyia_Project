@@ -1,38 +1,205 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CameraAlt, Edit } from '@mui/icons-material';
-import { TextField, Button, Box, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton } from '@mui/material';
+import { TextField, Button, Box, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 import Webcam from "react-webcam";
-
+import axios from 'axios';
+interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  Role: string;
+  Phone_number?: string;
+  Paypal_Email?: string;
+  Address?: string;
+  Zip_code?: number;
+  Picture?: string;
+  Gender?: string;
+  tutor?: {
+    Cover?: string;
+    Description?: string;
+    Intro_video?: string;
+    Verification_Id?: boolean;
+    qualifications?: string[];  // Add this
+    languages?: string[];
+  };
+}
 const UserProfile: React.FC = () => {
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [coverFile, setcoverFile] = useState<File | null>(null);
+
   const [activeTab, setActiveTab] = useState('General Information');
   const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');
   const [coverImage, setCoverImage] = useState('https://via.placeholder.com/600x200');
   const [isEditable, setIsEditable] = useState(true);
-
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [formData, setFormData] = useState<Partial<UserProfile>>({
+    tutor: {
+      qualifications: [],
+      languages: [],
+    },
+  });
+    const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   // State for video preview
-  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string| null>(null);
 
   // State for educational qualifications
   const [qualifications, setQualifications] = useState<string[]>(['']);
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      fetchUserProfile(parsedUser.id);
+    }
+  }, []);
 
+  const fetchUserProfile = async (userId: number) => {
+    try {
+      const response = await axios.get<UserProfile>(
+        `http://127.0.0.1:8000/api/users/${userId}/update/`
+      );
+      // Use the response data directly to update state
+      const userData = response.data;
+      setUser(userData);
+      setProfileImage(userData?.Picture || 'https://via.placeholder.com/150');
+      setCoverImage(userData.tutor?.Cover || 'https://via.placeholder.com/600x200');
+      setVideoPreview(userData.tutor?.Intro_video || null);
+      setFormData({
+        ...userData,
+        tutor: {
+          ...userData.tutor,
+          qualifications: userData.tutor?.qualifications || [],
+          languages: userData.tutor?.languages || [],
+        },
+      });
+      // For qualifications, we use a separate state to manage add/remove
+      setQualifications(userData.tutor?.qualifications || []);
+    } catch (err) {
+      setError('Failed to load user profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      tutor: {
+        ...formData.tutor,
+        [e.target.name]: e.target.value,
+      },        [e.target.name]: e.target.value,
+
+    });
+  };
+  
+  
+
+  const handleUpdate = async () => {
+    if (!user) return;
+    try {
+      // Build updatedData from formData using updated text values.
+      const updatedData: Partial<UserProfile> = {
+        id: user.id,
+        username: formData.username ?? user.username,
+        email: formData.email ?? user.email,
+        Role: user.Role,
+        Phone_number: formData.Phone_number ?? user.Phone_number,
+        Paypal_Email: formData.Paypal_Email ?? user.Paypal_Email,
+        Address: formData.Address ?? user.Address,
+        Zip_code: formData.Zip_code ?? user.Zip_code,
+        Gender: formData.Gender ?? user.Gender,
+        tutor: {
+          Description: formData.tutor?.Description ?? user.tutor?.Description,
+          Intro_video: formData.tutor?.Intro_video ?? user.tutor?.Intro_video,
+          Verification_Id: formData.tutor?.Verification_Id ?? user.tutor?.Verification_Id,
+          qualifications: qualifications, // our separate state for qualifications
+          languages: formData.tutor?.languages ?? user.tutor?.languages,
+        },
+      };
+  
+      const form = new FormData();
+  
+      // Append top-level fields.
+      form.append("username", updatedData.username!);
+      form.append("email", updatedData.email!);
+      form.append("Phone_number", updatedData.Phone_number || "");
+      form.append("Paypal_Email", updatedData.Paypal_Email || "");
+      form.append("Address", updatedData.Address || "");
+      form.append("Zip_code", updatedData.Zip_code ? String(updatedData.Zip_code) : "");
+      form.append("Gender", updatedData.Gender || "");
+  
+      // Append nested tutor fields individually.
+      if (updatedData.tutor) {
+        form.append("tutor[Description]", updatedData.tutor.Description || "");
+        form.append("tutor[Intro_video]", updatedData.tutor.Intro_video || "");
+        form.append("tutor[Verification_Id]", String(updatedData.tutor.Verification_Id || false));
+  
+        // Append each qualification
+        if (updatedData.tutor.qualifications) {
+          updatedData.tutor.qualifications.forEach((qual, index) => {
+            form.append(`tutor[qualifications][${index}]`, qual);
+          });
+        }
+        // Append each language
+        if (updatedData.tutor.languages) {
+          updatedData.tutor.languages.forEach((lang, index) => {
+            form.append(`tutor[languages][${index}]`, lang);
+          });
+        }
+      }
+  
+      // Append file fields if new files are selected.
+      if (profileFile) {
+        form.append("Picture", profileFile);
+      }
+      if (coverFile) {
+        form.append("tutor[Cover]", coverFile);
+      }
+  
+      const response = await axios.patch(
+        `http://127.0.0.1:8000/api/users/${user.id}/update/`,
+        form,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+  
+      setUser(response.data);
+      localStorage.setItem("user", JSON.stringify(response.data));
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update profile");
+    }
+  };
+  
+  
+  
+  
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
 
   const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      const newProfileImage = URL.createObjectURL(event.target.files[0]);
-      setProfileImage(newProfileImage);
+      const file = event.target.files[0];
+      setProfileFile(file); // Store file separately for upload
+      setProfileImage(URL.createObjectURL(file)); // Preview new image
     }
   };
+  
+  
 
   const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      const newCoverImage = URL.createObjectURL(event.target.files[0]);
-      setCoverImage(newCoverImage);
-    }
+      const file = event.target.files[0];
+      setcoverFile(file); // Store file separately for upload
+      setCoverImage(URL.createObjectURL(file)); 
+    }// Preview new image
   };
+  
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -47,23 +214,23 @@ const UserProfile: React.FC = () => {
   };
 
   const handleEditClick = () => {
+    handleUpdate();
     setIsEditable(!isEditable);
   };
-
+  const handleQualificationChange = (index: number, value: string) => {
+    const updatedQualifications = [...qualifications];
+    updatedQualifications[index] = value;
+    setQualifications(updatedQualifications);
+  };
+  
   const handleAddQualification = () => {
     setQualifications([...qualifications, '']);
   };
-
+  
   const handleRemoveQualification = (index: number) => {
-    setQualifications(qualifications.filter((_, i) => i !== index));
+    const updatedQualifications = qualifications.filter((_, i) => i !== index);
+    setQualifications(updatedQualifications);
   };
-
-  const handleQualificationChange = (index: number, value: string) => {
-    const newQualifications = [...qualifications];
-    newQualifications[index] = value;
-    setQualifications(newQualifications);
-  };
-
   return (
     <div className="user-profile flex flex-col justify-around ml-8 mt-16">
       <div className="relative w-full flex flex-col lg:flex-row bg-white h-full rounded-lg shadow-md">
@@ -144,40 +311,48 @@ const UserProfile: React.FC = () => {
               <TextField
                 label="Profile Name"
                 variant="outlined"
+                value={formData.username || ''} onChange={handleChange}
                 fullWidth
-                InputProps={{
-                  readOnly: !isEditable,
-                }}
-                defaultValue="Jonas"
+                name='username'
+                InputProps={{ readOnly: !isEditable }}
+
               />
-              <TextField
-                label="Gender"
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  readOnly: !isEditable,
-                }}
-                defaultValue="Male"
-              />
+          <FormControl fullWidth variant="outlined">
+  <InputLabel>Gender</InputLabel>
+  <Select
+  name='Gender'
+    value={formData.Gender || ''}
+    onChange={(e) => setFormData({ ...formData, Gender: e.target.value })}
+    label="Gender"
+    disabled={!isEditable}
+  >
+    <MenuItem value="Male">Male</MenuItem>
+    <MenuItem value="Female">Female</MenuItem>
+  </Select>
+</FormControl>
+
               <TextField
                 label="Email"
+                name='email'
                 variant="outlined"
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                 }}
-                defaultValue="jonas2411@yahoo.com"
+                value={formData.email || ''} onChange={handleChange}
               />
               <TextField
                 label="Phone Number"
+                name='Phone_number'
                 variant="outlined"
+                value={formData.Phone_number || ''} onChange={handleChange}
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                   startAdornment: <InputAdornment position="start">+213</InputAdornment>,
                 }}
               />
-              <TextField
+              {/* <TextField
                 label="City"
                 variant="outlined"
                 fullWidth
@@ -185,73 +360,142 @@ const UserProfile: React.FC = () => {
                   readOnly: !isEditable,
                 }}
                 defaultValue="Vienna"
-              />
+              /> */}
               <TextField
+              name='Address'
                 label="Address"
                 variant="outlined"
                 fullWidth
+                value={formData.Address || ''} onChange={handleChange}
+
                 InputProps={{
                   readOnly: !isEditable,
                 }}
                 defaultValue="2707 Pleasantdale Ro..."
               />
-              <TextField
-                label="Language"
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  readOnly: !isEditable,
-                }}
-                defaultValue="Ainu, Akoose, Aleut"
-              />
+            <Box sx={{ gridColumn: 'span 2' }}>
+  <Typography variant="h6" gutterBottom>
+    Languages
+  </Typography>
+  {formData.tutor?.languages?.map((language, index) => (
+  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+    <TextField
+      label={`Language ${index + 1}`}
+      variant="outlined"
+      fullWidth
+      value={language}
+      onChange={(e) => {
+        const updatedLanguages = [...(formData.tutor?.languages || [])];
+        updatedLanguages[index] = e.target.value;
+        setFormData({
+          ...formData,
+          tutor: { ...formData.tutor, languages: updatedLanguages },
+        });
+      }}
+      InputProps={{
+        readOnly: !isEditable,
+      }}
+    />
+    <IconButton
+      onClick={() => {
+        const updatedLanguages =
+          formData.tutor?.languages?.filter((_, i) => i !== index) || [];
+        setFormData({
+          ...formData,
+          tutor: { ...formData.tutor, languages: updatedLanguages },
+        });
+      }}
+      color="error"
+      disabled={formData.tutor?.languages?.length === 1}
+    >
+      <Remove />
+    </IconButton>
+  </Box>
+))}
+<Button
+  variant="outlined"
+  startIcon={<Add />}
+  onClick={() => {
+    const updatedLanguages = [...(formData.tutor?.languages || []), ''];
+    setFormData({
+      ...formData,
+      tutor: { ...formData.tutor, languages: updatedLanguages },
+    });
+  }}
+>
+  Add Language
+</Button>
+
+  <Button
+    variant="outlined"
+    startIcon={<Add />}
+    onClick={() => {
+      const updatedLanguages = [...(formData.tutor?.languages || []), ''];
+      setFormData({
+        ...formData,
+        tutor: { ...formData.tutor, languages: updatedLanguages },
+      });
+    }}
+  >
+    Add Language
+  </Button>
+</Box>
+
               <TextField
                 label="Zip Code"
+                name='Zip_code'
                 variant="outlined"
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                 }}
-                defaultValue="22180"
+                value={formData.Zip_code || ''} onChange={handleChange}
               />
               <TextField
                 label="Paypal Email ID"
                 variant="outlined"
+                name='Paypal_Email'
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                 }}
-                defaultValue="email@paypal.com"
+                value={formData.Paypal_Email || ''} onChange={handleChange}
               />
             
-              <Box sx={{ gridColumn: 'span 2' }}>
-                <Typography variant="h6" gutterBottom>
-                  Educational Qualifications
-                </Typography>
-                {qualifications.map((qualification, index) => (
-                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <TextField
-                      label={`Qualification ${index + 1}`}
-                      variant="outlined"
-                      fullWidth
-                      value={qualification}
-                      onChange={(e) => handleQualificationChange(index, e.target.value)}
-                      InputProps={{
-                        readOnly: !isEditable,
-                      }}
-                    />
-                    <IconButton onClick={() => handleRemoveQualification(index)} color="error" disabled={qualifications.length === 1}>
-                      <Remove />
-                    </IconButton>
-                  </Box>
-                ))}
-                <Button
-                  variant="outlined"
-                  startIcon={<Add />}
-                  onClick={handleAddQualification}
-                >
-                  Add Qualification
-                </Button>
-              </Box>
+            <Box sx={{ gridColumn: 'span 2' }}>
+  <Typography variant="h6" gutterBottom>
+    Educational Qualifications
+  </Typography>
+  {qualifications.map((qualification, index) => (
+  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+    <TextField
+      label={`Qualification ${index + 1}`}
+      variant="outlined"
+      fullWidth
+      value={qualification}
+      onChange={(e) => handleQualificationChange(index, e.target.value)}
+      InputProps={{
+        readOnly: !isEditable,
+      }}
+    />
+    <IconButton
+      onClick={() => handleRemoveQualification(index)}
+      color="error"
+      disabled={qualifications.length === 1}
+    >
+      <Remove />
+    </IconButton>
+  </Box>
+))}
+<Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
+  Add Qualification
+</Button>
+
+  <Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
+    Add Qualification
+  </Button>
+</Box>
+
               <Box sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
                 <Button
                   variant="contained"
@@ -268,15 +512,15 @@ const UserProfile: React.FC = () => {
           {activeTab === 'Description & Intro' && (
             <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gap: 2 }}>
               <TextField
+              name='Description'
                 label="Description"
                 multiline
                 rows={4}
                 variant="outlined"
                 fullWidth
-                InputProps={{
-                  readOnly: !isEditable,
-                }}
-                defaultValue="Your description here..."
+                InputProps={{ readOnly: !isEditable }}
+
+                value={formData.tutor?.Description || ''} onChange={handleChange}
               />
               <div className="video-upload-section bg-white p-6 rounded-lg shadow-md mt-5">
         <Typography variant="h6" gutterBottom>

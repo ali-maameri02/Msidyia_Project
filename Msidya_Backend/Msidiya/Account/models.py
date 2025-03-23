@@ -33,14 +33,22 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-
-
+class Qualification(models.Model):
+    name = models.CharField(max_length=50,blank=True)
+    def __str__(self):
+         return self.name
+class Language(models.Model):
+    name = models.CharField(max_length=50,blank=True)
+    def __str__(self):
+         return self.name
 class Tutor (models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE , null=True , default=None)  # One-to-one relation with User
     Cover = models.ImageField(upload_to='Cover/', height_field=None, width_field=None, max_length=None)    
     Description = models.CharField(null=True, max_length=50)
     Intro_video = models.FileField( upload_to='Intro_Videos/', max_length=None )
     Verification_Id = models.BooleanField(default=False)
+    qualifications = models.ManyToManyField(Qualification, blank=True, default=None, related_name='tutors')
+    languages = models.ManyToManyField(Language, blank=True, default=None, related_name='tutors')
     def __str__(self):
          return self.user
 
