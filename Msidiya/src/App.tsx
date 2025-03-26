@@ -22,7 +22,7 @@ function App() {
         <Route path="/" element={<Home />} />
         
         <Route path="/Tutors" element={<Tutors />} />
-        <Route path="/Tutors/TutorDetails" element={<TutorDetails />} />
+        <Route path="/Tutors/TutorDetails/:tutorId" element={<TutorDetails />} />
         <Route path="/Tutors/TutorDetails/TutorOneToOne" element={<TutorOneToOne/>} />
         
         <Route path="dashboard/*" element={<DashboardRoutes />} />

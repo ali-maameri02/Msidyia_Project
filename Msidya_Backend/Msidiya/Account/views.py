@@ -139,6 +139,12 @@ class SentMessageView(generics.ListCreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
-    
+class TutorList(generics.ListAPIView):
+    serializer_class=TutorslistSerializer
+    queryset=Tutor.objects.all()
+class TutorDetails(generics.RetrieveAPIView):
+    serializer_class=TutorslistSerializer
+    queryset=Tutor.objects.all()
+    lookup_field = 'pk'
 
        

@@ -13,6 +13,8 @@ urlpatterns = [
     path('chat/sent', SentMessageView.as_view(), name='update'),
     path('notifications/', NotificationListView.as_view(), name='notification-list'),
     path('notifications/<int:pk>/read/', NotificationUpdateView.as_view(), name='notification-update'),
-    path('qualification/',QualificationListcreatview.as_view(),name='Qualification')
+    path('qualification/',QualificationListcreatview.as_view(),name='Qualification'),
+    path('tutor/<int:pk>/',TutorDetails.as_view(),name='tutor'),
+    path('tutors/',TutorList.as_view(),name='tutor')
     
 ]

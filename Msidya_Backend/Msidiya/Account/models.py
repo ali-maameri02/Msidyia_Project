@@ -51,6 +51,13 @@ class Tutor (models.Model):
     languages = models.ManyToManyField(Language, blank=True, default=None, related_name='tutors')
     def __str__(self):
          return self.user
+     
+     
+class TutorReview(models.Model):
+    tutor = models.ForeignKey(Tutor,  on_delete=models.CASCADE,blank=True,default=None)
+    rating = models.IntegerField()
+    comment = models.TextField()
+
 
 class Student (models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE , null=True , default=None)  # One-to-one relation with User

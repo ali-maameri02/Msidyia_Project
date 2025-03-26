@@ -1,137 +1,92 @@
-import * as React from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardActions from '@mui/material/CardActions';
-import NavBar from '../Landing/NavBar';
-import Footer from '../Landing/Footer';
-import techer1 from '../../assets/teacher1.png'
-import techer2 from '../../assets/teacher2.jpg'
-import Rating from '@mui/material/Rating';
-import Stack from '@mui/material/Stack';
-export default function Tutors() {
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardActions from "@mui/material/CardActions";
+import Rating from "@mui/material/Rating";
+import NavBar from "../Landing/NavBar";
+import Footer from "../Landing/Footer";
+import { useNavigate } from "react-router-dom";
+
+interface User {
+  id: number;
+  username: string;
+  Picture?: string;
+}
+
+interface Tutor {
+  user: User;
+  Description?: string;
+  id: number;
+}
+
+const Tutors: React.FC = () => {
+  const navigate = useNavigate();
+  const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    axios
+      .get<Tutor[]>("http://127.0.0.1:8000/api/tutors/")
+      .then((response) => {
+        setTutors(response.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load tutors.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p className="text-center mt-20">Loading tutors...</p>;
+  if (error) return <p className="text-center mt-20 text-red-500">{error}</p>;
+
   return (
     <>
-    <NavBar/>
-    <div className="tutorslist mt-20 p-10 ml-20 flex flex-row justify-between flex-wrap gap-5">
-    <Card sx={{ maxWidth: 345 ,}}>
-      <CardActionArea>
-        <CardMedia
-          component="img"
-          height=""
-          className='h-64'
-          image={techer1}
-          alt="teacher1"
-        />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            teacher1
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-           teacher1 are a widespread group of squamate reptiles, with over 6,000
-            species, ranging across all continents except Antarctica
-          </Typography>
-          <Rating name="size-large" defaultValue={2} size="large" readOnly/>
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <Button size="medium" className='font-bold' variant='contained' color="primary" >
-          See More
-        </Button>
-      </CardActions>
-    </Card>
-    
-    <Card sx={{ maxWidth: 345 }} className='flex flex-col justify-between'>
-      <CardActionArea>
-        <CardMedia
-          component="img"
-          height="140"
-          className='h-64'
-          image={techer2}
-          alt="teacher1"
-        />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            teacher1
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-           teacher1 are a widespread group of squamate reptiles, with over 6,000
-            species, ranging across all continents except Antarctica
-          </Typography>
-          <Rating name="size-large" defaultValue={2} size="large" readOnly/>
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <Button size="medium" className='font-bold' variant='contained' color="primary" >
-          See More
-        </Button>
-      </CardActions>
-    </Card>
-
-
-
-    <Card sx={{ maxWidth: 345 }}>
-      <CardActionArea>
-        <CardMedia
-                  className='h-64'
-
-          component="img"
-          height="140"
-          image={techer1}
-          alt="teacher1"
-        />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            teacher1
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-           teacher1 are a widespread group of squamate reptiles, with over 6,000
-            species, ranging across all continents except Antarctica
-          </Typography>
-          <Rating name="size-large" defaultValue={2} size="large" readOnly/>
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <Button size="medium" className='font-bold' variant='contained' color="primary" >
-          See More
-        </Button>
-      </CardActions>
-    </Card>
-
-
-    <Card sx={{ maxWidth: 345 }}>
-      <CardActionArea>
-        <CardMedia
-                  className='h-64'
-
-          component="img"
-          height="140"
-          image={techer2}
-          alt="teacher1"
-        />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            teacher1
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-           teacher1 are a widespread group of squamate reptiles, with over 6,000
-            species, ranging across all continents except Antarctica
-          </Typography>
-          <Rating name="size-large" defaultValue={2} size="large" readOnly/>
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <Button size="medium" className='font-bold' variant='contained' color="primary" >
-          See More
-        </Button>
-      </CardActions>
-    </Card>
-    
-    </div>
-    <Footer/>
+      <NavBar />
+      <div className="tutorslist mt-20 p-10 ml-20 flex flex-row justify-around flex-wrap gap-5">
+        {tutors.map((tutor) => (
+          <Card key={tutor.user.id} sx={{ maxWidth: 345 }}>
+            <CardActionArea>
+              <CardMedia
+                component="img"
+                height="200"
+                className="h-64 object-cover"
+                image={tutor.user.Picture || "https://via.placeholder.com/200"}
+                alt={tutor.user.username}
+              />
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="div">
+                  {tutor.user.username}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {tutor.Description || "No bio available."}
+                </Typography>
+                <Rating name="size-large" defaultValue={3} size="large" readOnly />
+              </CardContent>
+            </CardActionArea>
+            <CardActions>
+              <Button
+                size="medium"
+                className="font-bold"
+                variant="contained"
+                color="primary"
+                onClick={() => navigate(`/Tutors/TutorDetails/${tutor.id}`)}
+              >
+                See More
+              </Button>
+            </CardActions>
+          </Card>
+        ))}
+      </div>
+      <Footer />
     </>
   );
-}
+};
+
+export default Tutors;

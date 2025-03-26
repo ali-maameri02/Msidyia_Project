@@ -1,268 +1,221 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
- 
   Typography,
-
   Card,
   CardContent,
   CardMedia,
   Button,
   CardActionArea,
-  CardActions,
   Rating,
-  Avatar,
   TextField,
   MenuItem,
 } from "@mui/material";
-import { Slide } from "react-awesome-reveal";
-import NavBar from "../Landing/NavBar";
-import Footer from "../Landing/Footer";
-import techer1 from "../../assets/teacher1.png";
-import techer2 from "../../assets/teacher2.jpg";
-import math from "../../assets/math.jpg";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import video from "../../assets/Msidiya _ E-learning Platform - Google Chrome 2024-08-24 00-38-41.mp4";
 import EmailIcon from "@mui/icons-material/Email";
 import InterpreterModeIcon from "@mui/icons-material/InterpreterMode";
 import GroupsIcon from "@mui/icons-material/Groups";
-import TodayIcon from '@mui/icons-material/Today';
-import WatchLaterIcon from '@mui/icons-material/WatchLater';
-import SendIcon from '@mui/icons-material/Send';
-import { Outlet, useNavigate } from "react-router-dom";
-const TutorDetails = () => {
-  const navigate = useNavigate();
-  const handleviewOne_TO_One = () => {
-    navigate(`/Tutors/TutorDetails/TutorOneToOne`); // Redirect to the update route with the class ID
-  };
+import TodayIcon from "@mui/icons-material/Today";
+import WatchLaterIcon from "@mui/icons-material/WatchLater";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import NavBar from "../Landing/NavBar";
+import Footer from "../Landing/Footer";
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  Picture: string;
+}
 
-  const [filters, setFilters] = useState({
-    availability: "",
-    grade: "",
-    category: "",
-    subject: "",
-    topic: "",
-    country: "",
-  });
-  const handleFilterChange = (field: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+interface Tutor {
+  user: User; // Change from string to an object
+  id: number;
+  name: string;
+  Description: string;
+  rating: number;
+  Intro_video: string;
+  languages: string[];
+  subjects: string[];
+  categories: string[];
+  groupClassImage: string;
+  groupClassRating: number;
+  groupClassReviews: string;
+  groupClassDate: string;
+  groupClassTime: string;
+}
+interface GroupClass {
+  id: number;
+  title: string;
+  age_range: string;
+  grade: string;
+  price: number;
+  category: {
+    id: number;
+    name: string;
   };
-  const filterOptions = {
-    grades: ["Grade 1", "Grade 2", "Grade 3"],
-    categories: ["Math", "Science", "English"],
-    subjects: ["Algebra", "Physics", "Grammar"],
-    topics: ["Equations", "Thermodynamics", "Sentence Structure"],
-    countries: ["USA", "Canada", "France"],
-  };
+  max_book: number;
+  class_type: string;
+  main_image: string;
+  date_created: string;
+  status: string;
+  last_time: string;
+  tutor: number;
+
+}
+interface Category {
+  
+  id: number;
+  tutor:number;
+  name: string;
+  status: boolean;
+  // subjects?: Subject[];
+}
+
+
+const TutorDetails = () => {
+
+  const [tutor, setTutor] = useState<Tutor | null>(null);
+  const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
+
+  const { tutorId } = useParams();
+  // const [tutor, setTutor] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTutorDetails = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/tutor/${tutorId}/`);
+        setTutor(response.data);
+        const Groupclasseresponse = await axios.get(`http://127.0.0.1:8000/api/group-classes/`);
+        const TutorGroupclass = Groupclasseresponse.data.filter((cls: GroupClass) => cls.tutor === Number(tutorId));
+        setGroupClasses(TutorGroupclass); // Remove .data
+        console.log(TutorGroupclass);
+        const CategoriesResponse = await axios.get(`http://127.0.0.1:8000/api/categories/`);
+        const FiltredCategories = CategoriesResponse.data.filter((cls: GroupClass) => cls.tutor === Number(tutorId));
+        setCategories(FiltredCategories)
+        console.log(FiltredCategories);
+
+      } catch (error) {
+        console.error("Error fetching tutor details:", error);
+      }
+    };
+    fetchTutorDetails();
+  }, [tutorId]);
+
+  if (!tutor) return <div>Loading...</div>;
+
   return (
     <>
       <NavBar />
-      <div className="tutordetails p-10  mt-20 ml-20">
+      <div className="tutordetails p-10 mt-20 ml-20">
         <div className="flex flex-row justify-between gap-10">
-          <div className="leftside flex flex-col ">
-
-
-          <Card sx={{ maxWidth: 345 , maxHeight:500 }}>
+          {/* Left Side - Tutor Card */}
+          <Card sx={{ maxWidth: 345, maxHeight: 500 }}>
             <CardActionArea>
               <CardMedia
                 component="img"
-                height=""
-                className="h-64"
-                image={techer1}
-                alt="teacher1"
+                className="h-64 p-2"
+                image={tutor.user?.Picture || "default-image.jpg"}
+                alt={tutor.user?.username}
               />
               <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="div"
-                  className="flex flex-row justify-content-evenly items-center"
-                >
+                <Typography variant="h5" className="flex flex-row items-center">
                   <VerifiedIcon sx={{ color: "#22D3EE" }} />
-                  <span> teacher1</span>
+                  <span>{tutor.user?.username || "Unknown Tutor"}</span>
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  teacher1 are a widespread group of squamate reptiles, with
-                  over 6,000 species, ranging across all continents except
-                  Antarctica
+                  {tutor.Description || "No description available."}
                 </Typography>
-                <Rating
-                  name="size-large"
-                  defaultValue={2}
-                  size="large"
-                  readOnly
-                />
-                <Button
-                  variant="contained"
-                  className="flex flex-row items-center font-bold p-0 w-full justify-evenly"
-                >
+                <Rating name="size-large" value={tutor.rating || 0} size="large" readOnly />
+                <Button variant="contained" className="flex items-center w-full justify-evenly">
                   <EmailIcon />
-                  <h3 className="w-52">Send Message</h3>
+                  <h3>Send Message</h3>
                 </Button>
               </CardContent>
             </CardActionArea>
-            <CardActions>
-              <div className="flex flex-row"></div>
-            </CardActions>
           </Card>
-                 {/* Filter Section */}
-          <div className="filter-section p-4 bg-gray-100 rounded-md mb-6">
-            <h2 className="font-bold mb-4">Filter</h2>
-            <div className="grid grid-cols-1 gap-4">
-              {/* Availability */}
-              <TextField
-                label="Availability"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={filters.availability}
-                onChange={(e) => handleFilterChange("availability", e.target.value)}
-                fullWidth
-              />
-              {/* Grades */}
-              <TextField
-                select
-                label="Grades"
-                value={filters.grade}
-                onChange={(e) => handleFilterChange("grade", e.target.value)}
-                fullWidth
-              >
-                {filterOptions.grades.map((grade) => (
-                  <MenuItem key={grade} value={grade}>
-                    {grade}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* Categories */}
-              <TextField
-                select
-                label="Categories"
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-                fullWidth
-              >
-                {filterOptions.categories.map((category) => (
-                  <MenuItem key={category} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* Subjects */}
-              <TextField
-                select
-                label="Subjects"
-                value={filters.subject}
-                onChange={(e) => handleFilterChange("subject", e.target.value)}
-                fullWidth
-              >
-                {filterOptions.subjects.map((subject) => (
-                  <MenuItem key={subject} value={subject}>
-                    {subject}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* Topics */}
-              <TextField
-                select
-                label="Topics"
-                value={filters.topic}
-                onChange={(e) => handleFilterChange("topic", e.target.value)}
-                fullWidth
-              >
-                {filterOptions.topics.map((topic) => (
-                  <MenuItem key={topic} value={topic}>
-                    {topic}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* Countries */}
-              <TextField
-                select
-                label="Countries"
-                value={filters.country}
-                onChange={(e) => handleFilterChange("country", e.target.value)}
-                fullWidth
-              >
-                {filterOptions.countries.map((country) => (
-                  <MenuItem key={country} value={country}>
-                    {country}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </div>
-          </div>
-          </div>
-          
-          <div className="filter"></div>
-          <div className="about_teacher w-full flex flex-col justify-around items-start">
+
+          {/* Right Side - Tutor Details */}
+          <div className="about_teacher w-full flex flex-col justify-around">
             <video controls className="w-[59rem]">
-              <source src={video} type="video/mp4" />
+              <source src={tutor.Intro_video || "default-video.mp4"} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
-            <div className="flex flex-row justify-around  gap-5 mt-2">
+
+            <div className="flex flex-row justify-around gap-5 mt-2">
               <Button
                 variant="contained"
-                className="flex flex-row items-center font-bold p-0 col-3  justify-evenly"
-                onClick={handleviewOne_TO_One}
+                className="flex items-center font-bold p-0 col-3"
+                onClick={() => navigate(`/Tutors/TutorDetails/TutorOneToOne`)}
               >
                 <InterpreterModeIcon />
-                <h3 className="w-52">One To One</h3>
+                <h3>One To One</h3>
               </Button>
-              <Button
-                variant="contained"
-                className="flex flex-row items-center font-bold p-0  justify-evenly"
-              >
+              <Button variant="contained" className="flex items-center font-bold p-0">
                 <GroupsIcon />
-                <h3 className="w-52">View Group Classes</h3>
+                <h3>View Group Classes</h3>
               </Button>
             </div>
-            <div className="flex flex-col items-start justify-around gap-8">
-              <div className="Languages flex flex-col justify-around items-start">
-                <div className="description mb-5 mt-5">
-                  <h2 className="font-bold">Description</h2>
-                  <span>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Quidem illo corporis fuga fugit similique, quaerat magni,
-                    hic qui laborum praesentium dolorem. Et reprehenderit vel
-                    voluptate debitis dicta atque ex voluptatem?
-                  </span>
-                </div>
+
+            {/* Description & Details */}
+            <div className="flex flex-col items-start gap-8">
+              <div className="Languages">
+                <h2 className="font-bold">Description</h2>
+                <span>{tutor.Description || "No description available."}</span>
+              </div>
+              <div className="Languages">
                 <h2 className="font-bold">Languages</h2>
-                <span>Arabic ,English</span>
+                <span>{tutor.languages?.join(", ") || "Not specified"}</span>
               </div>
-              <div className="Subjects flex flex-col justify-around items-start">
-                <h2 className="font-bold">Subjects which they specialize in</h2>
-                <span>Engineering</span>
-              </div>
-              <div className="Categories flex flex-col justify-around items-start">
+              {/* <div className="Subjects">
+                <h2 className="font-bold">Subjects</h2>
+                <span>{tutor.subjects?.join(", ") || "Not specified"}</span>
+              </div> */}
+              <div className="Categories">
                 <h2 className="font-bold">Categories</h2>
-                <span>IT & Software</span>
+                {categories.length > 0 ? (
+  <span>
+    {categories.map((category) => category.name).join(", ") || "Not specified"}
+  </span>
+) : (
+  <span>Not specified</span>
+)}
+
               </div>
             </div>
-            <Card className="bg-white">
+
+            {/* Group Class Details */}
+         {/* Display Group Classes */}
+{/* Display Group Classes */}
+<div className="group-classes mt-10 w-full">
+  <Typography variant="h5" className="font-bold">Group Classes</Typography>
+
+  {groupClasses.map((groupClass) => (
+    <Card key={groupClass.id} className="bg-white ">
       <CardActionArea>
         <CardContent className="flex flex-col p-4">
-     
-
           {/* Card Content Section */}
           <div className="flex flex-row justify-between items-center">
+            <div className="image h-36 w-1/2">
             <CardMedia
-              component="img"
-              height=""
-              className="h-36"
-              image={math}
-              alt="math"
-            />
-            <div className="group_details flex flex-col w-full flex-nowrap items-start">
-              <h2 className="font-bold">Group Class</h2>
-              <div className="rating flex flex-row items-end">
-                <Rating
-                  name="size-medium"
-                  defaultValue={2}
-                  size="medium"
-                  readOnly
-                />
-                <span>1(1)</span>
-              </div>
-              <div className="date_time flex flex-row justify-between w-full gap-5">
+              className="h-36 w-36 rounded-lg"
+              component={'img'}
+              image={groupClass.main_image || "default-class.jpg"}
+              alt={groupClass.title}
+            /></div>
+            <div className="group_details flex flex-col w-full flex-nowrap items-start p-2">
+              <Typography variant="h6" className="font-bold w-full">{groupClass.title}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Age Range: {groupClass.age_range}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Grade: {groupClass.grade}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Price: ${groupClass.price}
+              </Typography>
+              <div className="date_time flex flex-row justify-start w-full gap-5">
                 <div className="date flex flex-row items-center w-32 flex-nowrap">
                   <TodayIcon />
                   <h3>Apr 12, 2024</h3>
@@ -272,116 +225,26 @@ const TutorDetails = () => {
                   <h3>Apr 12, 2024</h3>
                 </div>
               </div>
-              <div className="price">
-                <h3 className="text-red-600">500 DA</h3>
+              <div className="rating flex flex-row items-end">
+                <Rating name="size-medium" defaultValue={2} size="medium" readOnly />
+                <span>1(1)</span>
               </div>
             </div>
-            <Button variant="contained" className="w-full p-0 h-10">
-              Book Now
-            </Button>
-          </div>
-        </CardContent>
+              <Button variant="contained" color="primary" className="mt-2 w-1/2 h-1/3 ">
+                Enroll Now
+              </Button>
+            </div>
+        
+        </CardContent> {/* Closing tag added */}
       </CardActionArea>
     </Card>
-            <div className="tutor_rating flex flex-col w-full items-start mt-10">
-                <Card className="w-full p-2 border-b-gray-500 mb-1">
+  ))}
+</div>
 
-                    <h1>Tutor's Rating & Review
-</h1>
-                </Card>
-                <Card className="w-full p-2 flex flex-col gap-10 items-start ">
-
-                   <div className="comment w-full flex flex-row justify-between">
-                    <div className="flex w-full flex-row justify-start gap-2 items-start">
-                    <Avatar alt="Remy Sharp" src={techer2} />
-                    <div className="flex flex-col">
-                    <h1>Imed Maamri</h1>
-                    <Rating
-                  name="size-small"
-                  defaultValue={2}
-                  size="small"
-                  readOnly
-                />
-                    </div>
-                    <div className="comment_message w-full">
-                        <p>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque maiores sapiente unde placeat distinctio. Dignissimos tempora cum harum eaque ratione,
-                             exercitationem vel nostrum quod culpa quos natus numquam veritatis excepturi.
-                        </p>
-                    </div>
-                    </div>
-                 
-                   
-                   </div>
-                   <div className="comment w-full flex flex-row justify-between">
-                    <div className="flex w-full flex-row justify-start gap-2 items-start">
-                    <Avatar alt="Remy Sharp" src={techer2} />
-                    <div className="flex flex-col">
-                    <h1>Imed Maamri</h1>
-                    <Rating
-                  name="size-small"
-                  defaultValue={2}
-                  size="small"
-                  readOnly
-                />
-                    </div>
-                    <div className="comment_message w-full">
-                        <p>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque maiores sapiente unde placeat distinctio. Dignissimos tempora cum harum eaque ratione,
-                             exercitationem vel nostrum quod culpa quos natus numquam veritatis excepturi.
-                        </p>
-                    </div>
-                    </div>
-                 
-                   
-                   </div>
-                   <div className="comment w-full flex flex-row justify-between">
-                    <div className="flex w-full flex-row justify-start gap-2 items-start">
-                    <Avatar alt="Remy Sharp" src={techer2} />
-                    <div className="flex flex-col">
-                    <h1>Imed Maamri</h1>
-                    <Rating
-                  name="size-small"
-                  defaultValue={2}
-                  size="small"
-                  readOnly
-                />
-                    </div>
-                    <div className="comment_message w-full">
-                        <p>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Atque maiores sapiente unde placeat distinctio. Dignissimos tempora cum harum eaque ratione,
-                             exercitationem vel nostrum quod culpa quos natus numquam veritatis excepturi.
-                        </p>
-                    </div>
-                    </div>
-                 
-                   
-                   </div>
-
-
-                   <div className="add_comment w-full flex flex-row items-center justify-center gap-3">
-                    <div className="flex flex-col w-full">
-                    <Rating
-                  name="size-small"
-                  defaultValue={2}
-                  size="large"
-                  className="mb-5"
-                />
-                    <TextField label="Add Comment" className="mt-5" />
-                  
-                    </div>
-                   
-                   <SendIcon className="mt-10"/>
-                   </div>
-                </Card>
-            </div>
           </div>
         </div>
       </div>
-      <Outlet /> {/* This renders nested routes */}
-
       <Footer />
-
     </>
   );
 };

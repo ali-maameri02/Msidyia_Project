@@ -17,6 +17,7 @@ class Subject(models.Model):
 
 # Category Model
 class Category(models.Model):
+    tutor = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=[('accepted', 'Accepted'), ('refused', 'Refused'), ('in_progress', 'In Progress')] , default='In Progress')
     subjects = models.ManyToManyField(Subject,blank=True)

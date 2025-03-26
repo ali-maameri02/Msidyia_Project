@@ -163,3 +163,8 @@ class Ms_WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ms_Seller
         fields = '__all__'
+class TutorslistSerializer(serializers.ModelSerializer):
+    user = UserSerializer(required=False)
+    class Meta:
+        model = Tutor
+        fields = '__all__'
