@@ -7,6 +7,7 @@ export interface User {
   Phone_number?: string;
   Address?: string;
   Picture?: string;
+  Role:string,
 }
 
 export const fetchUserData = async (): Promise<User | null> => {

@@ -9,7 +9,7 @@ export const NavLinks = [
     },
     {
         name: "Group Classes",
-        url: "/"
+        url: "/group-classes"
     },
     {
         name: "Courses",

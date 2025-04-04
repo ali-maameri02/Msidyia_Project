@@ -9,11 +9,13 @@ import CoursesGrid from '../Landing/CourseGrid';
 import Footer from "../Landing/Footer";
 import NavBar from "../Landing/NavBar"
 import OfferCards from '../Landing/OfferCards ';
-
+import { CartProvider } from '../Landing/context/CartContext';
 
 const Home: React.FC = () => {
   return (
     <>
+        <CartProvider>
+
      <NavBar />
       <HeroSection />
       <Services />
@@ -25,6 +27,8 @@ const Home: React.FC = () => {
       <Testimonials />
       {/* <NewsLetter /> */}
       <Footer />
+      </CartProvider>
+
     </>
   );
 };

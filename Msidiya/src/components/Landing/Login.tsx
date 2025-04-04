@@ -6,38 +6,40 @@ import { Slide } from "react-awesome-reveal";
 
 import loginimage from "../../assets/4957136_Mobile login.svg";
 import ball from "../../assets/balleft.svg";
+import { User,fetchUserData } from "../../utils/userData";
 
 interface LoginProps {
   onClose?: () => void;
   onSwitchToSignup: () => void;
+  onLoginSuccess: (userData: User) => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
+const Login: React.FC<LoginProps> = ({ onClose, onSwitchToSignup, onLoginSuccess }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(`${API_BASE_URL}/login/`, { username, password });
+      // Store user in localStorage
+      localStorage.setItem("user", JSON.stringify(response.data));
       
-      localStorage.setItem('user', JSON.stringify(response.data));
-      console.log(localStorage)
-      // Check user role and navigate accordingly
-      const { user_role } = response.data; // Assuming `role` is returned by the API
-      if (user_role === "Tutor") {
-        navigate("/dashboard/teacher");
-      } else if (user_role === "Student") {
-        navigate("/dashboardstudent/student");
-       
-      } else if (user_role === "Ms_seller") {
-        navigate("/dashboardseller/seller/");
-      } else {
-        setError("Invalid role. Please contact support.");
+      // Call the onLoginSuccess callback with the user data so the NavBar updates immediately
+      if (onLoginSuccess) {
+        fetchUserData()
+        onLoginSuccess(response.data);
+      }
+      
+      // Optionally, navigate or close the popup
+      const { user_role } = response.data;
+      if (user_role) {
+        navigate("/");
+        if (onClose) onClose();
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Something went wrong!");
@@ -47,21 +49,13 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
   return (
     <div className="font-[sans-serif] p-5">
       <div className="relative pb-0 p-8 flex items-center justify-center py-6 px-4">
-        <Slide
-          direction="right"
-          className="absolute"
-          style={{ top: "-2.65rem", left: "-1.71rem" }}
-        >
+        <Slide direction="right" className="absolute" style={{ top: "-2.65rem", left: "-1.71rem" }}>
           <img src={ball} alt="" className="rounded-br-lg" />
         </Slide>
-
         <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full pb-0">
           <form className="max-w-md md:ml-auto w-full" onSubmit={handleLogin}>
             <Slide direction="right">
-              <h3 className="text-gray-800 text-3xl font-extrabold mb-8">
-                Sign in
-              </h3>
-
+              <h3 className="text-gray-800 text-3xl font-extrabold mb-8">Sign in</h3>
               <div className="space-y-4">
                 <div>
                   <input
@@ -88,7 +82,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                   />
                 </div>
                 {error && <p className="text-red-600 text-sm">{error}</p>}
-
                 <div className="!mt-8">
                   <button
                     type="submit"
