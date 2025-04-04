@@ -21,7 +21,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=[('accepted', 'Accepted'), ('refused', 'Refused'), ('in_progress', 'In Progress')] , default='In Progress')
     subjects = models.ManyToManyField(Subject,blank=True)
-    
+    logo = models.ImageField( upload_to='Categories_logos/', height_field=None, width_field=None, max_length=None,blank=True,null=True)
     def __str__(self) :
         return self.name
 

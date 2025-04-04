@@ -5,6 +5,7 @@ import NavBar from '../Landing/NavBar';
 import Footer from '../Landing/Footer';
 import Skeleton from '@mui/material/Skeleton';
 import logo from '../../assets/msidiya-m-logo.png';
+import { Slider } from '@mui/material'; // Import Slider from MUI
 import { useCart } from '../Landing/context/CartContext'; // Import the CartContext
 
 // Define TypeScript interfaces for the data structure
@@ -47,6 +48,7 @@ const GroupClasses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTutor, setSelectedTutor] = useState('');
   const [minRating, setMinRating] = useState<number | null>(null);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]); // Price range state
 
   // Fetch group classes, reviews, and tutors from the Django backend
   useEffect(() => {
@@ -107,7 +109,7 @@ const GroupClasses = () => {
     return tutor.user?.username || 'Unknown Tutor';
   };
 
-  // Filtered group classes based on search term, tutor, and minimum rating
+  // Filtered group classes based on search term, tutor, minimum rating, and price range
   const filteredGroupClasses = groupClasses.filter((groupClass) => {
     const matchesSearchTerm =
       searchTerm.trim() === '' ||
@@ -116,14 +118,21 @@ const GroupClasses = () => {
       selectedTutor === '' || getTutorUsername(groupClass.tutor) === selectedTutor;
     const matchesRating =
       minRating === null || calculateAverageRating(groupClass.id) >= minRating;
+    const matchesPriceRange =
+      groupClass.price >= priceRange[0] && groupClass.price <= priceRange[1];
 
-    return matchesSearchTerm && matchesTutor && matchesRating;
+    return matchesSearchTerm && matchesTutor && matchesRating && matchesPriceRange;
   });
 
   // Get unique tutor usernames for the filter dropdown
   const uniqueTutors = Array.from(
     new Set(groupClasses.map((groupClass) => getTutorUsername(groupClass.tutor)))
   ).filter((username) => username !== 'Unknown Tutor');
+
+  // Handle price range slider changes
+  const handleChange = (_event: Event, newValue: number | number[]) => {
+    setPriceRange(newValue as [number, number]);
+  };
 
   return (
     <>
@@ -178,6 +187,24 @@ const GroupClasses = () => {
               ))}
             </select>
           </div>
+
+          {/* Two-Way Range Slider for Price Filtering */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2">Price Range:</label>
+            <Slider
+              getAriaLabel={() => 'Price range'}
+              value={priceRange}
+              onChange={handleChange}
+              valueLabelDisplay="auto"
+              min={0}
+              max={1000}
+              step={5}
+            />
+            <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <span>{priceRange[0]} DA</span>
+              <span>{priceRange[1]} DA</span>
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -217,19 +244,18 @@ const GroupClasses = () => {
 
                     {/* Book Now Button */}
                     <button
-  onClick={() =>
-    addToCart({
-      id: groupClass.id,
-      title: groupClass.title,
-      price: parseFloat(groupClass.price.toString()), // Ensure price is a number
-      quantity: 1,
-      main_image:groupClass.main_image,
-    })
-  }
-  className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
->
-  Book Now
-</button>
+                      onClick={() =>
+                        addToCart({
+                          id: groupClass.id,
+                          title: groupClass.title,
+                          price: parseFloat(groupClass.price.toString()), // Ensure price is a number
+                          main_image: groupClass.main_image,
+                        })
+                      }
+                      className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
+                    >
+                      Book Now
+                    </button>
                   </div>
                 </div>
               );

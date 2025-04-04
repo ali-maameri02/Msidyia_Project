@@ -1,62 +1,74 @@
-import { Image } from "../atoms/Image"
-import bgImage from "../../assets/HeroVector.png"
-// import heroImage from "../../assets/hero-img.png"
-import heroImage2 from "../../assets/hero-img (2).png"
-import { Text } from "../atoms/Text"
-import { HeroTexts } from "../particles/DataLists"
-import { Button } from "../atoms/Button"
-import { Play } from "@phosphor-icons/react"
+import { Image } from "../atoms/Image";
+import bgImage from "../../assets/HeroVector.png";
+import heroImage2 from "../../assets/hero-img (2).png";
+import { Text } from "../atoms/Text";
+import { Button } from "../atoms/Button";
+import { Play } from "@phosphor-icons/react";
 import SearchBar from "material-ui-search-bar";
-
-import { Fade, Slide } from "react-awesome-reveal"
-
+import { Fade, Slide } from "react-awesome-reveal";
+import { useTranslation } from "react-i18next"; // Import useTranslation hook
 
 const HeroSection = () => {
-    return (
-        <section className="w-full lg:h-screen md:h-[550px] h-[830px] relative overflow-x-hidden flex justify-end">
-            <Image className="h-[60%] w-[80%] lg:h-[90vh] md:h-[50vh] lg:w-1/2 md:w-[55%]" image={bgImage} alt="Hero Background Vector" />
-            <main className="w-full lg:h-full h-auto grid md:grid-cols-2 absolute top-0 left-0 lg:px-24 md:px-8 px-5 pt-24 md:pt-32 lg:pt-0">
-                <div className="flex flex-col justify-center md:gap-6 gap-3 md:order-1 order-2">
-                    <Text as="p" className="text-color1 uppercase tracking-widest lg:text-base  text-sm font-normal">
-                        <Fade>{HeroTexts.firstText}</Fade>
-                    </Text>
-                    <Text as="h1" className=" text-color3 lg:text-7xl md:text-5xl text-3xl font-medium">
-                        <Fade>{HeroTexts.secondText}</Fade>
-                    </Text>
-                    {/* <Text as="p" className="text-color3 md:text-base text-sm text-justify font-light">
-                        <Fade>{HeroTexts.thirdText}</Fade>
-                    </Text> */}
-                    <div className="w-full flex md:justify-start justify-between items-center lg:gap-12 md:gap-6 gap-0">
-                        <Button type="button" className="outline-none border-none lg:px-7 px-5 py-3 bg-color2 text-white font-extralight rounded-lg">
-                            {HeroTexts.firstButton}
-                        </Button>
-                        <div className="flex items-center lg:gap-6 gap-3 cursor-pointer">
-                            <Text as="span" className="relative flex h-14 w-14">
-                                <Text as="span" className="animate-ping absolute inline-flex h-full w-full rounded-full bg-color1 opacity-75"></Text>
-                                <Text as="span" className="relative flex justify-center items-center text-white rounded-full h-14 w-14 bg-color1">
-                                    <Play size={20} color="currentColor" weight="fill" />
-                                </Text>
-                            </Text>
-                            <Button type="button" className="outline-none border-none">
-                                {HeroTexts.secondButton}
-                            </Button>
-                        </div>
+  const { t, i18n } = useTranslation(); // Use the translation hook and i18n instance
 
-                    </div>
-                    <div className="searchbar flex ml-14" style={{width:'80vw',justifyContent:'center'}}>
-                    <SearchBar className="z-40  border-0 shadow-none "  style={{width:'70vw'}} />
-                    </div>
+  // Check if the current language is Arabic
+  const isArabic = i18n.language === "ar";
 
-                </div>
-                <div className="flex flex-col items-center justify-end md:order-2 order-1">
-                    <Slide direction="right">
-                        <Image image={heroImage2} alt="Hero Image" className=" top:0 lg:h-[100%] lg:w-[100%] md:h-[100%] md:w-full w-[100%] h-[100vh]" />
-                    </Slide>
+  return (
+    <section className="w-full lg:h-screen md:h-[550px] h-[830px] relative overflow-x-hidden flex justify-end">
+      {/* Add conditional styling for Arabic */}
+      <Image
+        className={`h-[60%] w-[80%] lg:h-[90vh] md:h-[50vh] lg:w-1/2 md:w-[55%] ${
+          isArabic ? "transform scale-x-[-1]" : ""
+        }`}
+        image={bgImage}
+        alt="Hero Background Vector"
+      />
+      <main className="w-full lg:h-full h-auto grid md:grid-cols-2 absolute top-0 left-0 lg:px-24 md:px-8 px-5 pt-24 md:pt-32 lg:pt-0">
+        <div className="flex flex-col justify-center md:gap-6 gap-3 md:order-1 order-2">
+          {/* Translated Text */}
+          <Text as="p" className="text-color1 uppercase tracking-widest lg:text-base text-sm font-normal">
+            <Fade>{t("BEST E-learning Platform")}</Fade>
+          </Text>
+          <Text as="h1" className="text-color3 lg:text-7xl md:text-5xl text-3xl font-medium">
+            <Fade>{t("Find Your Group Class Or Tutor And Start Learning Now!")}</Fade>
+          </Text>
+          <div className="w-full flex md:justify-start justify-between items-center lg:gap-12 md:gap-6 gap-0">
+            {/* Translated Buttons */}
+            <Button
+              type="button"
+              className="outline-none border-none lg:px-7 px-5 py-3 bg-color2 text-white font-extralight rounded-lg"
+            >
+              {t("Find out more")}
+            </Button>
+            <div className="flex items-center lg:gap-6 gap-3 cursor-pointer">
+              <Text as="span" className="relative flex h-14 w-14">
+                <Text as="span" className="animate-ping absolute inline-flex h-full w-full rounded-full bg-color1 opacity-75"></Text>
+                <Text as="span" className="relative flex justify-center items-center text-white rounded-full h-14 w-14 bg-color1">
+                  <Play size={20} color="currentColor" weight="fill" />
+                </Text>
+              </Text>
+              <Button type="button" className="outline-none border-none">
+                {t("Play Demo")}
+              </Button>
+            </div>
+          </div>
+          <div className="searchbar flex ml-14" style={{ width: "80vw", justifyContent: "center" }}>
+            <SearchBar className="z-40 border-0 shadow-none" style={{ width: "70vw" }} />
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-end md:order-2 order-1">
+          <Slide direction="right">
+            <Image
+              image={heroImage2}
+              alt="Hero Image"
+              className="top:0 lg:h-[100%] lg:w-[100%] md:h-[100%] md:w-full w-[100%] h-[100vh]"
+            />
+          </Slide>
+        </div>
+      </main>
+    </section>
+  );
+};
 
-                </div>
-            </main>
-        </section>
-    )
-}
-
-export default HeroSection
+export default HeroSection;

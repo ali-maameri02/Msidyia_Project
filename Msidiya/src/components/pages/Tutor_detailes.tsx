@@ -59,13 +59,13 @@ interface GroupClass {
   date_created: string;
   status: string;
   last_time: string;
-  tutor: number;
+  tutor: Tutor;
 
 }
 interface Category {
   
   id: number;
-  tutor:number;
+  tutor:Tutor;
   name: string;
   status: boolean;
   // subjects?: Subject[];
@@ -88,11 +88,11 @@ const TutorDetails = () => {
         const response = await axios.get(`http://127.0.0.1:8000/api/tutor/${tutorId}/`);
         setTutor(response.data);
         const Groupclasseresponse = await axios.get(`http://127.0.0.1:8000/api/group-classes/`);
-        const TutorGroupclass = Groupclasseresponse.data.filter((cls: GroupClass) => cls.tutor === Number(tutorId));
+        const TutorGroupclass = Groupclasseresponse.data.filter((cls: GroupClass) => cls.tutor.user.id === Number(tutorId));
         setGroupClasses(TutorGroupclass); // Remove .data
         console.log(TutorGroupclass);
         const CategoriesResponse = await axios.get(`http://127.0.0.1:8000/api/categories/`);
-        const FiltredCategories = CategoriesResponse.data.filter((cls: GroupClass) => cls.tutor === Number(tutorId));
+        const FiltredCategories = CategoriesResponse.data.filter((cls: GroupClass) => cls.tutor.user.id === Number(tutorId));
         setCategories(FiltredCategories)
         console.log(FiltredCategories);
 

@@ -5,7 +5,6 @@ interface CartItem {
   id: number;
   title: string;
   price: number;
-  quantity: number;
 }
 
 interface CartContextType {
@@ -45,13 +44,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setCartItems((prev) => {
+      // Check if the item already exists in the cart
       const existingItem = prev.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
-        return prev.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
-            : cartItem
-        );
+        return prev; // Do not add duplicates
       } else {
         return [...prev, item];
       }

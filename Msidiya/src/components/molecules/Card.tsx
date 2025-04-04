@@ -1,22 +1,35 @@
-import { Image } from "../atoms/Image"
+import React from "react";
 
-type CardProps = {
-    cardClass: string
-    imageWrapperClass: string
-    imageAlt: string
-    imageSrc: string
-    textWrapperClass?: string
-    cover?: string
-    children?: React.ReactNode
+interface CardProps {
+  cardClass?: string;
+  imageWrapperClass?: string;
+  cover?: string;
+  imageAlt?: string;
+  imageSrc?: string;
+  textWrapperClass?: string;
+  children?: React.ReactNode;
+  onClick?: () => void; // Add this line
+
 }
 
-export const Card = ({ cardClass, imageWrapperClass, imageAlt, imageSrc, textWrapperClass, children, cover, ...rest }: CardProps) => {
+const Card: React.FC<CardProps> = ({
+    cardClass,
+    imageWrapperClass,
+    cover,
+    imageAlt,
+    imageSrc,
+    textWrapperClass,
+    children,
+    onClick, // Destructure the onClick prop
+  }) => {
     return (
-        <div className={cardClass} {...rest}>
-            <Image className={imageWrapperClass} objectCover={cover} alt={imageAlt} image={imageSrc} />
-            <div className={textWrapperClass}>
-                {children}
-            </div>
+      <div className={cardClass} onClick={onClick}> {/* Pass onClick here */}
+        <div className={imageWrapperClass}>
+          <img src={imageSrc} alt={imageAlt} className={cover} />
         </div>
-    )
-}
+        <div className={textWrapperClass}>{children}</div>
+      </div>
+    );
+  };
+
+export default Card;

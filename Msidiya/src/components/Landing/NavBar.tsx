@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next"; // Import the translation hook
 import { Image } from "../atoms/Image";
 import "../../index.css";
 import { Button } from "../atoms/Button";
 import Logo from "../../assets/logo1.png";
 import { NavButtons, NavLinks } from "../particles/DataLists";
 import { List } from "../atoms/List";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { ArrowCircleRight, CirclesFour, ShoppingCart } from "@phosphor-icons/react";
 import { Slide } from "react-awesome-reveal";
 import Select from "react-select";
@@ -22,13 +23,16 @@ import { User, fetchUserData } from "../../utils/userData";
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems } = useCart();
-
+  const location = useLocation(); // Get the current location
   const [open, setOpen] = useState(false);
   const [navBarColor, setNavBarColor] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+
+  // Use the translation hook
+  const { t, i18n } = useTranslation();
 
   const switchToSignup = () => {
     setShowLogin(false);
@@ -45,19 +49,32 @@ const NavBar: React.FC = () => {
   };
 
   const listenScrollEvent = () => {
-    window.scrollY > 10 ? setNavBarColor(true) : setNavBarColor(false);
+    if (location.pathname === "/") {
+      const shouldChangeColor = window.scrollY > 10;
+      if (shouldChangeColor !== navBarColor) {
+        setNavBarColor(shouldChangeColor);
+      }
+    } else {
+      if (!navBarColor) {
+        setNavBarColor(true);
+      }
+    }
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", listenScrollEvent);
-    return () => {
-      window.removeEventListener("scroll", listenScrollEvent);
+    const handleScroll = () => {
+      requestAnimationFrame(listenScrollEvent);
     };
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    listenScrollEvent();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [location.pathname, navBarColor]);
 
   const languageOptions = [
     {
-      value: "EN",
+      value: "en",
       label: (
         <>
           <img src={USA} alt="US Flag" className="inline mr-2 w-8" /> EN
@@ -65,7 +82,7 @@ const NavBar: React.FC = () => {
       ),
     },
     {
-      value: "FR",
+      value: "fr",
       label: (
         <>
           <img src={FR} alt="FR Flag" className="inline mr-2 w-8" /> FR
@@ -73,7 +90,7 @@ const NavBar: React.FC = () => {
       ),
     },
     {
-      value: "AR",
+      value: "ar",
       label: (
         <>
           <img src={AR} alt="AR Flag" className="inline mr-2 w-8" /> AR
@@ -83,7 +100,8 @@ const NavBar: React.FC = () => {
   ];
 
   const handleLanguageChange = (selectedOption: any) => {
-    navigate(`/#${selectedOption.value.toLowerCase()}`);
+    i18n.changeLanguage(selectedOption.value); // Change the language
+    document.documentElement.dir = selectedOption.value === "ar" ? "rtl" : "ltr"; // Adjust text direction for RTL languages
   };
 
   const toggleLoginPopup = () => {
@@ -161,7 +179,6 @@ const NavBar: React.FC = () => {
           >
             <img src={LOGO} alt="Logo" width={200} />
           </a>
-
           <div className="lg:flex hidden items-center gap-6">
             <ul className="flex items-center justify-center gap-10">
               {NavLinks.map((navlink, index) => (
@@ -170,41 +187,37 @@ const NavBar: React.FC = () => {
                     to={navlink.url}
                     className="relative inline-block overflow-hidden pt-2 pl-2 before:w-2 before:h-2 before:bg-color2 before:absolute before:top-2 before:-left-10 before:rounded-full before:transition-all before:duration-200 before:ease-in hover:before:left-0.5 after:w-0.5 after:h-3 after:bg-color2 after:absolute after:left-1 after:-top-10 hover:after:top-3.5 after:transition-all after:duration-200 after:ease-in whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    {navlink.name}
+                    {t(navlink.name)} {/* Translate navigation links */}
                   </NavLink>
                 </List>
               ))}
             </ul>
-
             <ul className="flex items-center justify-center gap-6">
               {/* Shopping Cart Icon */}
               <List className="relative">
-              <button
-    className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
-    onClick={() => navigate("/cart")}
-  >
-    <ShoppingCart
-      size={24}
-      weight="fill"
-      className={`${navBarColor ? "text-gray-700" : "text-white"}`}
-    />
-    {cartItems.length > 0 && (
-      <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-        {cartItems.length}
-      </span>
-    )}
-  </button>
+                <button
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
+                  onClick={() => navigate("/cart")}
+                >
+                  <ShoppingCart
+                    size={24}
+                    weight="fill"
+                    className={`${navBarColor ? "text-gray-700" : "text-white"}`}
+                  />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </button>
               </List>
-
               {user ? (
                 <div className="relative">
                   <img
                     src={user.Picture || "/default-avatar.png"}
                     alt="User Avatar"
                     className="w-10 h-10 rounded-full cursor-pointer object-cover"
-                    onClick={() =>
-                      setShowProfileDropdown(!showProfileDropdown)
-                    }
+                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                   />
                   {showProfileDropdown && (
                     <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md py-2 z-50">
@@ -212,13 +225,13 @@ const NavBar: React.FC = () => {
                         onClick={handleDashboard}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                       >
-                        Dashboard
+                        {t("dashboard")} {/* Translate dashboard button */}
                       </button>
                       <button
                         onClick={handleLogout}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                       >
-                        Logout
+                        {t("logout")} {/* Translate logout button */}
                       </button>
                     </div>
                   )}
@@ -240,13 +253,12 @@ const NavBar: React.FC = () => {
                           navBarColor ? "text-black" : "text-white"
                         } border-0 before:top-0 rounded-xl hover:bg-color2 transition-all`}
                       >
-                        {navbutton.name}
+                        {t(navbutton.name)} {/* Translate buttons */}
                       </Button>
                     </List>
                   ))}
                 </>
               )}
-
               <List className="text-gray-950 border-none">
                 <Select
                   options={languageOptions}
@@ -287,24 +299,23 @@ const NavBar: React.FC = () => {
               </List>
             </ul>
           </div>
-
           <div className="lg:hidden flex gap-4 items-center">
             {/* Mobile Shopping Cart Icon */}
             <button
-    className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
-    onClick={() => navigate("/cart")}
-  >
-    <ShoppingCart
-      size={24}
-      weight="fill"
-      className={`${navBarColor ? "text-gray-700" : "text-white"}`}
-    />
-    {cartItems.length > 0 && (
-      <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-        {cartItems.length}
-      </span>
-    )}
-  </button>
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
+              onClick={() => navigate("/cart")}
+            >
+              <ShoppingCart
+                size={24}
+                weight="fill"
+                className={`${navBarColor ? "text-gray-700" : "text-white"}`}
+              />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItems.length}
+                </span>
+              )}
+            </button>
             <Select
               options={languageOptions}
               onChange={handleLanguageChange}
@@ -330,7 +341,6 @@ const NavBar: React.FC = () => {
           </div>
         </nav>
       </Slide>
-
       {/* Mobile Nav */}
       <nav
         className={`flex justify-end lg:hidden h-screen w-full bg-gray-950/90 fixed top-0 ${
@@ -370,7 +380,7 @@ const NavBar: React.FC = () => {
                     onClick={handleToggle}
                     className="w-full inline-block text-gray-950 hover:text-cyan-500 transition-all duration-300 ease-in whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    {navlink.name}
+                    {t(navlink.name)} {/* Translate mobile navigation links */}
                   </NavLink>
                 </List>
               ))}
@@ -399,7 +409,7 @@ const NavBar: React.FC = () => {
                         : "border-0 border-gray-200 before:top-0 rounded-xl"
                     } ${navBarColor ? "bg-transparent" : ""}`}
                   >
-                    {navbutton.name}
+                    {t(navbutton.name)} {/* Translate mobile buttons */}
                   </Button>
                 </List>
               ))}
@@ -407,7 +417,6 @@ const NavBar: React.FC = () => {
           </section>
         </div>
       </nav>
-
       {/* Login Popup */}
       {showLogin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
@@ -430,7 +439,6 @@ const NavBar: React.FC = () => {
           </div>
         </div>
       )}
-
       {/* Signup Popup */}
       {showSignup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">

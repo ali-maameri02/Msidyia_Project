@@ -40,6 +40,7 @@ interface CategoryRow {
   id: number;
   tutor:number;
   name: string;
+  logo:string;
   status: boolean;
   subjects?: Subject[];
 }
@@ -62,37 +63,35 @@ export default function Setcategories() {
   const [categories, setCategories] = React.useState<CategoryRow[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [logoFile, setLogoFile] = useState<File | null>(null); // State for storing the logo file
 
   const fetchCategories = async () => {
     try {
       const storedUser = localStorage.getItem("user");
-      if (!storedUser) return; // If no user found, exit
-  
+      if (!storedUser) return;
       const loggedInUser = JSON.parse(storedUser);
-      const tutorId = loggedInUser?.id; // Ensure `id` exists
-  
+      const tutorId = loggedInUser?.id;
+
       const response = await axios.get('http://127.0.0.1:8000/api/categories/');
-      
-      // 🔹 Filter categories by tutor
       const tutorCategories = response.data
-      .filter((category: any) => category.tutor === tutorId)
-      .map((category: any) => ({
-        id: category.id,
-        name: category.name,
-        status: category.status, // Add the status field here
-      }));
-    
-      setCategories(tutorCategories); // ✅ Correct placement
-  
+        .filter((category: any) => category.tutor === tutorId)
+        .map((category: any) => ({
+          id: category.id,
+          name: category.name,
+          status: category.status,
+          logo: category.logo,
+        }));
+
+      setCategories(tutorCategories);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
-  
 
-useEffect(() => {
-  fetchCategories();
-}, []);
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
 
   
   
@@ -177,42 +176,40 @@ const handleDeleteSubject = async (subjectId: number) => {
     console.error("Error deleting subject:", error);
   }
 };
-const handleAddCategory = async () => {
-  if (newCategory.trim()) {
-    try {
-     
-        // Get the logged-in tutor's ID from localStorage
-        const storedUser = localStorage.getItem("user");
-        if (!storedUser) return; // If no user found, exit
-  
-        const loggedInUser = JSON.parse(storedUser);
-        const tutorId = loggedInUser?.id; // Ensure `id` exists
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/categories/',
-        { name: newCategory.trim() ,
-        tutor:tutorId,
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      setCategories([...categories, response.data]);
-      setNewCategory('');
-      setOpenAddCategoryModal(false);
-    } catch (error) {
-      console.error("Error adding category:", error);
-    }
-  }
-};
+
  // Update category (e.g. update its name)
- const handleUpdateCategory = async (categoryId: number, updatedName: string) => {
+ const handleAddCategory = async () => {
+  if (!newCategory.trim()) {
+    alert('Please enter a category name.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('name', newCategory.trim());
+  if (logoFile) {
+    formData.append('logo', logoFile); // Append the logo file
+  }
+
   try {
-    await axios.patch(
-      `http://127.0.0.1:8000/api/categories/${categoryId}/`,
-      { name: updatedName },
-      { headers: { "Content-Type": "application/json" } }
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+    const loggedInUser = JSON.parse(storedUser);
+    const tutorId = loggedInUser?.id;
+
+    formData.append('tutor', tutorId.toString());
+
+    const response = await axios.post(
+      'http://127.0.0.1:8000/api/categories/',
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
-    await fetchCategories();
+
+    setCategories([...categories, response.data]);
+    setNewCategory('');
+    setLogoFile(null); // Reset the logo file state
+    setOpenAddCategoryModal(false);
   } catch (error) {
-    console.error("Error updating category:", error);
+    console.error("Error adding category:", error);
   }
 };
 
@@ -267,7 +264,25 @@ const handleDeleteCategory = async (categoryId: number) => {
       console.error("Error updating topic:", error);
     }
   };
+  const handleUpdateCategory = async (categoryId: number, updatedName: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('name', updatedName);
+      if (logoFile) {
+        formData.append('logo', logoFile); // Append the logo file if provided
+      }
 
+      await axios.patch(
+        `http://127.0.0.1:8000/api/categories/${categoryId}/`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      await fetchCategories(); // Refresh categories after update
+    } catch (error) {
+      console.error("Error updating category:", error);
+    }
+  };
   // Delete a topic
   const handleDeleteTopic = async (topicId: number) => {
     try {
@@ -540,10 +555,7 @@ const columns: GridColDef[] = [
       </Modal>
 
       {/* Add Category Modal */}
-      <Modal
-        open={openAddCategoryModal}
-        onClose={() => setOpenAddCategoryModal(false)}
-      >
+      <Modal open={openAddCategoryModal} onClose={() => setOpenAddCategoryModal(false)}>
         <Box
           sx={{
             position: 'absolute',
@@ -565,6 +577,13 @@ const columns: GridColDef[] = [
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             fullWidth
+            margin="normal"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setLogoFile(e.target.files ? e.target.files[0] : null)}
+            style={{ marginBottom: '1rem' }}
           />
           <div className="flex justify-end mt-4 space-x-4">
             <Button

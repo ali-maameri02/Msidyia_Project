@@ -3,7 +3,7 @@ import '../../index.css'; // Make sure to style the footer according to your des
 
 const Footer: React.FC = () => {
   return (
-    <footer className="footer  bottom-0">
+    <footer className="footer   bottom-0">
       <div className="footer-container">
         <div className="footer-section">
           <h2>Msidiya - practice makes progress.</h2>

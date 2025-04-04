@@ -11,6 +11,7 @@ import Rating from "@mui/material/Rating";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
 import { useNavigate } from "react-router-dom";
+import logo from '../../assets/msidiya-m-logo.png';
 
 interface User {
   id: number;
@@ -43,7 +44,9 @@ const Tutors: React.FC = () => {
       });
   }, []);
 
-  if (loading) return <p className="text-center mt-20">Loading tutors...</p>;
+  if (loading) return  <div className="p-6 bg-white min-h-screen flex justify-center items-center">
+  <img src={logo} width={50} alt="" className="animate-spin" />
+</div>;
   if (error) return <p className="text-center mt-20 text-red-500">{error}</p>;
 
   return (
