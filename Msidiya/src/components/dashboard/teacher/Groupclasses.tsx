@@ -13,7 +13,7 @@ import AddGroupClass from './AddGroupClass';
 interface GroupClass {
   id: number;
   title: string;
-  age_range: string;
+  // age_range: string;
   grade: string;
   price: number;
   category: {
@@ -90,7 +90,7 @@ const columns: GridColDef[] = [
     ),
   },
   { field: 'title', headerName: 'Title', width: 250 },
-  { field: 'age_range', headerName: 'Age Range', width: 100 },
+  // { field: 'age_range', headerName: 'Age Range', width: 100 },
   { field: 'grade', headerName: 'Grade', width: 120 },
   { field: 'price', headerName: 'Price', width: 80 },
   { field: 'category', headerName: 'Category', width: 130 },

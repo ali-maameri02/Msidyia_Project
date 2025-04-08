@@ -29,7 +29,7 @@ class Category(models.Model):
 class GroupClass(models.Model):
     tutor = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    age_range = models.CharField(max_length=50)
+    # age_range = models.CharField(max_length=50)
     grade = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

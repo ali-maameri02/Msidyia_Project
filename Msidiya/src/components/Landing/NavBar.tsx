@@ -132,6 +132,7 @@ const NavBar: React.FC = () => {
       }
     };
     getUserData();
+    
   }, []);
 
   // Callback to update user state on login success

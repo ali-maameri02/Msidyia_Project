@@ -1,7 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { User, fetchUserData} from '../../../utils/userData';
 
 const Navbar: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Retrieve user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // Fetch user data from API (optional if you want to refresh periodically)
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const userData = await fetchUserData();
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    getUserData();
+  }, []);
+
+  // Callback to update user state on login success
+  const handleLoginSuccess = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setShowLogin(false);
+  };
+
   return (
     <div>
       <div className="pt-0 pr-0 pb-0 pl-0 mt-0 mr-0 mb-0 ml-0"></div>
@@ -88,11 +121,20 @@ const Navbar: React.FC = () => {
                   </p>
                 </div>
                 <div className="justify-center items-center flex relative">
+                {user ? (
+                <div className="relative">
                   <img
-                    src="https://static01.nyt.com/images/2019/11/08/world/08quebec/08quebec-superJumbo.jpg"
-                    className="object-cover btn- h-9 w-9 rounded-full mr-2 bg-gray-300"
-                    alt=""
+                    src={user.Picture || "/default-avatar.png"}
+                    alt="User Avatar"
+                    className="w-10 h-10 rounded-full cursor-pointer object-cover"
                   />
+                 
+                </div>
+              ) : (
+                <>
+                 
+                </>
+              )}
                 </div>
               </div>
             </div>

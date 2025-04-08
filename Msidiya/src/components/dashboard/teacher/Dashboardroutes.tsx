@@ -14,7 +14,7 @@ import PayoutComponent from "./Payout";
 import GroupClassesTransaction from "./GroupClassesTransaction";
 import Messages from "./Messages";
 import Notification from "./Notification";
-
+import GroupClassReviews from "./GroupClassReviews";
 const DashboardRoutes: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -44,6 +44,7 @@ const DashboardRoutes: React.FC = () => {
           <Routes>
             <Route path="teacher" element={<Teacher />} />
             <Route path="teacher/group-classes" element={<Groupclasses />} />
+            <Route path="teacher/group-classes/reviews" element={<GroupClassReviews />} />
             <Route path="teacher/group-classes/add" element={<AddGroupClass />} />
             <Route path="teacher/group-classes/update/:id" element={<Updategroupclasse />} />
             <Route path="teacher/set-categories" element={<Setcategories />} />

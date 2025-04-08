@@ -26,7 +26,7 @@ const AddGroupClass: React.FC = () => {
 
   const [formData, setFormData] = useState({
     title: "",
-    age_range: "",
+    // age_range: "",
     grade: "",
     price: "",
     category: "",
@@ -57,7 +57,7 @@ const AddGroupClass: React.FC = () => {
       return;
     }
   
-    if (!formData.title || !formData.age_range || !formData.grade || !formData.class_type || !formData.status || !formData.last_time) {
+    if (!formData.title  || !formData.grade || !formData.class_type || !formData.status || !formData.last_time) {
       alert("Please fill all required fields.");
       return;
     }
@@ -243,10 +243,10 @@ const AddGroupClass: React.FC = () => {
           <input id="title" type="text" placeholder="Enter title" className="border p-2 rounded-lg" onChange={handleChange} />
         </div>
 
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <label htmlFor="age_range" className="font-medium mb-2">Age Range *</label>
           <input id="age_range" type="text" placeholder="Enter age range" className="border p-2 rounded-lg" onChange={handleChange} />
-        </div>
+        </div> */}
 
         <div className="flex flex-col">
           <label htmlFor="grade" className="font-medium mb-2">Grade *</label>

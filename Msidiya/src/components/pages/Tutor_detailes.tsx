@@ -85,24 +85,36 @@ const TutorDetails = () => {
   useEffect(() => {
     const fetchTutorDetails = async () => {
       try {
+        // Fetch tutor details
         const response = await axios.get(`http://127.0.0.1:8000/api/tutor/${tutorId}/`);
         setTutor(response.data);
+  
+        // Fetch all group classes
         const Groupclasseresponse = await axios.get(`http://127.0.0.1:8000/api/group-classes/`);
-        const TutorGroupclass = Groupclasseresponse.data.filter((cls: GroupClass) => cls.tutor.user.id === Number(tutorId));
-        setGroupClasses(TutorGroupclass); // Remove .data
+  
+        // Filter group classes by the tutor's user ID
+        const TutorGroupclass = Groupclasseresponse.data.filter(
+          (cls: GroupClass) => cls.tutor === response.data.user.id // Match tutor's user ID
+        );
+        setGroupClasses(TutorGroupclass);
         console.log(TutorGroupclass);
+  
+        // Fetch categories
         const CategoriesResponse = await axios.get(`http://127.0.0.1:8000/api/categories/`);
-        const FiltredCategories = CategoriesResponse.data.filter((cls: GroupClass) => cls.tutor.user.id === Number(tutorId));
-        setCategories(FiltredCategories)
+  
+        // Filter categories by the tutor's user ID
+        const FiltredCategories = CategoriesResponse.data.filter(
+          (category: Category) => category.tutor === response.data.user.id 
+        );
+        setCategories(FiltredCategories);
         console.log(FiltredCategories);
-
+  
       } catch (error) {
         console.error("Error fetching tutor details:", error);
       }
     };
     fetchTutorDetails();
   }, [tutorId]);
-
   if (!tutor) return <div>Loading...</div>;
 
   return (

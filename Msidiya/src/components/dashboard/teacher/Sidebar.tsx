@@ -16,6 +16,7 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import msidiyalogo from "../../../assets/msidiya.png";
 import { Link,useNavigate } from "react-router-dom";
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { ReviewsOutlined } from "@mui/icons-material";
 
 // Lazy loading of pages
 const Dashboard = lazy(() => import("../../../components/dashboard/teacher/Teacher"));
@@ -51,6 +52,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
   const groupClassesItems = useMemo(() => [
     { icon: <ClassIcon />, link: "/dashboard/teacher/group-classes", label: "My Group Classes" },
     { icon: <CategoryIcon />, link: "/dashboard/teacher/set-categories", label: "Set Categories" },
+    { icon: <ReviewsOutlined />, link: "/dashboard/teacher/group-classes/reviews", label: "Reviews" },
 
   ], []);
   const PayementItems = useMemo(() => [
