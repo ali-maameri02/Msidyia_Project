@@ -1,280 +1,324 @@
 import "./style.css";
-import * as React from 'react';
-import { TableContainer, Table , TableHead,TableBody , TableRow ,TableCell , Paper} from "@mui/material";
-import PreviewIcon from '@mui/icons-material/Preview';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import * as React from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Box, Typography, CircularProgress, IconButton } from "@mui/material";
+import PreviewIcon from "@mui/icons-material/Preview";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import axios from "axios";
+
+// Define TypeScript interfaces
+interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
+interface Schedule {
+  id: number;
+  date: string;
+  duration: string;
+  session_link: string | null;
+}
+
+interface GroupClass {
+  id: number;
+  title: string;
+  grade: string;
+  price: string;
+  category: number;
+  max_book: number;
+  class_type: string;
+  main_image: string;
+  status: string;
+  last_time: string;
+  schedules: Schedule[];
+  tutor: User;
+}
+
+interface StudentPayment {
+  id: number;
+  student: number;
+  group_class: GroupClass;
+  amount: string;
+  status: string;
+  checkout_url: string | null;
+  created_on: string;
+}
 
 const UpcomingAppointments: React.FC = () => {
-    const [viewDataVisible , setViewDataVisible] = React.useState(false);
-    const [viewDataVisible1 , setViewDataVisible1] = React.useState(false);
-     
+  const [viewDataVisible, setViewDataVisible] = React.useState(false); // Group Classes
+  const [viewDataVisible1, setViewDataVisible1] = React.useState(false); // One-on-One Classes
+  const [popUp, setPopUp] = React.useState(false);
+  const [payments, setPayments] = React.useState<StudentPayment[]>([]);
+  const [studentId, setStudentId] = React.useState<number | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-    const handleViewDataClick =()=>{
-        setViewDataVisible(false);
-        setViewDataVisible1(true);
+  // Fetch student ID from local storage
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setStudentId(user.id); // Set the student ID
+      } catch (error) {
+        console.error("Error parsing user data from local storage:", error);
+      }
+    } else {
+      console.warn("No user data found in local storage.");
     }
-    const handleViewDataClick1 =()=>{
-        setViewDataVisible1(false);
-        setViewDataVisible(true);
-    }
-    
-    const [popUp , setPopUp] = React.useState(false);
-    const popUpCard =()=> {
-       setPopUp(!popUp);
-    }
-  return(
-    <main className=" mt-16 ml-16 ">
-      
-        <div className="grid grid-cols-1  gap-y-6">
-             <div className="first-column border-b-2">
-               <button className='btn' onClick={handleViewDataClick1}>One on One Classes</button>
-               <button className='btn' onClick={handleViewDataClick}>Groupe Classes</button>
-            </div>  
-             <div className="second-column">
-                <select name="days" id="days" className='feild-form'>
-                    <option value="All Days">All Days</option>
-                    <option value="today">Today</option>
-                    <option value="this week">This week</option>
-                 </select>
-                 <input className='searching' placeholder='search : tutor,user,subject,groupclass'></input>
-             </div>
-             {viewDataVisible &&
-             <div className="third-column">
-                <TableContainer component={Paper} sx={{maxHeight:"400px"}} >
-                    <Table aria-label="simple table" stickyHeader className="my-table-shadow">
-                        <TableHead>
-                            <TableRow >
-                                <TableCell><div className="font-extrabold ">Tutor name</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Subject/Group Class</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Enroll Type</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Lesson Type</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Paid</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Start Time</div></TableCell>
-                                <TableCell><div className="font-extrabold ">To Time</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Created On</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Status</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Action</div></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                tableData.map(row =>(
-                                    <TableRow key={row["Tutor name"]} 
-                                    sx={{ '&:last-child td , &:last-child':{border:0}}}>
+  }, []);
 
-                                      <TableCell className="font-extrabold" >{row["Tutor name"]}</TableCell>
-                                         <TableCell className="font-extrabold">{row["Subject/Group Class"]}</TableCell>
-                                         <TableCell className="font-extrabold"> {row["Enroll Type"]}</TableCell>
-                                         <TableCell className="font-extrabold" align="center"><div className="bg-red-400 font-semibold text-red-700 rounded-lg">{row["Lesson Type"]}</div></TableCell>
-                                         <TableCell className="font-extrabold" align="center"><div className="bg-green-400 font-semibold text-green-600 rounded-lg p-2">{row.Paid}</div></TableCell>
-                                         <TableCell className="font-extrabold">{row["Start Time"]} </TableCell>
-                                         <TableCell className="font-extrabold">{row["To Time"]} </TableCell>
-                                         <TableCell className="font-extrabold">{row["Created On"]} </TableCell>
-                                         <TableCell className="font-extrabold" align="center"><div className="bg-green-400 font-semibold text-green-600 rounded-lg p-2">{row.Status}</div></TableCell>
-                                         <TableCell className="font-extrabold" align="center"><div className="cursor-pointer hover:bg-red-500 p-1 transition-all">{row.Action}</div></TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-             </div>}
-             {/* second column */}
-             {viewDataVisible1 &&
-             <div className="third-column">
-                <TableContainer component={Paper} sx={{maxHeight:"400px"}} >
-                    <Table aria-label="simple table" stickyHeader className="my-table-shadow">
-                        <TableHead>
-                            <TableRow >
-                                <TableCell><div className="font-extrabold ">Tutor name</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Group Class</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Action</div></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                tableData1.map(row =>(
-                                    <TableRow key={row["Tutor name"]} 
-                                    sx={{ '&:last-child td , &:last-child':{border:0}}}>
+  // Fetch student payments when studentId is set
+  React.useEffect(() => {
+    const fetchStudentPayments = async () => {
+      if (!studentId) return;
 
-                                <TableCell className="font-extrabold" >{row["Tutor name"]}</TableCell>
-                                <TableCell className="font-extrabold">{row["Subject/Group Class"]}</TableCell>
-                                <TableCell className="font-extrabold"><button onClick={popUpCard} className="cursor-pointer bg-green-400 font-semibold text-green-600 rounded-lg p-2 w-30">{row.Action}</button></TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                
-                {popUp &&
-                 
-                <TableContainer component={Paper} sx={{maxHeight:"400px"}} className="popUp" >
-                   <div className="bg-blue-500 p-3"><p className="text-white font-extrabold"> list appointments of Deep Tissue Massage Class <CancelOutlinedIcon onClick={popUpCard} className="ml-10 cursor-pointer hover:bg-green-400 hover:transition-all"/></p></div>
-                    <Table aria-label="simple table" stickyHeader className="my-table-shadow">
-                        <TableHead>
-                            <TableRow >
-                                <TableCell><div className="font-extrabold ">Tutor name</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Group Class</div></TableCell>
-                                <TableCell><div className="font-extrabold ">Action</div></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                tableData1.map(row =>(
-                                    <TableRow key={row["Tutor name"]} 
-                                    sx={{ '&:last-child td , &:last-child':{border:0}}}>
+      setLoading(true);
+      setError(null);
 
-                                <TableCell className="font-extrabold" >{row["Tutor name"]}</TableCell>
-                                <TableCell className="font-extrabold">{row["Subject/Group Class"]}</TableCell>
-                                <TableCell className="font-extrabold"><button  className="cursor-pointer bg-green-400 font-semibold text-green-600 rounded-lg p-2 w-30">{row.Action}</button></TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    </Table>
-                </TableContainer> } 
-             </div>}
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/student-payments/${studentId}/`);
+        setPayments(response.data as StudentPayment[]);
+      } catch (error) {
+        setError("Error fetching student payments. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudentPayments();
+  }, [studentId]);
+
+  const handleViewDataClick = () => {
+    setViewDataVisible(false);
+    setViewDataVisible1(true);
+  };
+
+  const handleViewDataClick1 = () => {
+    setViewDataVisible1(false);
+    setViewDataVisible(true);
+  };
+
+  const popUpCard = () => {
+    setPopUp(!popUp);
+  };
+
+  // Define columns for the DataGrid
+  const groupClassesColumns: GridColDef[] = [
+    { field: "tutorName", headerName: "Tutor Name", width: 150 },
+    { field: "groupClassTitle", headerName: "Group Class", width: 200 },
+    { field: "enrollType", headerName: "Enroll Type", width: 150 },
+    {
+      field: "lessonType",
+      headerName: "Lesson Type",
+      width: 150,
+      renderCell: () => (
+        <Box
+          sx={{
+            bgcolor: "error.light",
+            color: "error.main",
+            p: 1,
+            borderRadius: 1,
+          }}
+        >
+          Paid Lesson
+        </Box>
+      ),
+    },
+    {
+      field: "paid",
+      headerName: "Paid",
+      width: 100,
+      align: "center",
+      renderCell: () => (
+        <Box
+          sx={{
+            bgcolor: "success.light",
+            color: "success.main",
+            p: 1,
+            borderRadius: 1,
+          }}
+        >
+          Yes
+        </Box>
+      ),
+    },
+    { field: "startTime", headerName: "Start Time", width: 150 },
+    { field: "toTime", headerName: "To Time", width: 150 },
+    { field: "createdOn", headerName: "Created On", width: 150 },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 150,
+      align: "center",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            bgcolor: "success.light",
+            color: "success.main",
+            p: 1,
+            borderRadius: 1,
+          }}
+        >
+          {params.row.status}
+        </Box>
+      ),
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 100,
+      renderCell: () => (
+        <IconButton>
+          <PreviewIcon />
+        </IconButton>
+      ),
+    },
+  ];
+
+  const oneOnOneClassesColumns: GridColDef[] = [
+    { field: "tutorName", headerName: "Tutor Name", width: 150 },
+    { field: "classTitle", headerName: "Class Title", width: 200 },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 200,
+      renderCell: () => (
+        <button
+          onClick={popUpCard}
+          className="cursor-pointer bg-green-400 font-semibold text-green-600 rounded-lg p-2"
+        >
+          View List Appointments
+        </button>
+      ),
+    },
+  ];
+
+  // Transform payments into rows for DataGrid
+  const groupClassesRows = payments
+    .filter((payment) => payment.group_class.max_book > 1)
+    .map((payment) => ({
+      id: payment.id,
+      tutorName: payment.group_class.tutor.username,
+      groupClassTitle: payment.group_class.title,
+      enrollType: "Group",
+      startTime: payment.group_class.schedules[0]?.date || "N/A",
+      toTime: payment.group_class.schedules[0]?.date || "N/A",
+      createdOn: payment.created_on,
+      status: payment.status,
+    }));
+
+  const oneOnOneClassesRows = payments
+    .filter((payment) => payment.group_class.max_book === 1)
+    .map((payment) => ({
+      id: payment.id,
+      tutorName: payment.group_class.tutor.username,
+      classTitle: payment.group_class.title,
+    }));
+
+  return (
+    <main className="mt-16 ml-16">
+      <div className="grid grid-cols-1 gap-y-6">
+        {/* Buttons for switching views */}
+        <div className="first-column border-b-2">
+          <button className="btn" onClick={handleViewDataClick1}>
+            One on One Classes
+          </button>
+          <button className="btn" onClick={handleViewDataClick}>
+            Group Classes
+          </button>
         </div>
+
+        {/* Filters */}
+        <div className="second-column">
+          <select name="days" id="days" className="feild-form">
+            <option value="All Days">All Days</option>
+            <option value="today">Today</option>
+            <option value="this week">This week</option>
+          </select>
+          <input
+            className="searching"
+            placeholder="search : tutor,user,subject,groupclass"
+          />
+        </div>
+
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
+        ) : (
+          <>
+            {/* Group Classes Table */}
+            {viewDataVisible1 && (
+              <div className="third-column">
+                <Box sx={{ height: 400, width: "100%" }}>
+                  <DataGrid
+                    rows={groupClassesRows}
+                    columns={groupClassesColumns}
+                    // pageSize={5}
+                    // rowsPerPageOptions={[5]}
+                    checkboxSelection={false}
+                    // disableSelectionOnClick
+                    autoHeight
+                  />
+                </Box>
+              </div>
+            )}
+
+            {/* One-on-One Classes Table */}
+            {viewDataVisible && (
+              <div className="third-column">
+                <Box sx={{ height: 400, width: "100%" }}>
+                  <DataGrid
+                    rows={oneOnOneClassesRows}
+                    columns={oneOnOneClassesColumns}
+                    // pageSize={5}
+                    // rowsPerPageOptions={[5]}
+                    checkboxSelection={false}
+                    // disableSelectionOnClick
+                    autoHeight
+                  />
+                </Box>
+                {popUp && (
+                  <Box
+                    sx={{
+                      bgcolor: "primary.main",
+                      p: 2,
+                      color: "white",
+                      mt: 2,
+                    }}
+                  >
+                    <Typography variant="h6">
+                      List Appointments of Deep Tissue Massage Class
+                      <IconButton onClick={popUpCard} sx={{ ml: 2 }}>
+                        <CancelOutlinedIcon sx={{ color: "white" }} />
+                      </IconButton>
+                    </Typography>
+                    <Box sx={{ height: 400, width: "100%", mt: 2 }}>
+                      <DataGrid
+                        rows={oneOnOneClassesRows}
+                        columns={oneOnOneClassesColumns}
+                        // pageSize={5}
+                        // rowsPerPageOptions={[5]}
+                        checkboxSelection={false}
+                        // disableSelectionOnClick
+                        autoHeight
+                      />
+                    </Box>
+                  </Box>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </main>
-  )
+  );
 };
 
 export default UpcomingAppointments;
-
-const tableData = [{
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action": <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action":  <PreviewIcon />
-  }, {
-    "Tutor name": "tutor B",
-    "Subject/Group Class": "Hardware",
-    "Enroll Type": "Subject",
-    "Lesson Type": "Paid Lesson",
-    "Paid": "Yes",
-    "Start Time": "28/06/2025 , 10.00Am",
-    "To Time": "28/06/2025 , 10.00Am",
-    "Created On": "28/06/2025 , 10.00Am",
-    "Status": "Booked",
-    "Action": <PreviewIcon />
-  }];
-  const tableData1 = [{
-    "Tutor name": "imed fetah",
-    "Subject/Group Class": "Data science",
-    
-    "Action":  "View list appointments"
-  }, {
-    "Tutor name": "ali abdou",
-    "Subject/Group Class": "it",
- 
-    "Action": "View list appointments"
-  }, {
-    "Tutor name": "imed fetah ",
-    "Subject/Group Class": "Data science",
-    "Action":  "View list appointments"
-  }, {
-    "Tutor name": "fetah imed",
-    "Subject/Group Class": "Hardware",
-    
-    "Action":  "View list appointments"
-  }, {
-    "Tutor name": "maameri djedaiet",
-    "Subject/Group Class": "java",
-    "Action":  "View list appointments"
-  }
-];

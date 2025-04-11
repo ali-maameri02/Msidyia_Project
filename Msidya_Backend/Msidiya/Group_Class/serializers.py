@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
+from .models import Category, StudentAppointment, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -66,3 +66,9 @@ class DiscountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Discount
         fields = '__all__'
+class StudentAppointmentSerializer(serializers.ModelSerializer):
+    schedule = ScheduleSerializer(read_only=True)
+
+    class Meta:
+        model = StudentAppointment
+        fields = ['id', 'schedule', 'booking_date', 'status']

@@ -1,7 +1,8 @@
+from django.utils import timezone
 from rest_framework import generics, permissions
-from .models import Category, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
+from .models import Category, StudentAppointment, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 from .serializers import (
-    CategorySerializer, ScheduleCreateSerializer, SubjectSerializer, TopicSerializer,
+    CategorySerializer, ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
     GroupClassSerializer, GroupClassReviewSerializer, ReportSerializer,
     ScheduleSerializer, DiscountSerializer
 )
@@ -190,3 +191,37 @@ class AddTopicToSubjectView(generics.CreateAPIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework.permissions import IsAuthenticated
+
+class StudentAppointmentListView(generics.ListAPIView):
+    serializer_class = StudentAppointmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter appointments for the logged-in student
+        return StudentAppointment.objects.filter(student=self.request.user)
+    
+class BookScheduleView(generics.CreateAPIView):
+    serializer_class = StudentAppointmentSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        schedule_id = self.request.data.get('schedule_id')
+        schedule = Schedule.objects.get(id=schedule_id)
+        serializer.save(student=self.request.user, schedule=schedule)
+        
+
+
+
+class AvailableSchedulesView(generics.ListAPIView):
+    serializer_class = ScheduleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter schedules for group classes that are visible and upcoming
+        return Schedule.objects.filter(
+            group_class__status='Visible',
+            date__gte=timezone.now()
+        ).order_by('date')

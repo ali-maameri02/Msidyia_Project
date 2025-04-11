@@ -73,9 +73,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         
         # Get the role of the user if available
         if 'data' in kwargs:
-            role = kwargs['data'].get('Role')  # During creation/updating
+         role = kwargs['data'].get('Role')  # During creation/updating
         else:
-            role = getattr(self.instance, 'Role', None)  # During read
+         role = getattr(self.instance, 'Role', None)  # During read
 
         # Conditionally remove fields based on user role
         if role == 'Student':
@@ -94,37 +94,40 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             self.fields.pop('ms_seller', None)
 
     def update(self, instance, validated_data):
-        # Update user fields
-        instance.username = validated_data.get('username', instance.username)
-        instance.email = validated_data.get('email', instance.email)
-        instance.Phone_number = validated_data.get('Phone_number', instance.Phone_number)
-        instance.Picture = validated_data.get('Picture', instance.Picture)  # Add this line
-        instance.Paypal_Email = validated_data.get('Paypal_Email', instance.Paypal_Email)
-        instance.Address = validated_data.get('Address', instance.Address)
-        instance.Zip_code = validated_data.get('Zip_code', instance.Zip_code)
-        instance.Gender = validated_data.get('Gender', instance.Gender)
-        # Extract data for related entities
-        student_data = validated_data.pop('student', None)
-        tutor_data = validated_data.pop('tutor', None)
-        ms_seller_data = validated_data.pop('ms_seller', None)
+    # Update user fields
+     instance.username = validated_data.get('username', instance.username)
+     instance.email = validated_data.get('email', instance.email)
+     instance.Phone_number = validated_data.get('Phone_number', instance.Phone_number)
+     instance.Picture = validated_data.get('Picture', instance.Picture)
+     instance.Paypal_Email = validated_data.get('Paypal_Email', instance.Paypal_Email)
+     instance.Address = validated_data.get('Address', instance.Address)
+     instance.Zip_code = validated_data.get('Zip_code', instance.Zip_code)
+     instance.Gender = validated_data.get('Gender', instance.Gender)
+    
+    # Extract related data
+     student_data = validated_data.pop('student', None)
+     tutor_data = validated_data.pop('tutor', None)
+     ms_seller_data = validated_data.pop('ms_seller', None)
 
-        # Logic to update related entities based on role
-        if student_data:
-            Tutor.objects.filter(user=instance).delete()
-            Ms_Seller.objects.filter(user=instance).delete()
-            Student.objects.update_or_create(user=instance, defaults=student_data)
-        elif tutor_data:
-            Student.objects.filter(user=instance).delete()
-            Ms_Seller.objects.filter(user=instance).delete()
-            Tutor.objects.update_or_create(user=instance, defaults=tutor_data)
-        elif ms_seller_data:
-            Student.objects.filter(user=instance).delete()
-            Tutor.objects.filter(user=instance).delete()
-            Ms_Seller.objects.update_or_create(user=instance, defaults=ms_seller_data)
+    # Logic to update related entities based on role
+     if student_data:
+        Tutor.objects.filter(user=instance).delete()
+        Ms_Seller.objects.filter(user=instance).delete()
+        Student.objects.update_or_create(user=instance, defaults=student_data)
+     elif tutor_data:
+        Student.objects.filter(user=instance).delete()
+        Ms_Seller.objects.filter(user=instance).delete()
+        Tutor.objects.update_or_create(user=instance, defaults=tutor_data)
+     elif ms_seller_data:
+        Student.objects.filter(user=instance).delete()
+        Tutor.objects.filter(user=instance).delete()
+        Ms_Seller.objects.update_or_create(user=instance, defaults=ms_seller_data)
 
-        # Save the updated user instance
-        instance.save()
-        return instance
+     instance.save()
+    # Refresh instance (including related student) before serializing
+     instance.refresh_from_db()
+     return instance
+
 
     def to_representation(self, instance):
         # Get the standard representation

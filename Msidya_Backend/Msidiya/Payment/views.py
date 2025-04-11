@@ -102,3 +102,14 @@ class InitiatePaymentView(APIView):
             return Response({"checkout_url": payment.checkout_url, "payment": serializer.data}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+        
+class StudentPaymentView(generics.ListAPIView):
+    serializer_class = StudentPaymentSerializer
+
+    def get_queryset(self):
+        # Get the student_id from the URL parameters
+        student_id = self.kwargs.get('student_id')
+        # Filter payments for the given student_id
+        return StudentPayment.objects.filter(student_id=student_id)

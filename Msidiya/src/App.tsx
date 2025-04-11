@@ -15,6 +15,7 @@ import CartPage from "./components/pages/Cart";
 import GroupClasses from "./components/pages/GroupClasses";
 import CheckoutPage from "./components/pages/Checkout";
 import GroupClassesFiltered from "./components/pages/GroupClassesFiltered";
+import GroupClassDetails from "./components/pages/GroupClassDetails";
 
 function App() {
   const location = useLocation();
@@ -40,7 +41,7 @@ function App() {
             <Route path="/group-classes/category/:categoryId/" element={<GroupClassesFiltered />} />
             <Route path="/Tutors/TutorDetails/:tutorId" element={<TutorDetails />} />
             <Route path="/Tutors/TutorDetails/TutorOneToOne" element={<TutorOneToOne />} />
-
+            <Route path="/group-class/:classId" element={<GroupClassDetails />} />
             {/* Dashboard Routes */}
             <Route path="dashboard/*" element={<DashboardRoutes />} />
             <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />

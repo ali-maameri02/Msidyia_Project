@@ -23,7 +23,10 @@ urlpatterns = [
     
     path('discounts/', views.DiscountListCreateView.as_view(), name='discount-list-create'),
     path('discounts/<int:pk>/', views.DiscountDetailView.as_view(), name='discount-detail'),
-    
+        path('student-appointments/', views.StudentAppointmentListView.as_view(), name='student-appointment-list'),
+    path('book-schedule/', views.BookScheduleView.as_view(), name='book-schedule'),
+    path('available-schedules/', views.AvailableSchedulesView.as_view(), name='available-schedules'),
+
     path('schedulescreate/', views.ScheduleListCreateView.as_view(), name='schedule-create'),
     path('schedules/', views.ScheduleListView.as_view(), name='schedule-create'),
     path('schedules/<int:pk>/', views.ScheduleDetailView.as_view(), name='schedule-detail'),

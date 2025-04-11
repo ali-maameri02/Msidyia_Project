@@ -1,3 +1,4 @@
+import json
 import requests
 from rest_framework.response import Response
 from rest_framework import generics
@@ -96,7 +97,17 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
 
     def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs) 
+        data = request.data.copy()
+        student_str = data.get('student')
+        if student_str:
+            try:
+                data['student'] = json.loads(student_str)
+            except json.JSONDecodeError:
+                data['student'] = {}
+        serializer = UserUpdateSerializer(instance=self.get_object(), data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data) 
 class UserDelete(generics.RetrieveDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

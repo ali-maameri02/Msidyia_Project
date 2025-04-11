@@ -14,6 +14,7 @@ urlpatterns = [
     path('payment-accounts/<int:pk>/', views.PaymentAccountRetrieveUpdateDestroyView.as_view(), name='paymentaccount-detail'),
     # path("webhook/", views.WebhookView.as_view(), name="webhook"),
     path('group-classes/<int:class_id>/initiate-payment/', InitiatePaymentView.as_view(), name='initiate-payment'),
+    path('student-payments/<int:student_id>/', views.StudentPaymentView.as_view(), name='student-payments'),
 
     # Payout URLs
     path('payouts/', views.PayoutListCreateView.as_view(), name='payout-list-create'),

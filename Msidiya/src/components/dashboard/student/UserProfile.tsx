@@ -23,7 +23,7 @@ interface StudentProfile {
   Gender: string | null;
   Picture: string | null;
   student: {
-    Grade?: string | null;
+    Grade: string | null;
   };
 }
 
@@ -32,10 +32,9 @@ const UserProfile = () => {
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState('General Information');
   const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');
-  const [isEditable, setIsEditable] = useState(false);
+  const [isEditable, setIsEditable] = useState(false); // Controls edit mode
   const [user, setUser] = useState<StudentProfile | null>(null);
   const [formData, setFormData] = useState<Partial<StudentProfile>>({});
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +54,6 @@ const UserProfile = () => {
         `http://127.0.0.1:8000/api/users/${userId}/update/`
       );
       const userData = response.data;
-
       setUser(userData);
       setProfileImage(userData.Picture || 'https://via.placeholder.com/150');
       setFormData({
@@ -72,32 +70,31 @@ const UserProfile = () => {
     }
   };
 
+  // Handle changes in form fields
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-  
+
+    // Check if the field belongs to the nested `student` object
     if (name.startsWith('student.')) {
       const studentField = name.split('.')[1] as keyof StudentProfile['student'];
-      setFormData((prev) => {
-        const updatedStudent = {
+      setFormData((prev) => ({
+        ...prev,
+        student: {
           ...(prev.student ?? {}),
           [studentField]: value || null,
-        };
-  
-        return {
-          ...prev,
-          student: updatedStudent,
-        };
-      });
+        },
+      }));
     } else {
+      // Handle top-level fields
       setFormData((prev) => ({
         ...prev,
         [name]: value,
       }));
     }
   };
-  
+
   // Handle profile image upload
   const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -107,29 +104,27 @@ const UserProfile = () => {
     }
   };
 
-  // Handle profile update
   const handleUpdate = async () => {
     if (!user) return;
-
+  
+    const updatedData: Partial<StudentProfile> = {
+      username: formData.username ?? user.username,
+      email: formData.email ?? user.email,
+      Phone_number: formData.Phone_number ?? user.Phone_number,
+      Paypal_Email: formData.Paypal_Email ?? user.Paypal_Email,
+      Address: formData.Address ?? user.Address,
+      Zip_code: formData.Zip_code ?? user.Zip_code,
+      Gender: formData.Gender ?? user.Gender,
+      Role: user.Role,
+      student: {
+        Grade: formData.student?.Grade ?? user.student?.Grade,
+      },
+    };
+  
     try {
-      const updatedData: Partial<StudentProfile> = {
-        id: user.id,
-        username: formData.username ?? user.username,
-        email: formData.email ?? user.email,
-        Role: user.Role,
-        Phone_number: formData.Phone_number ?? user.Phone_number,
-        Paypal_Email: formData.Paypal_Email ?? user.Paypal_Email,
-        Address: formData.Address ?? user.Address,
-        Zip_code: formData.Zip_code ?? user.Zip_code,
-        Gender: formData.Gender ?? user.Gender,
-        student: {
-          Grade: formData.student?.Grade ?? user.student?.Grade,
-        },
-      };
-
       const form = new FormData();
-
-      // Append top-level fields
+  
+      // Append fields to FormData
       form.append('username', updatedData.username!);
       form.append('email', updatedData.email!);
       form.append('Phone_number', updatedData.Phone_number || '');
@@ -137,54 +132,64 @@ const UserProfile = () => {
       form.append('Address', updatedData.Address || '');
       form.append('Zip_code', updatedData.Zip_code || '');
       form.append('Gender', updatedData.Gender || '');
-
-      // Append nested student fields
-      form.append('student[Grade]', updatedData.student?.Grade || '');
-
-      // Append profile picture if a new file is selected
+      form.append('Role', updatedData.Role!);
+  
+      // Add individual fields from the 'student' object
+      if (updatedData.student?.Grade) {
+        form.append('student.Grade', updatedData.student.Grade);
+      }
+  
+      // Append profile picture if available
       if (profileFile) {
         form.append('Picture', profileFile);
       }
-
-      // Send PATCH request to update profile
+  
       const response = await axios.patch(
         `http://127.0.0.1:8000/api/users/${user.id}/update/`,
         form,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
       );
-
-      setUser(response.data);
-      localStorage.setItem('user', JSON.stringify(response.data));
+  
+      await fetchUserProfile(user.id); // Refresh the user data
+      setIsEditable(false); // Turn off edit mode
       alert('Profile updated successfully!');
     } catch (err) {
       console.error(err);
       setError('Failed to update profile');
     }
   };
-
-  // Render loading or error states
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  
+  
+  
+  
+  
+  // Toggle edit mode
+  const handleEditClick = () => {
+    setIsEditable(!isEditable); // Toggle edit mode
+  };
 
   // Handle tab clicks
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
 
-  // Toggle edit mode
-  const handleEditClick = () => {
-    setIsEditable(!isEditable);
-  };
+  // Render loading or error states
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
-    <div className="mt-16 ml-16">
-      <div className="relative w-full flex flex-col lg:flex-row bg-white h-full rounded-lg shadow-md">
+    <div className="mt-16 p-16 ml-16">
+      <div className="relative w-full flex flex-col justify-start items-start lg:flex-col bg-white h-full rounded-lg shadow-md">
         {/* Profile Image */}
         <div className="relative -mt-16">
           <img
             src={profileImage}
             alt="Profile"
-            className="w-48 h-48 rounded-full mx-auto border-4 border-white"
+            className="w-52 h-48 rounded-full mx-auto border-4 border-white"
           />
           <input
             type="file"
@@ -230,7 +235,12 @@ const UserProfile = () => {
 
           {/* Render the form based on the active tab */}
           {activeTab === 'General Information' && (
-            <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+            <Box
+              component="form"
+              noValidate
+              autoComplete="off"
+              sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}
+            >
               <TextField
                 label="Username"
                 variant="outlined"
@@ -313,8 +323,7 @@ const UserProfile = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleEditClick}
-                  disabled={!isEditable}
+                  onClick={isEditable ? handleUpdate : handleEditClick}
                 >
                   {isEditable ? 'Save Changes' : 'Edit'}
                 </Button>
@@ -323,7 +332,12 @@ const UserProfile = () => {
           )}
 
           {activeTab === 'Security and Notification' && (
-            <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gap: 2 }}>
+            <Box
+              component="form"
+              noValidate
+              autoComplete="off"
+              sx={{ display: 'grid', gap: 2 }}
+            >
               <Typography variant="h6" gutterBottom>
                 Security Settings
               </Typography>
@@ -337,8 +351,7 @@ const UserProfile = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleEditClick}
-                  disabled={!isEditable}
+                  onClick={isEditable ? handleUpdate : handleEditClick}
                 >
                   {isEditable ? 'Save Changes' : 'Edit'}
                 </Button>

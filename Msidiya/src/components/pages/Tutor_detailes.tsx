@@ -242,9 +242,14 @@ const TutorDetails = () => {
                 <span>1(1)</span>
               </div>
             </div>
-              <Button variant="contained" color="primary" className="mt-2 w-1/2 h-1/3 ">
-                Enroll Now
-              </Button>
+            <Button 
+  variant="contained" 
+  color="primary"
+  className="mt-2 w-1/2 h-1/3"
+  onClick={() => navigate(`/group-class/${groupClass.id}`)}
+>
+  Enroll Now
+</Button>
             </div>
         
         </CardContent> {/* Closing tag added */}
