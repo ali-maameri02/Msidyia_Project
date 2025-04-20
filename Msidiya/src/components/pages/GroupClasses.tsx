@@ -7,6 +7,7 @@ import Skeleton from '@mui/material/Skeleton';
 import logo from '../../assets/msidiya-m-logo.png';
 import { Slider } from '@mui/material'; // Import Slider from MUI
 import { useCart } from '../Landing/context/CartContext'; // Import the CartContext
+import { useNavigate } from 'react-router-dom';
 
 // Define TypeScript interfaces for the data structure
 interface Review {
@@ -49,7 +50,7 @@ const GroupClasses = () => {
   const [selectedTutor, setSelectedTutor] = useState('');
   const [minRating, setMinRating] = useState<number | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]); // Price range state
-
+const navigate = useNavigate()
   // Fetch group classes, reviews, and tutors from the Django backend
   useEffect(() => {
     const fetchData = async () => {
@@ -216,8 +217,10 @@ const GroupClasses = () => {
               return (
                 <div
                   key={groupClass.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105"
-                >
+                  className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer"
+                  onClick={() => navigate(`/group-class/${groupClass.id}`)}
+
+             >
                   {/* Main Image */}
                   <img
                     src={groupClass.main_image}

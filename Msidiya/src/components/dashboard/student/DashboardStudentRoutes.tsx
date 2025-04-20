@@ -13,6 +13,7 @@ import MyTransaction from "./MyTransaction";
 import RefundRequest from "./RefundRequest";
 import Notification from "./Notification";
 import Messages from "./Messages";
+import CartPage from "./Cart";
 const DashboardRoutes: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -40,6 +41,7 @@ const DashboardRoutes: React.FC = () => {
             <Route path="student/Refund-Request" element={<RefundRequest/>}  />
             <Route path="student/Notification" element={<Notification/>} />
             <Route path="student/Messages" element={<Messages/>} />
+            <Route path="student/Shopping-Cart" element={<CartPage/>} />
 
             {/* Uncomment these as needed */}
             {/* <Route path="student/set-price" element={<SetPrice />} />

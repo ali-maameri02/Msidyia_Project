@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next"; // Import the translation hook
 import { Image } from "../atoms/Image";
 import "../../index.css";
-import { Button } from "../atoms/Button";
+// import { Button } from "../atoms/Button";
 import Logo from "../../assets/logo1.png";
 import { NavButtons, NavLinks } from "../particles/DataLists";
 import { List } from "../atoms/List";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { ArrowCircleRight, CirclesFour, ShoppingCart } from "@phosphor-icons/react";
+import { ArrowCircleRight, CirclesFour, ShoppingCart, Wallet } from "@phosphor-icons/react";
 import { Slide } from "react-awesome-reveal";
 import Select from "react-select";
 import USA from "../../assets/icons8-usa-48.png";
@@ -16,10 +16,17 @@ import AR from "../../assets/icons8-saudi-arabia-48.png";
 import Login from "./Login";
 import Signup from "./Signup";
 import LOGO from "../../assets/msidiya.png";
+import logom from "../../assets/msidiya-m-logo.png"
 import { useCart } from "./context/CartContext";
 import axios from "axios";
 import { User, fetchUserData } from "../../utils/userData";
-
+import Modal from '@mui/material/Modal';
+import { Button } from "@mui/material";
+import Box from '@mui/material/Box';
+import wallet3d from '../../assets/3d-icon-wallet-with-pockets-money-cards.png'
+// import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import { CloseOutlined } from "@mui/icons-material";
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems } = useCart();
@@ -30,6 +37,8 @@ const NavBar: React.FC = () => {
   const [showSignup, setShowSignup] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   // Use the translation hook
   const { t, i18n } = useTranslation();
@@ -195,7 +204,7 @@ const NavBar: React.FC = () => {
             </ul>
             <ul className="flex items-center justify-center gap-6">
               {/* Shopping Cart Icon */}
-              <List className="relative">
+              <List className="relative flex flex-row justify-between items-center ">
                 <button
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
                   onClick={() => navigate("/cart")}
@@ -205,12 +214,19 @@ const NavBar: React.FC = () => {
                     weight="fill"
                     className={`${navBarColor ? "text-gray-700" : "text-white"}`}
                   />
+                 
                   {cartItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                       {cartItems.length}
                     </span>
                   )}
                 </button>
+                {user ? (
+                <button onClick={handleOpen} className="border-black border-solid flex flex-row items-center  p-1 h-8 shadow-gray-400 shadow-sm bg-gray-200 rounded-md">
+               <img src={logom} className=" border-solid border-black" width={20} style={{height:'1rem'}} alt=""  />
+            </button>
+             ) : (
+              <div className="none hidden"></div>  )}
               </List>
               {user ? (
                 <div className="relative">
@@ -316,6 +332,9 @@ const NavBar: React.FC = () => {
                   {cartItems.length}
                 </span>
               )}
+            </button>
+            <button>
+              <Wallet/>
             </button>
             <Select
               options={languageOptions}
@@ -457,7 +476,29 @@ const NavBar: React.FC = () => {
           </div>
         </div>
       )}
+       <Modal
+        open={open}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50"        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+
+        <Box  className="relative bg-white p-5 pt-2 rounded-lg shadow-lg "
+            style={{ width: "60vw" }}>
+                            <div className="iconsdiv w-full flex justify-end items-start">
+                            <Button className="iconclose  " onClick={handleClose}><CloseOutlined className="text-color" /></Button> 
+
+                              </div>
+              <div className="flex flex-row justify-between items-center">
+
+          <Typography id="modal-modal-title" className="flex flex-row items-center" variant="h6" component="h2">
+No Wallet Exists    <CloseOutlined className="text-red-500"/>
+      </Typography>
+         <img src={wallet3d} width={200} /></div>
+<Button variant="contained" >Add a MS_Wallet</Button>        </Box>
+      </Modal>
     </header>
+    
   );
 };
 
