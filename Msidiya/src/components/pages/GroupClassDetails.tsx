@@ -5,17 +5,27 @@ import {
   CardContent,
   CardMedia,
   Button,
+  Box,
+  Grid,
+  Rating,
   TextField,
+  Divider,
 } from "@mui/material";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
+import NavBar from "../Landing/NavBar";
 
-interface User {
+interface Topic {
   id: number;
-  username: string;
-  email: string;
+  name: string;
+}
+
+interface Schedule {
+  id: number;
+  date: string;
+  duration: string;
+  topic: Topic;
 }
 
 interface GroupClass {
@@ -29,49 +39,107 @@ interface GroupClass {
   max_book: number;
   class_type: string;
   main_image: string;
-  schedules?: { // Optional schedules
-    date: string;
-    duration: string;
-  }[];
-  tutor: User;
+  user: {
+    username: string;
+  };
+}
+
+interface Review {
+  id: number;
+  rating: number;
+  comment: string;
+  user?:{
+    id:number;
+    username:string;
+    Picture:string;
+  }
+  group_class: number;
 }
 
 const GroupClassDetails: React.FC = () => {
-  const { classId } = useParams();
+  const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
+
   const [groupClass, setGroupClass] = useState<GroupClass | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  const [rating, setRating] = useState<number | null>(4);
+  const [comment, setComment] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Assume user is stored in localStorage
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+
+  const fetchReviews = async () => {
+    try {
+      const res = await axios.get<Review[]>(`http://127.0.0.1:8000/api/group-class-reviews/`);
+      setReviews(res.data.filter((r) => r.group_class === Number(classId)));
+    } catch (err) {
+      console.error("Failed to fetch reviews", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchGroupClass = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/group-classes/${classId}/`);
-        console.log("API Response:", response.data); // Debugging line
-        setGroupClass(response.data);
+        const classRes = await axios.get<GroupClass>(
+          `http://127.0.0.1:8000/api/group-classes/${classId}/`
+        );
+        setGroupClass(classRes.data);
+
+        const scheduleRes = await axios.get<Schedule[]>(
+          `http://127.0.0.1:8000/api/available-schedules/?group_class=${classId}`
+        );
+        setSchedules(scheduleRes.data);
+
+        await fetchReviews();
       } catch (error) {
-        console.error("Error fetching group class details:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchGroupClass();
+
+    fetchData();
   }, [classId]);
 
-  const handleEnroll = async () => {
+  const handleBookNow = (scheduleId: number) => {
+    // Navigate to booking confirmation or payment page
+    navigate(`/booking-confirm?schedule=${scheduleId}&class=${classId}`);
+  };
+
+  const handleAddReview = async () => {
+    if (!rating || !comment.trim()) {
+      alert("Please fill in both rating and review.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await axios.post(`http://127.0.0.1:8000/api/enrollments/`, {
-        group_class: classId,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-      });
-      alert("Enrollment successful!");
-      navigate("/dashboardstudent/student");
-    } catch (error) {
-      console.error("Enrollment failed:", error);
-      alert("Enrollment failed. Please try again.");
+      await axios.post(
+        `http://127.0.0.1:8000/api/group-class-reviews/`,
+        {
+          rating,
+          comment,
+          user: user.id,
+          group_class: classId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setRating(null);
+      setComment("");
+      await fetchReviews();
+    } catch (err) {
+      console.error("Failed to submit review", err);
+      alert("Could not submit review.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,79 +148,120 @@ const GroupClassDetails: React.FC = () => {
   return (
     <>
       <NavBar />
-      <div className="group-class-details p-10 mt-20 ml-20">
-        <Card sx={{ maxWidth: 800 }}>
-          <CardMedia
-            component="img"
-            height="400"
-            image={groupClass.main_image}
-            alt={groupClass.title}
-          />
+      <Box sx={{ p: 3, maxWidth: 900, margin: "auto" }}>
+        <Card>
+          <CardMedia component="img" height="300" image={groupClass.main_image} alt={groupClass.title} />
           <CardContent>
-            <Typography variant="h4">{groupClass.title}</Typography>
-            <Typography variant="h6">
-              Tutor: {groupClass.tutor?.username || "Unknown Tutor"}
+            <Typography variant="h4" gutterBottom>
+              {groupClass.title}
             </Typography>
-            <div className="details mt-4">
-              <Typography>Grade: {groupClass.grade}</Typography>
-              <Typography>Price: ${groupClass.price}</Typography>
-              <Typography>Category: {groupClass.category.name}</Typography>
-              <Typography>Max Students: {groupClass.max_book}</Typography>
-              <Typography>Type: {groupClass.class_type}</Typography>
-              <div className="schedules mt-4">
-                <Typography variant="h6">Schedules:</Typography>
-                {groupClass.schedules && groupClass.schedules.length > 0 ? (
-                  (groupClass.schedules || []).map((schedule, index) => (
-                    <div key={index}>
-                      <Typography>Date: {schedule.date}</Typography>
-                      <Typography>Duration: {schedule.duration}</Typography>
-                    </div>
-                  ))
-                ) : (
-                  <Typography>No schedules available.</Typography>
-                )}
-              </div>
-            </div>
-            <div className="enrollment-form mt-6">
-              <TextField
-                label="Your Name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Phone Number"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleEnroll}
-                fullWidth
-              >
-                Confirm Enrollment
-              </Button>
-            </div>
+            <Typography variant="h6" color="text.secondary">
+              Tutor: {groupClass.user?.username || "Unknown"}
+            </Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Typography>Grade: {groupClass.grade}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography>Price: ${groupClass.price}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography>Category: {groupClass.category.name}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography>Type: {groupClass.class_type}</Typography>
+              </Grid>
+              
+            </Grid>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Schedules */}
+            <Typography variant="h6" gutterBottom>
+              Available Schedules
+            </Typography>
+            <Grid container spacing={2}>
+              {schedules.length > 0 ? (
+                schedules.map((schedule) => (
+                  <Grid item xs={12} sm={6} key={schedule.id}>
+                    <Card variant="outlined" sx={{ p: 2 }}>
+                      <Typography variant="body2">Date: {new Date(schedule.date).toLocaleString()}</Typography>
+                      <Typography variant="body2">Duration: {schedule.duration}</Typography>
+                      <Typography variant="body2">
+                        Topic: {schedule.topic?.name || "No Topic"}
+                      </Typography>
+                   
+                    </Card>
+                  </Grid>
+                ))
+              ) : (
+                <Typography>No schedules available</Typography>
+              )}
+            </Grid>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Reviews */}
+            <Typography variant="h6" gutterBottom>
+              Reviews
+            </Typography>
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <Box key={review.id} sx={{ mb: 2 }}>
+                  <div className="content flex flex-row justify-between items-start">
+                  <div className="left flex flex-row items-start">
+                  <img className="rounded-full w-12 h-12" src={review.user?.Picture}alt="" />
+                  <Typography variant="caption"> {review.user?.username}</Typography>
+                  </div>
+                 <div className="right flex flex-col items-end w-full">
+                 <Rating value={review.rating} readOnly precision={0.5} size="small" />
+                 <Typography variant="body2" className="bg-gray-100 w-full rounded-lg p-2">{review.comment}</Typography>
+
+                 </div>
+                  </div>
+
+                </Box>
+              ))
+            ) : (
+              <Typography>No reviews yet.</Typography>
+            )}
+
+            {/* Add Review */}
+            {user && (
+              <>
+                <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                  Add Your Review
+                </Typography>
+                <Rating
+                  value={rating}
+                  onChange={(event, newValue) => setRating(newValue)}
+                  sx={{ mb: 1 }}
+                />
+                <TextField
+                  label="Write your review"
+                  multiline
+                  rows={3}
+                  fullWidth
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  sx={{ mb: 1 }}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddReview}
+                  disabled={loading}
+                >
+                  Submit Review
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
-      </div>
+      </Box>
       <Footer />
     </>
   );

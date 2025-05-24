@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'admin_reorder',
         "corsheaders",
 
+    'drf_spectacular',  # <-- Add this
 
 ]
 
@@ -174,6 +175,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "Account.User"
 REST_FRAMEWORK = {
+        'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -183,7 +186,12 @@ REST_FRAMEWORK = {
     
 
 }
-
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Msidiya API',
+    'DESCRIPTION': 'API documentation for Msidiya Project',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  

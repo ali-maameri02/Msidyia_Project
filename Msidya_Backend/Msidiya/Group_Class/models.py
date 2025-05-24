@@ -48,7 +48,7 @@ class Schedule(models.Model):
     duration = models.DurationField()
     session_link = models.URLField(blank=True, null=True)  # Automatically generated
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="schedules_created")
-
+    topic = models.OneToOneField(Topic, on_delete=models.CASCADE, null=True)
     def save(self, *args, **kwargs):
      if not self.session_link:
         try:

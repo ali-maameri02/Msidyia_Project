@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
 
@@ -14,32 +15,87 @@ interface CartItem {
 const CheckoutPage = () => {
   const location = useLocation();
 
-  // Extract cartItems and totalPrice from location.state with proper typing
+  // Extract cartItems and totalPrice from location.state
   const { cartItems, totalPrice }: { cartItems: CartItem[]; totalPrice: number } =
     location.state || {
       cartItems: [],
       totalPrice: 0,
     };
 
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleConfirmOrder = async () => {
+    const token = localStorage.getItem("user");
+  
+    if (!token) {
+      alert("You must be logged in to make a payment.");
+      return;
+    }
+  
+    if (!cartItems.length) {
+      alert("Your cart is empty.");
+      return;
+    }
+  
+    try {
+      // Handle each class one by one
+      for (const item of cartItems) {
+        const response = await axios.post(
+          `http://127.0.0.1:8000/api/group-classes/initiate-payment/${item.id}/`,
+          {},
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+  
+        // Redirect to the Chargily payment URL if available
+        if (response.data.checkout_url) {
+          window.location.href = response.data.checkout_url;
+          return; // Redirects to only the first payment for now
+        }
+      }
+  
+      alert("Payment initiated.");
+    } catch (error: any) {
+      console.error("Error initiating payment:", error.response?.data || error.message);
+      alert("Failed to initiate payment. Please try again.");
+    }
+  };
+  
+
   return (
     <>
       <NavBar />
       <div className="container mx-auto p-4 mt-20">
-        {/* <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1> */}
-
-        {/* Order Summary */}
+        {/* Shipping Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Shipping Details */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Shipping Details</h2>
             <form className="space-y-4">
               <div className="flex flex-col">
-                <label htmlFor="name" className="text-sm font-medium mb-1">
+                <label htmlFor="fullName" className="text-sm font-medium mb-1">
                   Full Name
                 </label>
                 <input
                   type="text"
-                  id="name"
+                  name="fullName"
+                  id="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
                   placeholder="Enter your full name"
                   className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -50,7 +106,10 @@ const CheckoutPage = () => {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   id="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="Enter your email address"
                   className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -61,7 +120,10 @@ const CheckoutPage = () => {
                 </label>
                 <input
                   type="text"
+                  name="address"
                   id="address"
+                  value={formData.address}
+                  onChange={handleChange}
                   placeholder="Enter your address"
                   className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -72,7 +134,10 @@ const CheckoutPage = () => {
                 </label>
                 <input
                   type="text"
+                  name="city"
                   id="city"
+                  value={formData.city}
+                  onChange={handleChange}
                   placeholder="Enter your city"
                   className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -84,18 +149,24 @@ const CheckoutPage = () => {
                   </label>
                   <input
                     type="text"
+                    name="state"
                     id="state"
+                    value={formData.state}
+                    onChange={handleChange}
                     placeholder="Enter your state"
                     className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label htmlFor="zip" className="text-sm font-medium mb-1">
+                  <label htmlFor="zipCode" className="text-sm font-medium mb-1">
                     ZIP Code
                   </label>
                   <input
                     type="text"
-                    id="zip"
+                    name="zipCode"
+                    id="zipCode"
+                    value={formData.zipCode}
+                    onChange={handleChange}
                     placeholder="Enter your ZIP code"
                     className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
@@ -108,7 +179,7 @@ const CheckoutPage = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
             <div className="space-y-4">
-              {cartItems.map((item: CartItem) => (
+              {cartItems.map((item) => (
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
                     <img
@@ -137,7 +208,7 @@ const CheckoutPage = () => {
         {/* Payment Section */}
         <div className="bg-white rounded-lg shadow p-6 mt-8">
           <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
-          <form className="space-y-4">
+          <div className="space-y-4">
             <div className="flex flex-col">
               <label htmlFor="cardNumber" className="text-sm font-medium mb-1">
                 Card Number
@@ -173,12 +244,12 @@ const CheckoutPage = () => {
                 />
               </div>
             </div>
-          </form>
+          </div>
         </div>
 
         {/* Confirm Order Button */}
         <button
-          onClick={() => alert("Order placed successfully!")}
+          onClick={handleConfirmOrder}
           className="w-full bg-cyan-500 text-white py-3 rounded-lg font-medium mt-6 hover:bg-cyan-600 transition-colors"
         >
           Confirm Order
