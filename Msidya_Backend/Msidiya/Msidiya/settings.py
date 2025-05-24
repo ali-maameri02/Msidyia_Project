@@ -117,14 +117,26 @@ WSGI_APPLICATION = 'Msidiya.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Msidiya',
-        'USER': 'postgres',
-        'PASSWORD': 'imeddevloper',
-        'HOST': 'localhost',  # or the IP address of your PostgreSQL server
-        'PORT': '5432',       # default PostgreSQL port
+        'NAME': env("DB_NAME"),
+        'USER': env("DB_USER"),
+        'PASSWORD': env("DB_PASSWORD"),
+        'HOST': env("DB_HOST"),  # or the IP address of your PostgreSQL server
+        'PORT': env("DB_PORT"),       # default PostgreSQL port
     }
 }
 
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'Msidiya',
+#         'USER': 'postgres',
+#         'PASSWORD': 'imeddevloper',
+#         'HOST': 'localhost',  # or the IP address of your PostgreSQL server
+#         'PORT': '5432',       # default PostgreSQL port
+#     }
+# }
+#
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -163,6 +175,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 # Default primary key field type

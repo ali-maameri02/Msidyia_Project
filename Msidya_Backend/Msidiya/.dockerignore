@@ -1,0 +1,27 @@
+env
+Dockerfile.dev
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore version control folders
+.git
+.gitignore
+
+
+# Ignore Docker-related files (if needed)
+.dockerignore
+Dockerfile
+
+# Ignore IDE/editor folders
+.vscode/
+.idea/
+
+# Ignore logs
+*.log
