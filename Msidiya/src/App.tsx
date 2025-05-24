@@ -5,6 +5,7 @@ import { I18nextProvider } from "react-i18next";
 import { CartProvider } from "./components/Landing/context/CartContext";
 import i18n from "./translate/i18n";
 import Home from "./components/pages/Home";
+import Test from "./components/pages/Test";
 import DashboardRoutes from "./components/dashboard/teacher/Dashboardroutes";
 import DashboardStudentRoutes from "./components/dashboard/student/DashboardStudentRoutes";
 import DashboardSellerRoutes from "./components/dashboard/ms_seller/Dashboardseller";
@@ -34,6 +35,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/test" element={<Test />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/cart/checkout" element={<CheckoutPage />} />
             <Route path="/group-classes" element={<GroupClasses />} />

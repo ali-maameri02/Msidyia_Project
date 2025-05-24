@@ -39,13 +39,13 @@ SECRET_KEY = 'django-insecure-tir$wa786fanu%cfw#o+y8zd4-an1bo0qwqb&gvw%6f%ajl&m9
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-]
-
-CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["*"]  # Allow all hosts for development
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:5173',
+# ]
+CORS_ALLOW_ALL_ORIGINS = True 
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SECURE = False  # Set to True only in production
 # Application definition
@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'allauth',
     'admin_reorder',
         "corsheaders",
+    "E_wallet",
 
 
 ]
@@ -117,11 +118,14 @@ WSGI_APPLICATION = 'Msidiya.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Msidiya',
-        'USER': 'postgres',
-        'PASSWORD': 'imeddevloper',
-        'HOST': 'localhost',  # or the IP address of your PostgreSQL server
-        'PORT': '5432',       # default PostgreSQL port
+        'NAME': 'neondb',
+        'USER': 'neondb_owner',
+        'PASSWORD': 'npg_IqsJat1ZxB2Q',
+        'HOST': 'ep-late-sea-a2iwpggp-pooler.eu-central-1.aws.neon.tech',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
