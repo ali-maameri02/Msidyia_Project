@@ -1,4 +1,5 @@
 from django.urls import path, include, re_path
+
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
@@ -17,6 +18,7 @@ urlpatterns = [
     # Schema and Swagger UI
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('e_wallet/', include('E_wallet.urls')),
 ]
 
 if settings.DEBUG:
