@@ -144,8 +144,9 @@ class SentMessageView(generics.ListCreateAPIView):
         return self.request.user
 
     def get_queryset(self):
+
         user = self.get_user()
-        return Chat.objects.filter(Sender=user.id) if user else Chat.objects.none()
+        return Chat.objects.filter(Receiver=user.id) if user else Chat.objects.none()
     
     def perform_create(self, serializer):
         chat_instance = serializer.save()

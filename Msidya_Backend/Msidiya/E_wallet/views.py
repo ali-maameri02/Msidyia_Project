@@ -22,6 +22,7 @@ from django.views.decorators.http import require_POST
 api_secret_key = 'test_sk_oqQbwAEfHjhC5p36EJPQnUAO7KEA8ydDs3pUZiTS'
 
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def initiate_payment(request):
@@ -212,7 +213,7 @@ class WalletViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Admins see all wallets; users see their own.
     """
-    print("HIIIIIII")
+
     serializer_class = WalletSerializer
     permission_classes = [permissions.IsAuthenticated]
     
