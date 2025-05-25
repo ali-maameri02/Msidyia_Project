@@ -19,7 +19,7 @@ services:
     environment:
       CLIENT_URL: "https://localhost:3000"
       DB_HOST: db
-      DB_NAME: "db"
+      DB_NAME: "new"
       DB_USER: "db_user"
       DB_PORT: "5432"
       DB_PASSWORD: "db_password"

@@ -46,10 +46,8 @@ function App() {
             <Route path="/group-class/:classId" element={<GroupClassDetails />} />
 
             <Route path="dashboard/*" element={<DashboardRoutes />} />
-            {/*
             <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />
             <Route path="dashboardseller/*" element={<DashboardSellerRoutes />} />
-              */}
           </Routes>
         </CartProvider>
       </I18nextProvider>
