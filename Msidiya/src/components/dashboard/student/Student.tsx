@@ -9,10 +9,12 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { Slide } from "react-awesome-reveal";
 import { fetchUserData, User } from '../../../utils/userData'; // Adjust the import path if needed
 import { getUserWalletBalance } from '../../../services/wallet.services';
+import { getUserSentMessages, IMessage } from '../../../services/chat.service';
 
 const Student: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userBalance, setUserBalance] = useState(0)
+  const [userMessages, setUserMessages] = useState<IMessage[]>([])
 
   const getUserData = async () => {
     const userData = await fetchUserData();
@@ -27,10 +29,15 @@ const Student: React.FC = () => {
       console.error(err)
     }
   }
+  const fetchUserSentMessages = async () => {
+    const data = await getUserSentMessages()
+    setUserMessages(data)
+  }
 
   useEffect(() => {
     getUserData();
     fetchUserBalance()
+    fetchUserSentMessages()
   }, []);
   return (
     <div className="flex mt-16 ml-16 ">
@@ -67,7 +74,7 @@ const Student: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Messages</p>
-              <p className="text-2xl font-bold">75</p>
+              <p className="text-2xl font-bold">{userMessages.length}</p>
               <div className="h-2 bg-gray-200 rounded-full mt-2">
                 <div className="h-2 bg-purple-500 rounded-full" style={{ width: '75.5%' }}></div>
               </div>
@@ -112,21 +119,19 @@ const Student: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-bold mb-4">Latest Notifications</h2>
             <ul>
-              <li className="py-2 border-b">Assignment deadline for Math 101</li>
-              <li className="py-2 border-b">New message from John Doe</li>
-              <li className="py-2 border-b">Class canceled for Biology 202</li>
-              <li className="py-2">New enrollment in Chemistry 303</li>
+              {userMessages.map(msg => (
+                <li className="py-2 border-b">{msg.Content} from <span className="px-2">{msg.sender_username}</span></li>
+              ))}
             </ul>
           </div>
 
           {/* Recent Messages */}
           <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4">Recent Messages</h2>
+            <h2 className="text-xl font-bold mb-4">Recent Messages </h2>
             <ul>
-              <li className="py-2 border-b">MSG-001 - From Jane Smith</li>
-              <li className="py-2 border-b">MSG-002 - From Mark Wilson</li>
-              <li className="py-2 border-b">MSG-003 - From Sarah Brown</li>
-              <li className="py-2">MSG-004 - From Alex Johnson</li>
+              {userMessages.map(msg => (
+                <li className="py-2 border-b">{msg.Content} from <span className="px-2">{msg.sender_username}</span></li>
+              ))}
             </ul>
           </div>
         </div>
