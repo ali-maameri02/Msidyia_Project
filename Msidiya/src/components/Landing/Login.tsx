@@ -6,7 +6,7 @@ import { Slide } from "react-awesome-reveal";
 
 import loginimage from "../../assets/4957136_Mobile login.svg";
 import ball from "../../assets/balleft.svg";
-import { User,fetchUserData } from "../../utils/userData";
+import { User, fetchUserData } from "../../utils/userData";
 
 interface LoginProps {
   onClose?: () => void;
@@ -28,13 +28,14 @@ const Login: React.FC<LoginProps> = ({ onClose, onSwitchToSignup, onLoginSuccess
       const response = await axios.post(`${API_BASE_URL}/login/`, { username, password });
       // Store user in localStorage
       localStorage.setItem("user", JSON.stringify(response.data));
+      localStorage.setItem("token", JSON.stringify(response.data));
       console.log("User data:", response.data);
       // Call the onLoginSuccess callback with the user data so the NavBar updates immediately
       if (onLoginSuccess) {
         fetchUserData()
         onLoginSuccess(response.data);
       }
-      
+
       // Optionally, navigate or close the popup
       const { user_role } = response.data;
       if (user_role) {

@@ -18,7 +18,7 @@ urlpatterns = [
     # Schema and Swagger UI
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('e_wallet/', include('E_wallet.urls')),
+    path('api/e_wallet/', include('E_wallet.urls')),
 ]
 
 if settings.DEBUG:

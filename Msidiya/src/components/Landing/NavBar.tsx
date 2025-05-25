@@ -18,15 +18,17 @@ import Signup from "./Signup";
 import LOGO from "../../assets/msidiya.png";
 import logom from "../../assets/msidiya-m-logo.png"
 import { useCart } from "./context/CartContext";
-import axios from "axios";
 import { User, fetchUserData } from "../../utils/userData";
 import Modal from '@mui/material/Modal';
 import { Button } from "@mui/material";
 import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
 import wallet3d from '../../assets/3d-icon-wallet-with-pockets-money-cards.png'
 // import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { CloseOutlined } from "@mui/icons-material";
+import { axiosClient } from "../../assets/lib/axiosClient";
+
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems } = useCart();
@@ -37,8 +39,15 @@ const NavBar: React.FC = () => {
   const [showSignup, setShowSignup] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [amount, setAmount] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setError(""); // Clear error when closing modal
+  };
 
   // Use the translation hook
   const { t, i18n } = useTranslation();
@@ -55,6 +64,66 @@ const NavBar: React.FC = () => {
 
   const handleToggle = () => {
     setOpen(!open);
+  };
+
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value);
+    setAmount(value > 0 ? value : 1);
+    setError(""); // Clear error when user changes amount
+  };
+
+  const handleWalletFilling = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Validate amount
+      if (!amount || amount <= 0) {
+        setError("Please enter a valid amount greater than 0");
+        setLoading(false);
+        return;
+      }
+
+      const data = {
+        amount: amount
+      };
+
+      const response = await axiosClient.post("/api/e_wallet/checkout", data);
+
+      if (response.status === 200) {
+        // Success - you might want to redirect to payment page or show success message
+        console.log("Checkout successful:", response.data);
+
+        // If the API returns a redirect URL, you can navigate there
+        if (response.data.checkout_url) {
+          window.location.href = response.data.checkout_url;
+        } else {
+          // Close modal and show success message
+          handleClose();
+          // You might want to show a success toast here
+          alert("Wallet filling initiated successfully!");
+        }
+      } else {
+        setError("Failed to process wallet filling. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Wallet filling error:", err);
+
+      // Handle different types of errors
+      if (err.response) {
+        // Server responded with error status
+        const errorMessage = err.response.data?.message || err.response.data?.error || "Server error occurred";
+        setError(errorMessage);
+      } else if (err.request) {
+        // Network error
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        // Other error
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const listenScrollEvent = () => {
@@ -141,7 +210,7 @@ const NavBar: React.FC = () => {
       }
     };
     getUserData();
-    
+
   }, []);
 
   // Callback to update user state on login success
@@ -178,9 +247,8 @@ const NavBar: React.FC = () => {
     <header className="w-full h-auto bg-transparent overflow-visible fixed z-50 top-0 left-0">
       <Slide direction="down">
         <nav
-          className={`w-full md:h-16 h-14 ${
-            navBarColor ? "bg-white shadow_nav" : "bg-transparent"
-          } lg:px-24 md:px-12 px-8 flex justify-between items-center`}
+          className={`w-full md:h-16 h-14 ${navBarColor ? "bg-white shadow_nav" : "bg-transparent"
+            } lg:px-24 md:px-12 px-8 flex justify-between items-center`}
         >
           <a
             href="/"
@@ -214,7 +282,7 @@ const NavBar: React.FC = () => {
                     weight="fill"
                     className={`${navBarColor ? "text-gray-700" : "text-white"}`}
                   />
-                 
+
                   {cartItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-cyan-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                       {cartItems.length}
@@ -222,11 +290,11 @@ const NavBar: React.FC = () => {
                   )}
                 </button>
                 {user ? (
-                <button onClick={handleOpen} className="border-black border-solid flex flex-row items-center  p-1 h-8 shadow-gray-400 shadow-sm bg-gray-200 rounded-md">
-               <img src={logom} className=" border-solid border-black" width={20} style={{height:'1rem'}} alt=""  />
-            </button>
-             ) : (
-              <div className="none hidden"></div>  )}
+                  <button onClick={handleOpen} className="border-black border-solid flex flex-row items-center  p-1 h-8 shadow-gray-400 shadow-sm bg-gray-200 rounded-md">
+                    <img src={logom} className=" border-solid border-black" width={20} style={{ height: '1rem' }} alt="" />
+                  </button>
+                ) : (
+                  <div className="none hidden"></div>)}
               </List>
               {user ? (
                 <div className="relative">
@@ -262,13 +330,12 @@ const NavBar: React.FC = () => {
                           navbutton.name === "Login"
                             ? toggleLoginPopup
                             : navbutton.name === "Signup"
-                            ? toggleSignupPopup
-                            : () => navigate(navbutton.url)
+                              ? toggleSignupPopup
+                              : () => navigate(navbutton.url)
                         }
                         type="button"
-                        className={`py-2 px-8 text-base ${
-                          navBarColor ? "text-black" : "text-white"
-                        } border-0 before:top-0 rounded-xl hover:bg-color2 transition-all`}
+                        className={`py-2 px-8 text-base ${navBarColor ? "text-black" : "text-white"
+                          } border-0 before:top-0 rounded-xl hover:bg-color2 transition-all`}
                       >
                         {t(navbutton.name)} {/* Translate buttons */}
                       </Button>
@@ -333,9 +400,11 @@ const NavBar: React.FC = () => {
                 </span>
               )}
             </button>
-            <button>
-              <Wallet/>
-            </button>
+            {user && (
+              <button onClick={handleOpen}>
+                <Wallet />
+              </button>
+            )}
             <Select
               options={languageOptions}
               onChange={handleLanguageChange}
@@ -363,14 +432,12 @@ const NavBar: React.FC = () => {
       </Slide>
       {/* Mobile Nav */}
       <nav
-        className={`flex justify-end lg:hidden h-screen w-full bg-gray-950/90 fixed top-0 ${
-          open ? "right-0" : "-right-[120vw]"
-        } transition-all duration-500 ease-out`}
+        className={`flex justify-end lg:hidden h-screen w-full bg-gray-950/90 fixed top-0 ${open ? "right-0" : "-right-[120vw]"
+          } transition-all duration-500 ease-out`}
       >
         <div
-          className={`w-[70%] h-screen bg-white flex flex-col justify-between items-center relative ${
-            open ? "right-0" : "-right-[120vw]"
-          } transition-all duration-500 ease-out delay-300`}
+          className={`w-[70%] h-screen bg-white flex flex-col justify-between items-center relative ${open ? "right-0" : "-right-[120vw]"
+            } transition-all duration-500 ease-out delay-300`}
         >
           <section className="w-full px-4 py-6 flex flex-col gap-16">
             <div className="w-full flex justify-between items-center">
@@ -415,19 +482,17 @@ const NavBar: React.FC = () => {
                       navbutton.name === "Login"
                         ? toggleLoginPopup
                         : navbutton.name === "Signup"
-                        ? toggleSignupPopup
-                        : () => navigate(navbutton.url)
+                          ? toggleSignupPopup
+                          : () => navigate(navbutton.url)
                     }
                     type="button"
                     className={`py-2 px-8 w-full relative z-10 before:content-[''] before:absolute before:left-0 before:w-full 
                       before:h-0 before:bg-color2 before:-z-10 hover:before:h-full before:rounded-xl before:transition-all before:duration-300 
-                      before:ease-in text-base ${
-                        navBarColor ? "text-black" : "text-white"
-                      } ${
-                      navbutton.name === "Signup"
+                      before:ease-in text-base ${navBarColor ? "text-black" : "text-white"
+                      } ${navbutton.name === "Signup"
                         ? "border-0 border-gray-200 before:top-0 rounded-xl"
                         : "border-0 border-gray-200 before:top-0 rounded-xl"
-                    } ${navBarColor ? "bg-transparent" : ""}`}
+                      } ${navBarColor ? "bg-transparent" : ""}`}
                   >
                     {t(navbutton.name)} {/* Translate mobile buttons */}
                   </Button>
@@ -476,29 +541,66 @@ const NavBar: React.FC = () => {
           </div>
         </div>
       )}
-       <Modal
+
+      {/* Enhanced Wallet Modal */}
+      <Modal
         open={open}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50"        onClose={handleClose}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50"
+        onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
+        <Box className="relative bg-white p-6 pt-4 rounded-lg shadow-lg max-w-md w-full mx-4">
+          <div className="w-full flex justify-end items-start mb-2">
+            <Button className="min-w-0 p-1" onClick={handleClose}>
+              <CloseOutlined className="text-gray-500 hover:text-gray-700" />
+            </Button>
+          </div>
 
-        <Box  className="relative bg-white p-5 pt-2 rounded-lg shadow-lg "
-            style={{ width: "60vw" }}>
-                            <div className="iconsdiv w-full flex justify-end items-start">
-                            <Button className="iconclose  " onClick={handleClose}><CloseOutlined className="text-color" /></Button> 
+          <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-row justify-between items-center w-full">
+              <Typography id="modal-modal-title" variant="h6" component="h2" className="text-gray-800">
+                Fill Your MS Wallet
+              </Typography>
+              <img src={wallet3d} width={80} height={80} alt="Wallet" />
+            </div>
 
-                              </div>
-              <div className="flex flex-row justify-between items-center">
+            <div className="w-full space-y-4">
+              <TextField
+                label="Amount"
+                type="number"
+                value={amount}
+                onChange={handleAmountChange}
+                fullWidth
+                variant="outlined"
+                inputProps={{
+                  min: 1,
+                  step: 0.01
+                }}
+                helperText="Enter the amount you want to add to your wallet"
+                error={!!error}
+              />
 
-          <Typography id="modal-modal-title" className="flex flex-row items-center" variant="h6" component="h2">
-No Wallet Exists    <CloseOutlined className="text-red-500"/>
-      </Typography>
-         <img src={wallet3d} width={200} /></div>
-<Button variant="contained" >Add a MS_Wallet</Button>        </Box>
+              {error && (
+                <Typography color="error" variant="body2" className="text-center">
+                  {error}
+                </Typography>
+              )}
+
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={handleWalletFilling}
+                disabled={loading || !amount || amount <= 0}
+                className="bg-cyan-500 hover:bg-cyan-600 py-3"
+              >
+                {loading ? "Processing..." : `Add $${amount} to Wallet`}
+              </Button>
+            </div>
+          </div>
+        </Box>
       </Modal>
     </header>
-    
   );
 };
 

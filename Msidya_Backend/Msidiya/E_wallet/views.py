@@ -33,7 +33,7 @@ def initiate_payment(request):
         "amount": amount,
         "currency": "dzd",
         "description": str(user.id),  # So you get it back in webhook
-        "success_url": "https://your-frontend.com/payment-success",
+        "success_url": "http://127.0.0.1:8000/api/e_wallet/webhook",
 
 
     }
@@ -48,7 +48,7 @@ def initiate_payment(request):
         json=payload,
         headers=headers
     )
-    print("Response: ", response)
+    print("Response: ", response.json())
     if response.status_code == 200:
         data = response.json()
         print("checkout_url: ", data["checkout_url"])
