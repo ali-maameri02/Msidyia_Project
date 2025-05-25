@@ -159,9 +159,11 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
 class ChatSerializer(serializers.ModelSerializer):
+    sender_username = serializers.CharField(source='Sender.username', read_only=True)
+    receiver_username = serializers.CharField(source='Receiver.username', read_only=True)
     class Meta:
         model = Chat
-        fields = '__all__'
+        fields = ['id', 'Content', 'Sender', 'sender_username', 'Receiver', 'receiver_username', 'Time']
 class Ms_WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ms_Seller
