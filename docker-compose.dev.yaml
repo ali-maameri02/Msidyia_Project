@@ -9,6 +9,8 @@ services:
     env_file:
       - .env
     working_dir: /app/Msidiya
+    volumes:
+      - "./Msidya_Backend:/app"
     command: >
       sh -c "
       python  manage.py collectstatic --noinput &&
