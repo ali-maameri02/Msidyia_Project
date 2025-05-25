@@ -52,8 +52,7 @@ CSRF_COOKIE_SECURE = False  # Set to True only in production
 
 INSTALLED_APPS = [
     # 'jazzmin',
-        "unfold",  # before django.contrib.admin
-
+    "unfold", 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -67,10 +66,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'allauth',
     'admin_reorder',
-        "corsheaders",
+    "corsheaders",
     "E_wallet",
-
-    'drf_spectacular',  # <-- Add this
+    'drf_spectacular',  
 
 ]
 
@@ -119,22 +117,11 @@ WSGI_APPLICATION = 'Msidiya.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-<<<<<<< HEAD
         'NAME': env("DB_NAME"),
         'USER': env("DB_USER"),
         'PASSWORD': env("DB_PASSWORD"),
         'HOST': env("DB_HOST"),  # or the IP address of your PostgreSQL server
         'PORT': env("DB_PORT"),       # default PostgreSQL port
-=======
-        'NAME': 'Msidiya',
-        'USER': 'postgres',
-        'PASSWORD': 'imeddevloper',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        # 'OPTIONS': {
-        #     'sslmode': 'require',
-        # },
->>>>>>> origin/main
     }
 }
 
