@@ -213,7 +213,7 @@ UNFOLD = {
     "SITE_TITLE": "Msidiya",
     "SITE_HEADER": "Msidiya",
     "LOGIN": {
-        "image": lambda request: static("images/msidiya.png"),
+        # "image": lambda request: static("images/msidiya.png"),
         # "redirect_after": lambda request: reverse_lazy("admin:APP_MODEL_changelist"),
     },
     "SIDEBAR": {
@@ -222,15 +222,15 @@ UNFOLD = {
      
     },
       "SITE_ICON": {
-        "light": lambda _ : static("/images/111.png"),  # light mode
-        "dark": lambda _: static("/images/111.png"),  # dark mode
+        # "light": lambda _ : static("/images/111.png"),  # light mode
+        # "dark": lambda _: static("/images/111.png"),  # dark mode
     },
          "SITE_FAVICONS": [
         {
             "rel": "icon",
             "sizes": "32x32",
             "type": "image/png",
-            "href": lambda _: static("images/111.png"),
+            # "href": lambda _: static("images/111.png"),
         },
     ],
           "SHOW_HISTORY": True, # show/hide "History" button, default: True

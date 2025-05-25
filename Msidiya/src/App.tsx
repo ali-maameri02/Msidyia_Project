@@ -43,6 +43,7 @@ function App() {
             <Route path="/Tutors/TutorDetails/TutorOneToOne" element={<TutorOneToOne />} />
             <Route path="/group-class/:classId" element={<GroupClassDetails />} />
             {/* Dashboard Routes */}
+
             <Route path="dashboard/*" element={<DashboardRoutes />} />
             <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />
             <Route path="dashboardseller/*" element={<DashboardSellerRoutes />} />
