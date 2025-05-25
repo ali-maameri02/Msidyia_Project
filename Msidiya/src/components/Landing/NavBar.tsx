@@ -32,6 +32,7 @@ import { axiosClient } from "../../assets/lib/axiosClient";
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems } = useCart();
+  const [userBalance, setUserBalance] = useState(0)
   const location = useLocation(); // Get the current location
   const [open, setOpen] = useState(false);
   const [navBarColor, setNavBarColor] = useState(false);
@@ -39,7 +40,7 @@ const NavBar: React.FC = () => {
   const [showSignup, setShowSignup] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [amount, setAmount] = useState<number>(1);
+  const [amount, setAmount] = useState<number>(50);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
@@ -48,6 +49,25 @@ const NavBar: React.FC = () => {
     setOpen(false);
     setError(""); // Clear error when closing modal
   };
+  const fetchUserPoints = async () => {
+    try {
+
+      const response = await axiosClient.get("/api/e_wallet/wallet/")
+      const amount = response.data[0].balance
+      setUserBalance(amount)
+      if (response.status != 200) {
+        throw new Error("can't fetch the user points");
+
+      }
+    } catch (err) {
+      console.error(err)
+    }
+
+  }
+
+  useEffect(() => {
+    fetchUserPoints()
+  }, [])
 
   // Use the translation hook
   const { t, i18n } = useTranslation();
@@ -68,7 +88,7 @@ const NavBar: React.FC = () => {
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
-    setAmount(value > 0 ? value : 1);
+    setAmount(value >= 50 ? value : 50);
     setError(""); // Clear error when user changes amount
   };
 
@@ -292,6 +312,7 @@ const NavBar: React.FC = () => {
                 {user ? (
                   <button onClick={handleOpen} className="border-black border-solid flex flex-row items-center  p-1 h-8 shadow-gray-400 shadow-sm bg-gray-200 rounded-md">
                     <img src={logom} className=" border-solid border-black" width={20} style={{ height: '1rem' }} alt="" />
+                    {userBalance}
                   </button>
                 ) : (
                   <div className="none hidden"></div>)}
@@ -574,7 +595,7 @@ const NavBar: React.FC = () => {
                 fullWidth
                 variant="outlined"
                 inputProps={{
-                  min: 1,
+                  min: 50,
                   step: 0.01
                 }}
                 helperText="Enter the amount you want to add to your wallet"
@@ -594,7 +615,7 @@ const NavBar: React.FC = () => {
                 disabled={loading || !amount || amount <= 0}
                 className="bg-cyan-500 hover:bg-cyan-600 py-3"
               >
-                {loading ? "Processing..." : `Add $${amount} to Wallet`}
+                {loading ? "Processing..." : `Add ${amount} to Wallet`}
               </Button>
             </div>
           </div>
