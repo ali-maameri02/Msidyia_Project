@@ -7,30 +7,38 @@ import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { Slide } from "react-awesome-reveal";
-import Alert from '@mui/material/Alert';
-import CardMedia from '@mui/material/CardMedia';
-import picture from '../../../assets/Capture d’écran_25-11-2024_44215_www.instagram.com.jpeg';
-import Card from '@mui/material/Card';
-import axios from 'axios';
 import { fetchUserData, User } from '../../../utils/userData'; // Adjust the import path if needed
+import { getUserWalletBalance } from '../../../services/wallet.services';
 
 const Student: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [userBalance, setUserBalance] = useState(0)
+
+  const getUserData = async () => {
+    const userData = await fetchUserData();
+    setUser(userData);
+  };
+  const fetchUserBalance = async () => {
+    try {
+
+      const amount = await getUserWalletBalance()
+      setUserBalance(parseInt(amount))
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   useEffect(() => {
-    const getUserData = async () => {
-      const userData = await fetchUserData();
-      setUser(userData);
-    };
     getUserData();
+    fetchUserBalance()
   }, []);
   return (
     <div className="flex mt-16 ml-16 ">
-    
+
 
       {/* Main Content */}
       <main className="flex flex-col   mt-20 bg-transparent   ">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
             <div className="p-3 bg-purple-100 rounded-full">
               <FaChalkboardTeacher className="text-purple-500 text-2xl" />
@@ -72,12 +80,12 @@ const Student: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Wallet</p>
-              <p className="text-2xl font-bold">MS 15k</p>
+              <p className="text-2xl font-bold">MS {userBalance}</p>
               <p className="text-sm text-green-500">↑ 12% Since last month</p>
             </div>
           </div>
         </div>
-       
+
         <Slide direction="left" style={{ display: 'flex', justifyContent: 'center' }}>
           <div className="user-profile-view h-[15rem]  w-[50rem] bg-[#fff] rounded-[1rem] border border-[#e5e7eb] shadow-lg flex">
             <img src={user?.Picture || 'default-profile.png'} className="h-[15rem] w-[15rem] rounded-[1rem] p-2" alt="User" />
@@ -124,7 +132,7 @@ const Student: React.FC = () => {
         </div>
       </main>
     </div>
-    
+
   );
 };
 

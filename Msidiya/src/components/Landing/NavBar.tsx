@@ -28,6 +28,7 @@ import wallet3d from '../../assets/3d-icon-wallet-with-pockets-money-cards.png'
 import Typography from '@mui/material/Typography';
 import { CloseOutlined } from "@mui/icons-material";
 import { axiosClient } from "../../assets/lib/axiosClient";
+import { getUserWalletBalance } from "../../services/wallet.services";
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
@@ -52,17 +53,12 @@ const NavBar: React.FC = () => {
   const fetchUserPoints = async () => {
     try {
 
-      const response = await axiosClient.get("/api/e_wallet/wallet/")
-      const amount = response.data[0].balance
-      setUserBalance(amount)
-      if (response.status != 200) {
-        throw new Error("can't fetch the user points");
-
-      }
+      const amount = await getUserWalletBalance()
+      setUserBalance(parseInt(amount))
     } catch (err) {
       console.error(err)
+      setUserBalance(0)
     }
-
   }
 
   useEffect(() => {
