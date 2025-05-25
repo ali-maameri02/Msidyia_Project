@@ -15,7 +15,7 @@ export const fetchUserData = async (): Promise<User | null> => {
   if (storedUser) {
     const parsedUser: User = JSON.parse(storedUser);
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/Users/${parsedUser.id}/`);
+      const response = await axios.get(`http://127.0.0.1:8000/api/users/${parsedUser.id}/`);
       return response.data;
     } catch (error) {
       console.error("Error fetching user data:", error);

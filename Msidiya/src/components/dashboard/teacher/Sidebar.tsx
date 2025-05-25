@@ -1,6 +1,18 @@
-import React, { useState, useMemo, Suspense, lazy } from "react";
-import { Sidebar, Menu, MenuItem, Logo } from "react-mui-sidebar";
-import { Drawer, IconButton, List, ListItem, ListItemText, Collapse } from "@mui/material";
+import React, { useState, useMemo } from "react";
+import {
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  Toolbar,
+  Divider,
+  Box,
+  Typography,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
@@ -13,15 +25,12 @@ import CategoryIcon from '@mui/icons-material/Category';
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentIcon from "@mui/icons-material/Payment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import msidiyalogo from "../../../assets/msidiya.png";
-import { Link,useNavigate } from "react-router-dom";
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { ReviewsOutlined } from "@mui/icons-material";
+import { useNavigate, Link } from "react-router-dom";
 
-// Lazy loading of pages
-const Dashboard = lazy(() => import("../../../components/dashboard/teacher/Teacher"));
-const Profile = lazy(() => import("../../../components/dashboard/teacher/UserProfile"));
-const SetCategories = lazy(() => import("../../../components/dashboard/teacher/Setcategories"));
+const drawerWidthOpen = 240;
+const drawerWidthClosed = 60;
 
 interface SidebarAppProps {
   isSidebarOpen: boolean;
@@ -31,216 +40,281 @@ interface SidebarAppProps {
 const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
   const [openGroupClasses, setOpenGroupClasses] = useState(false);
   const [openAppointments, setOpenAppointments] = useState(false);
-  const [openPayements, setOpenPayements] = useState(false);
+  const [openPayments, setOpenPayments] = useState(false);
+  const navigate = useNavigate();
 
-  const handleGroupClassesClick = () => setOpenGroupClasses(!openGroupClasses);
-  const handleAppointmentsClick = () => setOpenAppointments(!openAppointments);
-  const handlePayementsClick = () => setOpenPayements(!openPayements);
-  const navigate = useNavigate(); // For navigation
-
-  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
   };
+
   const menuItems = useMemo(() => [
     { icon: <DashboardIcon />, link: "/dashboard/teacher", label: "Dashboard" },
     { icon: <PersonIcon />, link: "/dashboard/teacher/profile", label: "Profile" },
-   
   ], []);
 
   const groupClassesItems = useMemo(() => [
     { icon: <ClassIcon />, link: "/dashboard/teacher/group-classes", label: "My Group Classes" },
     { icon: <CategoryIcon />, link: "/dashboard/teacher/set-categories", label: "Set Categories" },
     { icon: <ReviewsOutlined />, link: "/dashboard/teacher/group-classes/reviews", label: "Reviews" },
-
   ], []);
-  const PayementItems = useMemo(() => [
+
+  const paymentsItems = useMemo(() => [
     { icon: <ReceiptLongIcon />, link: "/dashboard/teacher/group-class-transactions", label: "Group Class Transactions" },
     { icon: <PaymentIcon />, link: "/dashboard/teacher/payment", label: "Payment" },
     { icon: <MonetizationOnIcon />, link: "/dashboard/teacher/payout", label: "Payout" }
   ], []);
 
   const appointmentsItems = useMemo(() => [
-    { link: "/dashboard/teacher/upcoming-appointments", label: "Upcoming Appointments" },
-    { link: "/dashboard/teacher/coupons-manager", label: "Coupons Manager" }
+    { icon: <EventIcon />, link: "/dashboard/teacher/upcoming-appointments", label: "Upcoming Appointments" },
+    { icon: <EditIcon />, link: "/dashboard/teacher/coupons-manager", label: "Coupons Manager" }
   ], []);
+
+  // For responsive drawer open state on mobile
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  // Drawer content
+  const drawerContent = (
+    <Box sx={{ height: "100%", bgcolor: "background.paper", display: "flex", flexDirection: "column" }}>
+      <Toolbar sx={{ justifyContent: isSidebarOpen ? "center" : "center", p: 2 }}>
+        {/* You can add your logo here */}
+        {isSidebarOpen && <Typography variant="h6" noWrap>Msidiya</Typography>}
+      </Toolbar>
+      <Divider />
+
+      <List>
+        {/* Simple menu items */}
+        {menuItems.map(({ icon, label, link }) => (
+          <ListItem key={label} disablePadding sx={{ display: "block" }}>
+            <ListItemButton
+              component={Link}
+              to={link}
+              sx={{
+                minHeight: 48,
+                justifyContent: isSidebarOpen ? "initial" : "center",
+                px: 2.5,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: isSidebarOpen ? 3 : "auto",
+                  justifyContent: "center",
+                }}
+              >
+                {icon}
+              </ListItemIcon>
+              {isSidebarOpen && <ListItemText primary={label} />}
+            </ListItemButton>
+          </ListItem>
+        ))}
+
+        {/* Group Classes with collapse */}
+        <ListItem disablePadding sx={{ display: "block" }}>
+          <ListItemButton
+            onClick={() => setOpenGroupClasses(!openGroupClasses)}
+            sx={{
+              minHeight: 48,
+              justifyContent: isSidebarOpen ? "initial" : "center",
+              px: 2.5,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: isSidebarOpen ? 3 : "auto",
+                justifyContent: "center",
+              }}
+            >
+              <GroupIcon />
+            </ListItemIcon>
+            {isSidebarOpen && <ListItemText primary="Group Classes" />}
+            {isSidebarOpen && (openGroupClasses ? <ExpandLess /> : <ExpandMore />)}
+          </ListItemButton>
+          <Collapse in={openGroupClasses} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {groupClassesItems.map(({ icon, label, link }) => (
+                <ListItemButton
+                  key={label}
+                  sx={{ pl: isSidebarOpen ? 4 : 2 }}
+                  component={Link}
+                  to={link}
+                >
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  {isSidebarOpen && <ListItemText primary={label} />}
+                </ListItemButton>
+              ))}
+            </List>
+          </Collapse>
+        </ListItem>
+
+        {/* Appointments with collapse */}
+        <ListItem disablePadding sx={{ display: "block" }}>
+          <ListItemButton
+            onClick={() => setOpenAppointments(!openAppointments)}
+            sx={{
+              minHeight: 48,
+              justifyContent: isSidebarOpen ? "initial" : "center",
+              px: 2.5,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: isSidebarOpen ? 3 : "auto",
+                justifyContent: "center",
+              }}
+            >
+              <EventIcon />
+            </ListItemIcon>
+            {isSidebarOpen && <ListItemText primary="Appointments" />}
+            {isSidebarOpen && (openAppointments ? <ExpandLess /> : <ExpandMore />)}
+          </ListItemButton>
+          <Collapse in={openAppointments} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {appointmentsItems.map(({ icon, label, link }) => (
+                <ListItemButton
+                  key={label}
+                  sx={{ pl: isSidebarOpen ? 4 : 2 }}
+                  component={Link}
+                  to={link}
+                >
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  {isSidebarOpen && <ListItemText primary={label} />}
+                </ListItemButton>
+              ))}
+            </List>
+          </Collapse>
+        </ListItem>
+
+        {/* Payments with collapse */}
+        <ListItem disablePadding sx={{ display: "block" }}>
+          <ListItemButton
+            onClick={() => setOpenPayments(!openPayments)}
+            sx={{
+              minHeight: 48,
+              justifyContent: isSidebarOpen ? "initial" : "center",
+              px: 2.5,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: isSidebarOpen ? 3 : "auto",
+                justifyContent: "center",
+              }}
+            >
+              <AttachMoneyIcon />
+            </ListItemIcon>
+            {isSidebarOpen && <ListItemText primary="Payments" />}
+            {isSidebarOpen && (openPayments ? <ExpandLess /> : <ExpandMore />)}
+          </ListItemButton>
+          <Collapse in={openPayments} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {paymentsItems.map(({ icon, label, link }) => (
+                <ListItemButton
+                  key={label}
+                  sx={{ pl: isSidebarOpen ? 4 : 2 }}
+                  component={Link}
+                  to={link}
+                >
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  {isSidebarOpen && <ListItemText primary={label} />}
+                </ListItemButton>
+              ))}
+            </List>
+          </Collapse>
+        </ListItem>
+      </List>
+
+      <Box sx={{ flexGrow: 1 }} />
+      <Divider />
+      {/* Logout button */}
+      <List>
+        <ListItem disablePadding sx={{ display: "block" }}>
+          <ListItemButton
+            onClick={handleLogout}
+            sx={{
+              minHeight: 48,
+              justifyContent: isSidebarOpen ? "initial" : "center",
+              px: 2.5,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: isSidebarOpen ? 3 : "auto",
+                justifyContent: "center",
+              }}
+            >
+              <LogoutOutlinedIcon />
+            </ListItemIcon>
+            {isSidebarOpen && <ListItemText primary="Logout" />}
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Box>
+  );
 
   return (
     <>
-      {/* Toggle button for smaller screens */}
+      {/* Toggle button */}
       <IconButton
-        edge="start"
-        color="inherit"
-        aria-label="menu"
         onClick={toggleSidebar}
-        sx={{
-          display: { xs: "block", md: "block" }, // Show only on small screens
-          position: "fixed",
-          top: 6,
-          left: 16,
-          zIndex: 9999999,
-        }}
+        sx={{ position: "fixed", top: 10, left: 10, zIndex: 1301 }}
+        size="large"
+        color="inherit"
       >
         <MenuIcon />
       </IconButton>
 
-      {/* Sidebar for larger screens */}
-      <div
-        style={{
-          position: "fixed",
-          top: 50,
-          left: 0,
-          height: "100vh",
-          zIndex: 1,
-          width: isSidebarOpen ? "17rem" : "4rem", // Adjust width dynamically
-          overflowY: "auto",
-          transition: "width 0.3s ease", // Smooth transition for width
-          scrollbarWidth: "thin",
-          scrollbarColor: "#22D3EE #f0f0f0",
-          backgroundColor: "white",
+      {/* Permanent drawer for desktop */}
+      <Drawer
+        variant="permanent"
+        open={isSidebarOpen}
+        sx={{
+          width: isSidebarOpen ? drawerWidthOpen : drawerWidthClosed,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: isSidebarOpen ? drawerWidthOpen : drawerWidthClosed,
+            boxSizing: "border-box",
+            overflowX: "hidden",
+            transition: (theme) =>
+              theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+          },
+          display: { xs: "none", sm: "block" },
         }}
       >
-        <Sidebar
-        showProfile={false}
-          sx={{
-            height: "100vh",
-            overflowY: "auto",
-            backgroundColor: "#fff",
-            display: { xs: "none", md: "block" }, // Hidden on smaller screens
-            scrollbarWidth: "thin",
-            scrollbarColor: "#888 #f0f0f0",
-            "&::-webkit-scrollbar": {
-              width: "1px",
-            },
-            "&::-webkit-scrollbar-track": {
-              background: "#f0f0f0",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              background: "#888",
-              borderRadius: "6px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              background: "#555",
-            },
-          }}
-        >
-          <Logo img={msidiyalogo}>Msidiya</Logo>
-          <Menu>
-            {menuItems.map(item => (
-              <MenuItem key={item.link} icon={item.icon} link={item.link}>
-                {item.label}
-              </MenuItem>
-            ))}
+        {drawerContent}
+      </Drawer>
 
-            {/* Manage Group Classes Section */}
-            <List>
-            <ListItem
-  button
-  onClick={handleGroupClassesClick}
-  sx={{
-    width: '100%',
-    padding: '0.5rem 0.5rem',
-    display: 'flex',
-    flexDirection: 'row',
-    borderRadius:'0.5rem',
-    flexWrap:'nowrap',
-    justifyContent: 'space-around',
-    ":hover": {
-      backgroundColor: '#5d87ff20',
-      color:'#5d87ff'
-    },
-  }}className=" ml-0"
->
-
-                <GroupIcon />
-                <ListItemText primary="Manage Group Classes" />
-              </ListItem>
-              <Collapse in={openGroupClasses} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {groupClassesItems.map(item => (
-                    <ListItem key={item.link} button component={Link} to={item.link}>
-                      {item.icon}
-                      <ListItemText primary={item.label} />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            </List>
-
-            {/* Manage Appointments Section */}
-            <List>
-              <ListItem button 
-              onClick={handleAppointmentsClick}  sx={{
-                width: '100%',
-                padding: '0.5rem 0.5rem',
-                display: 'flex',
-                flexDirection: 'row',
-                borderRadius:'0.5rem',
-                flexWrap:'nowrap',
-                justifyContent: 'space-around',
-                ":hover": {
-                  backgroundColor: '#5d87ff20',
-                  color:'#5d87ff'
-                   // Replace with your desired color, e.g., '#f0f0f0'
-                },
-              }}
-              
-               >
-                <EventIcon />
-                <ListItemText primary="Manage Appointments" />
-              </ListItem>
-              <Collapse in={openAppointments} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {appointmentsItems.map(item => (
-                    <ListItem key={item.link} button component={Link} to={item.link}>
-                      <ListItemText primary={item.label} />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            </List>
-
-            <List>
-              <ListItem button onClick={handlePayementsClick} sx={{
-                width: '100%',
-                padding: '0.5rem 0.5rem',
-                display: 'flex',
-                flexDirection: 'row',
-                borderRadius:'0.5rem',
-                flexWrap:'nowrap',
-                justifyContent: 'space-around',
-                ":hover": {
-                  backgroundColor: '#5d87ff20',
-                  color:'#5d87ff'
-                   // Replace with your desired color, e.g., '#f0f0f0'
-                },
-              }}
-  >
-                <AttachMoneyIcon />
-                <ListItemText primary="Manage Payement" />
-              </ListItem>
-              <Collapse in={openPayements} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {PayementItems.map(item => (
-                    <ListItem key={item.link} button component={Link} to={item.link}>
-                      {item.icon}
-                      <ListItemText primary={item.label} />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            </List>
-          </Menu>
-          <div className=" flex flex-row justify-center align-middle px-5 p-3 m-2 rounded-lg w-full hover:bg-red-500 hover:text-white " >
-           <button onClick={handleLogout}>Logout</button>
-                                       <LogoutOutlinedIcon/>
-                                       </div>
-        </Sidebar>
-        
-      </div>
+      {/* Temporary drawer for mobile */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: "block", sm: "none" },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidthOpen },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
     </>
   );
 };
 
 export default SidebarApp;
+
+// Don't forget to import ExpandLess, ExpandMore from @mui/icons-material for the collapse toggles
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";

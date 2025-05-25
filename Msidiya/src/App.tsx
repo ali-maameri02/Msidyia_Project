@@ -44,11 +44,12 @@ function App() {
             <Route path="/Tutors/TutorDetails/:tutorId" element={<TutorDetails />} />
             <Route path="/Tutors/TutorDetails/TutorOneToOne" element={<TutorOneToOne />} />
             <Route path="/group-class/:classId" element={<GroupClassDetails />} />
-            {/* Dashboard Routes */}
 
             <Route path="dashboard/*" element={<DashboardRoutes />} />
+            {/*
             <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />
             <Route path="dashboardseller/*" element={<DashboardSellerRoutes />} />
+              */}
           </Routes>
         </CartProvider>
       </I18nextProvider>
