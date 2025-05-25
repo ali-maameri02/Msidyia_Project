@@ -39,13 +39,13 @@ SECRET_KEY = 'django-insecure-tir$wa786fanu%cfw#o+y8zd4-an1bo0qwqb&gvw%6f%ajl&m9
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-]
-
-CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["*"]  # Allow all hosts for development
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:5173',
+# ]
+CORS_ALLOW_ALL_ORIGINS = True 
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SECURE = False  # Set to True only in production
 # Application definition
@@ -68,7 +68,9 @@ INSTALLED_APPS = [
     'allauth',
     'admin_reorder',
         "corsheaders",
+    "E_wallet",
 
+    'drf_spectacular',  # <-- Add this
 
 ]
 
@@ -117,11 +119,22 @@ WSGI_APPLICATION = 'Msidiya.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+<<<<<<< HEAD
         'NAME': env("DB_NAME"),
         'USER': env("DB_USER"),
         'PASSWORD': env("DB_PASSWORD"),
         'HOST': env("DB_HOST"),  # or the IP address of your PostgreSQL server
         'PORT': env("DB_PORT"),       # default PostgreSQL port
+=======
+        'NAME': 'Msidiya',
+        'USER': 'postgres',
+        'PASSWORD': 'imeddevloper',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        # 'OPTIONS': {
+        #     'sslmode': 'require',
+        # },
+>>>>>>> origin/main
     }
 }
 
@@ -188,6 +201,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "Account.User"
 REST_FRAMEWORK = {
+        'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -197,7 +212,12 @@ REST_FRAMEWORK = {
     
 
 }
-
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Msidiya API',
+    'DESCRIPTION': 'API documentation for Msidiya Project',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  

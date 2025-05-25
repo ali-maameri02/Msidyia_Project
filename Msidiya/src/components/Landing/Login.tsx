@@ -28,7 +28,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onSwitchToSignup, onLoginSuccess
       const response = await axios.post(`${API_BASE_URL}/login/`, { username, password });
       // Store user in localStorage
       localStorage.setItem("user", JSON.stringify(response.data));
-      
+      console.log("User data:", response.data);
       // Call the onLoginSuccess callback with the user data so the NavBar updates immediately
       if (onLoginSuccess) {
         fetchUserData()

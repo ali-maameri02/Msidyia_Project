@@ -12,6 +12,10 @@ from .models import User
 from .serializers import * 
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+# what amir added 
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = UserregisterSerializer
@@ -29,6 +33,7 @@ class RegisterUserView(generics.CreateAPIView):
             # print("Serializer errors:")
             # print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
 @api_view(['POST'])
 def user_login(request):
     if request.method == 'POST':
@@ -83,9 +88,11 @@ class Users(generics.ListAPIView):
 
     def get_queryset(self):
         return User.objects.all()  # Add parentheses here 
+
 class QualificationListcreatview(generics.ListCreateAPIView):
     serializer_class=QualificationSerializer
     queryset = Qualification.objects.all()    
+
 class Userretreive(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -108,6 +115,7 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data) 
+
 class UserDelete(generics.RetrieveDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -120,12 +128,14 @@ class NotificationListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user  # Assuming you have user authentication
         return Notification.objects.filter(User=user)  
+
 class NotificationUpdateView(generics.UpdateAPIView):
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
 
     def get_object(self):
         return self.get_queryset().filter(User=self.request.user).first()      
+
 class SentMessageView(generics.ListCreateAPIView):
     serializer_class = ChatSerializer
 
@@ -153,6 +163,7 @@ class SentMessageView(generics.ListCreateAPIView):
 class TutorList(generics.ListAPIView):
     serializer_class=TutorslistSerializer
     queryset=Tutor.objects.all()
+
 class TutorDetails(generics.RetrieveAPIView):
     serializer_class=TutorslistSerializer
     queryset=Tutor.objects.all()

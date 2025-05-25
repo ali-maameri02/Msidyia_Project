@@ -2,7 +2,9 @@ from rest_framework import generics
 from .models import Currency, PaymentAccount, Payout
 from .serializers import CurrencySerializer, PaymentAccountSerializer, PayoutSerializer
 from rest_framework import viewsets
-
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from .models import  StudentPayment
 from Group_Class.models import  GroupClass
 from .serializers import StudentPaymentSerializer
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -74,7 +77,10 @@ class PayoutRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 #         return JsonResponse({}, status=200)
 
 
-
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
 
 class InitiatePaymentView(APIView):
     def post(self, request, class_id):

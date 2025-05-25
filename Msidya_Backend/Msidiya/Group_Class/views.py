@@ -2,8 +2,8 @@ from django.utils import timezone
 from rest_framework import generics, permissions
 from .models import Category, StudentAppointment, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 from .serializers import (
-    CategorySerializer, ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
-    GroupClassSerializer, GroupClassReviewSerializer, ReportSerializer,
+    CategorySerializer, GroupClassReviewSerializer, GroupClassReviewSerializercreate, ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
+    GroupClassSerializer, ReportSerializer,
     ScheduleSerializer, DiscountSerializer
 )
 from rest_framework.response import Response
@@ -83,13 +83,19 @@ class GroupClassDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.AllowAny]
 class GroupClassReviewListCreateView(generics.ListCreateAPIView):
     queryset = GroupClassReview.objects.all()
-    serializer_class = GroupClassReviewSerializer
     permission_classes = [permissions.AllowAny]
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return GroupClassReviewSerializercreate
+        return GroupClassReviewSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 class GroupClassReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = GroupClassReview.objects.all()
-    serializer_class = GroupClassReviewSerializer
+    serializer_class = GroupClassReviewSerializercreate
     permission_classes = [permissions.AllowAny]
 class ReportListCreateView(generics.ListCreateAPIView):
     queryset = Report.objects.all()
@@ -217,11 +223,11 @@ class BookScheduleView(generics.CreateAPIView):
 
 class AvailableSchedulesView(generics.ListAPIView):
     serializer_class = ScheduleSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Filter schedules for group classes that are visible and upcoming
         return Schedule.objects.filter(
             group_class__status='Visible',
-            date__gte=timezone.now()
+            
         ).order_by('date')
