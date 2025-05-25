@@ -138,13 +138,14 @@ class NotificationUpdateView(generics.UpdateAPIView):
 
 class SentMessageView(generics.ListCreateAPIView):
     serializer_class = ChatSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_user(self):
-        return self.request.data.get('user')
+        return self.request.user
 
     def get_queryset(self):
         user = self.get_user()
-        return Chat.objects.filter(Sender=user) if user else Chat.objects.none()
+        return Chat.objects.filter(Sender=user.id) if user else Chat.objects.none()
     
     def perform_create(self, serializer):
         chat_instance = serializer.save()
