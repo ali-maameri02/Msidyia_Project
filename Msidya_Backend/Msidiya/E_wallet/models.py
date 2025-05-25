@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 User = settings.AUTH_USER_MODEL
 
@@ -53,3 +55,11 @@ class Transaction(models.Model):
         sender = self.sender.username if self.sender else "System"
         receiver = self.receiver.username if self.receiver else "System"
         return f"{self.type.capitalize()} - {self.amount} coins ({sender} → {receiver})"
+
+# Signal to create corresponding role objects based on the role selected
+@receiver(post_save, sender=User)
+def create_role_instance(sender, instance, created, **kwargs):
+    if created:
+        if instance.Role == 'Student':
+            Wallet.objects.create(user=instance,balance=0)
+            
