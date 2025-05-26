@@ -161,9 +161,22 @@ class NotificationSerializer(serializers.ModelSerializer):
 class ChatSerializer(serializers.ModelSerializer):
     sender_username = serializers.CharField(source='Sender.username', read_only=True)
     receiver_username = serializers.CharField(source='Receiver.username', read_only=True)
+    receiver_avatar = serializers.ImageField(source='Receiver.Picture', read_only=True)
+
     class Meta:
         model = Chat
-        fields = ['id', 'Content', 'Sender', 'sender_username', 'Receiver', 'receiver_username', 'Time']
+        fields = [
+            'id',
+            'Content',
+            'Sender',            # Auto-set in view during creation
+            'sender_username',
+            'Receiver',
+            'receiver_username',
+            'receiver_avatar',
+            'Time'
+        ]
+        read_only_fields = ['Sender', 'Time', 'sender_username', 'receiver_username',  'receiver_avatar']
+
 class Ms_WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ms_Seller
@@ -173,3 +186,6 @@ class TutorslistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tutor
         fields = '__all__'
+
+
+

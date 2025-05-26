@@ -1,4 +1,5 @@
 import json
+from django.db.models import F, Q
 import requests
 from rest_framework.response import Response
 from rest_framework import generics
@@ -8,6 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.views import APIView
 from .models import User
 from .serializers import * 
 from rest_framework.permissions import IsAuthenticated
@@ -161,6 +163,57 @@ class SentMessageView(generics.ListCreateAPIView):
             {"detail": "Message sent and notification created."},
             status=status.HTTP_201_CREATED
         )
+# this view will return the latest chat from unique users and 
+# will create a chat between the current logged in user and a sender 
+class ChatListCreateView(generics.ListCreateAPIView):
+    serializer_class = ChatSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Get all messages where the user is either sender or receiver, but exclude self-messages
+        chats = Chat.objects.filter(
+            (Q(Sender=user) | Q(Receiver=user)) & ~Q(Sender=F('Receiver'))
+        ).order_by('-Time')
+
+        latest_by_user = {}
+
+        for chat in chats:
+            # Identify the other user
+            other_user = chat.Receiver if chat.Sender == user else chat.Sender
+
+            # If this is the first time we encounter this user, store the chat (latest due to ordering)
+            if other_user.id not in latest_by_user:
+                latest_by_user[other_user.id] = chat
+
+        return list(latest_by_user.values())
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        chat_instance = serializer.save(Sender=self.request.user)
+
+        Notification.objects.create(
+            User=chat_instance.Receiver,
+            Message=f"New message from {chat_instance.Sender.username}: {chat_instance.Content}")
+
+class ChatBetweenUsersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        current_user = request.user
+        chats = Chat.objects.filter(
+            Q(Sender=current_user, Receiver__id=user_id) |
+            Q(Sender__id=user_id, Receiver=current_user)
+        ).order_by('Time')
+
+        serializer = ChatSerializer(chats, many=True, context={'request': request})
+        return Response(serializer.data)
+            
 
 class TutorList(generics.ListAPIView):
     serializer_class=TutorslistSerializer
@@ -171,4 +224,3 @@ class TutorDetails(generics.RetrieveAPIView):
     queryset=Tutor.objects.all()
     lookup_field = 'pk'
 
-       
