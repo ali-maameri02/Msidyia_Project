@@ -48,10 +48,10 @@ interface Review {
   id: number;
   rating: number;
   comment: string;
-  user?:{
-    id:number;
-    username:string;
-    Picture:string;
+  user?: {
+    id: number;
+    username: string;
+    Picture: string;
   }
   group_class: number;
 }
@@ -166,7 +166,7 @@ const GroupClassDetails: React.FC = () => {
                 <Typography>Grade: {groupClass.grade}</Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography>Price: ${groupClass.price}</Typography>
+                <Typography>Amount: {groupClass.price}</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography>Category: {groupClass.category.name}</Typography>
@@ -174,7 +174,7 @@ const GroupClassDetails: React.FC = () => {
               <Grid item xs={6}>
                 <Typography>Type: {groupClass.class_type}</Typography>
               </Grid>
-              
+
             </Grid>
 
             <Divider sx={{ my: 2 }} />
@@ -193,7 +193,7 @@ const GroupClassDetails: React.FC = () => {
                       <Typography variant="body2">
                         Topic: {schedule.topic?.name || "No Topic"}
                       </Typography>
-                   
+
                     </Card>
                   </Grid>
                 ))
@@ -212,15 +212,15 @@ const GroupClassDetails: React.FC = () => {
               reviews.map((review) => (
                 <Box key={review.id} sx={{ mb: 2 }}>
                   <div className="content flex flex-row justify-between items-start">
-                  <div className="left flex flex-row items-start">
-                  <img className="rounded-full w-12 h-12" src={review.user?.Picture}alt="" />
-                  <Typography variant="caption"> {review.user?.username}</Typography>
-                  </div>
-                 <div className="right flex flex-col items-end w-full">
-                 <Rating value={review.rating} readOnly precision={0.5} size="small" />
-                 <Typography variant="body2" className="bg-gray-100 w-full rounded-lg p-2">{review.comment}</Typography>
+                    <div className="left flex flex-row items-start">
+                      <img className="rounded-full w-12 h-12" src={review.user?.Picture} alt="" />
+                      <Typography variant="caption"> {review.user?.username}</Typography>
+                    </div>
+                    <div className="right flex flex-col items-end w-full">
+                      <Rating value={review.rating} readOnly precision={0.5} size="small" />
+                      <Typography variant="body2" className="bg-gray-100 w-full rounded-lg p-2">{review.comment}</Typography>
 
-                 </div>
+                    </div>
                   </div>
 
                 </Box>

@@ -12,13 +12,15 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   removeFromCart: (itemId: number) => void;
   clearCart: () => void;
+  totalPrice: number;
 }
 
 const CartContext = createContext<CartContextType>({
   cartItems: [],
-  addToCart: () => {},
-  removeFromCart: () => {},
-  clearCart: () => {},
+  addToCart: () => { },
+  removeFromCart: () => { },
+  clearCart: () => { },
+  totalPrice: 0,
 });
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
@@ -27,10 +29,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const storedCart = localStorage.getItem("cart");
     return storedCart ? JSON.parse(storedCart) : [];
   });
+  const [totalPrice, setTotalPrice] = useState(0)
 
   // Save cartItems to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
+    setTotalPrice(cartItems.reduce((acc, item) => acc + item.price, 0))
   }, [cartItems]);
 
   // Add an item to the cart
@@ -65,7 +69,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, totalPrice }}>
       {children}
     </CartContext.Provider>
   );

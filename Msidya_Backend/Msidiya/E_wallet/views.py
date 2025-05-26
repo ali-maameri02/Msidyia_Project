@@ -1,5 +1,7 @@
 from rest_framework import viewsets, permissions
 from django.db.models import Q
+from decimal import Decimal 
+from Group_Class.models import GroupClass
 from .models import Wallet, Payment, Transaction
 from .serializers import WalletSerializer, PaymentSerializer, TransactionSerializer
 from rest_framework.decorators import api_view, permission_classes
@@ -12,6 +14,21 @@ from django.shortcuts import get_object_or_404
 import requests
 import json
 from Account.models import User
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.db import transaction as db_transaction
+from django.utils import timezone # For potential enrollment date logging
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import Wallet, Transaction
+from .serializers import EnrollClassListSerializer
+
+User = get_user_model()
 
 
 import hashlib
@@ -123,37 +140,91 @@ def Chargily_webhook(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def enroll_class(request):
-    print(request.data)
     student = request.user
-    class_fee = request.data['class_fee']  
-    tutor_id = request.data['tutor_id']  
-    tutor = get_object_or_404(User, pk=tutor_id)
-    with db_transaction.atomic():
-        # 1) Withdraw from student
-        s_wallet = Wallet.objects.select_for_update().get(user=student )
-        print("hiiiiiiiiiii")
-        if s_wallet.balance < class_fee:
-            return JsonResponse({"error":"Insufficient coins"}, 400)
-        s_wallet.balance -= class_fee
+    serializer = EnrollClassListSerializer(data=request.data)
 
-        s_wallet.save()
-        print("PRRRRRRRRRRRRRRRRRRRRRRRRRR")
-        # 2) Deposit to tutor
-        t_wallet = Wallet.objects.select_for_update().get(user=tutor )
-        t_wallet.balance += class_fee
-        t_wallet.save()
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # 3) Log it 
-        Transaction.objects.create(
-            sender=student,
-            receiver=tutor,
-            amount=class_fee,
-            type='enroll',
-            note=f"Enrollment in class {request.data['tutor_id']}"
-        )
+    validated_items_data = serializer.validated_data['items']
+     
+    classes_to_process = []
+    total_fee_due = Decimal('0.00') # <--- CHANGED: Initialize as Decimal
+     
+    for item_data in validated_items_data:
+        class_id = item_data['class_id']
+        try:
+            group_class = GroupClass.objects.get(pk=class_id) 
+            
+            # Serializer should have already validated type and status.
+            # You can keep the commented checks as an additional safeguard if desired.
 
-    # then your existing class‐registration logic…
-    return JsonResponse({"message":"Enrolled!"})
+            classes_to_process.append({
+                'class_instance': group_class,
+                'fee': group_class.price, # This is already a Decimal
+                'tutor': group_class.tutor
+            })
+            total_fee_due += group_class.price # Decimal + Decimal is fine
+        except GroupClass.DoesNotExist:
+            return Response({"error": f"Class with ID {class_id} not found during processing."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        with db_transaction.atomic():
+            student_wallet = Wallet.objects.select_for_update().get(user=student)
+
+            # student_wallet.balance is Decimal, total_fee_due is Decimal
+            if student_wallet.balance < total_fee_due:
+                return Response({
+                    "error": "Insufficient coins to enroll in all selected classes.",
+                    "detail": f"Required: {total_fee_due:.2f}, Available: {student_wallet.balance:.2f}. Please top up your wallet."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            student_wallet.balance -= total_fee_due # Decimal - Decimal is fine
+            student_wallet.save()
+
+            successful_enrollments_info = []
+            for class_data in classes_to_process:
+                group_class = class_data['class_instance']
+                class_fee = class_data['fee'] # This is Decimal
+                tutor = class_data['tutor']
+                 
+                tutor_wallet, _ = Wallet.objects.select_for_update().get_or_create(
+                    user=tutor, 
+                    defaults={'balance': Decimal('0.00')} # <--- CHANGED: Use Decimal for default
+                )
+                # tutor_wallet.balance is now guaranteed to be Decimal
+                tutor_wallet.balance += class_fee # Decimal + Decimal is fine
+                tutor_wallet.save()
+
+                Transaction.objects.create(
+                    sender=student,
+                    receiver=tutor,
+                    amount=class_fee, # Pass the Decimal value
+                    type='enroll',
+                    note=f"Enrollment in class '{group_class.title}' (ID: {group_class.id}) by {student.username} for {tutor.username}."
+                )
+                 
+                # --- Actual Class Enrollment Logic ---
+                # (Your existing placeholder)
+                # -------------------------------------
+                 
+                successful_enrollments_info.append({
+                    "class_id": group_class.id,
+                    "title": group_class.title,
+                    "fee_paid": class_fee # This will be a Decimal
+                })
+                 
+        return Response({
+            "message": f"Successfully enrolled in {len(successful_enrollments_info)} class(es).",
+            "enrollments": successful_enrollments_info
+        }, status=status.HTTP_200_OK)
+
+    except Wallet.DoesNotExist:
+        return Response({"error": "Student wallet not found. Please contact support."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        print(f"Error during enrollment transaction: {str(e)}") 
+        return Response({"error": "An unexpected error occurred during the enrollment process. The transaction has been rolled back."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['POST'])
