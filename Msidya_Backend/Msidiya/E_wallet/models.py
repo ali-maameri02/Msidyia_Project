@@ -60,6 +60,5 @@ class Transaction(models.Model):
 @receiver(post_save, sender=User)
 def create_role_instance(sender, instance, created, **kwargs):
     if created:
-        if instance.Role == 'Student':
-            Wallet.objects.create(user=instance,balance=0)
+        Wallet.objects.create(user=instance,balance=0)
             
