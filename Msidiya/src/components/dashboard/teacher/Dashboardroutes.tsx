@@ -43,6 +43,19 @@ const DashboardRoutes: React.FC = () => {
         <main className="flex-1 p-4 overflow-y-scroll w-100">
           <Routes>
             <Route path="teacher" element={<Teacher />} />
+            <Route path="teacher/group-classes" element={<Groupclasses />} />
+            <Route path="teacher/group-classes/reviews" element={<GroupClassReviews />} />
+            <Route path="teacher/group-classes/add" element={<AddGroupClass />} />
+            <Route path="teacher/group-classes/update/:id" element={<Updategroupclasse />} />
+            <Route path="teacher/set-categories" element={<Setcategories />} />
+            <Route path="teacher/profile" element={<UserProfile />} />
+            <Route path="teacher/payout" element={<PayoutComponent />} /> {/* teacher payoutA*/}
+            <Route path="teacher/messages" element={<Messages />} /> 
+            <Route path="teacher/notifications" element={<Notification />} />
+            {/* Pass transactions as a prop here */}
+            <Route path="teacher/course-transactions" element={<Transactions transactions={mockTransactions} />} />
+            <Route path="teacher/upcoming-appointments" element={<UpcomingAppointments />} />
+            <Route path="teacher/group-class-transactions" element={<GroupClassesTransaction />} /> {/*  group class trans*/}
           </Routes>
         </main>
       </div>

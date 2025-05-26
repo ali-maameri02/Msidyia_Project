@@ -40,7 +40,7 @@ const DashboardRoutes: React.FC = () => {
             <Route path="student/My-Transaction" element={<MyTransaction/>}  />
             <Route path="student/Refund-Request" element={<RefundRequest/>}  />
             <Route path="student/Notification" element={<Notification/>} />
-            <Route path="student/Messages" element={<Messages/>} />
+            <Route path="student/messages" element={<Messages/>} />
             <Route path="student/Shopping-Cart" element={<CartPage/>} />
 
             {/* Uncomment these as needed */}
