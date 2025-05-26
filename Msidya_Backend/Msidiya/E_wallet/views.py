@@ -19,7 +19,7 @@ import hmac
 from django.views.decorators.http import require_POST
 
 # Your Chargily Pay Secret key, will be used to calculate the Signature
-api_secret_key = 'test_sk_oqQbwAEfHjhC5p36EJPQnUAO7KEA8ydDs3pUZiTS'
+api_secret_key = 'test_sk_qSQ8o3Aa1HRlU5pWrO6lOUT1RnoqG7JyQ629mRRV'
 
 
 
@@ -34,7 +34,7 @@ def initiate_payment(request):
         "amount": amount,
         "currency": "dzd",
         "description": str(user.id),  # So you get it back in webhook
-        "success_url": "http://127.0.0.1:8000/api/e_wallet/webhook",
+        "success_url": "http://localhost:5173/",
 
 
     }
@@ -92,7 +92,7 @@ def Chargily_webhook(request):
             user_id=user_id,
             amount=amount,
             successful=True,
-            coins_purchased=amount * 0.1, 
+            coins_purchased=amount , 
             gateway=payment_method,
             gateway_transaction_id=checkout['id']
         )
@@ -100,7 +100,7 @@ def Chargily_webhook(request):
         with db_transaction.atomic():
         # 1) Credit the user’s wallet
             wallet = Wallet.objects.select_for_update().get(user_id=user_id)
-            wallet.balance +=Decimal( amount * 0.1)
+            wallet.balance +=Decimal( amount  )
             wallet.save()
 
             # 2) Log the “purchase” transaction

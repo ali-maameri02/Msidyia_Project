@@ -84,7 +84,7 @@ const NavBar: React.FC = () => {
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
-    setAmount(value >= 50 ? value : 50);
+    setAmount(value >= 1 ? value : 50);
     setError(""); // Clear error when user changes amount
   };
 
@@ -592,7 +592,7 @@ const NavBar: React.FC = () => {
                 variant="outlined"
                 inputProps={{
                   min: 50,
-                  step: 0.01
+                  step: 1
                 }}
                 helperText="Enter the amount you want to add to your wallet"
                 error={!!error}
