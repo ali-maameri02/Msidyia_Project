@@ -116,7 +116,9 @@ def Chargily_webhook(request):
         print("✅ Payment saved!")
         with db_transaction.atomic():
         # 1) Credit the user’s wallet
-            wallet = Wallet.objects.select_for_update().get(user_id=user_id)
+            wallet, created = Wallet.objects.select_for_update().get_or_create(
+                user_id=user_id,
+            )
             wallet.balance +=Decimal( amount  )
             wallet.save()
 

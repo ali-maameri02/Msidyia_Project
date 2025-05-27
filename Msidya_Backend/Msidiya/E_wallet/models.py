@@ -3,12 +3,13 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from decimal import Decimal
 
 User = settings.AUTH_USER_MODEL
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
 
     def __str__(self):
         return f"{self.user.username}'s Wallet - {self.balance} coins"
@@ -60,5 +61,4 @@ class Transaction(models.Model):
 @receiver(post_save, sender=User)
 def create_role_instance(sender, instance, created, **kwargs):
     if created:
-        Wallet.objects.create(user=instance,balance=0)
-            
+        Wallet.objects.create(user=instance,balance=Decimal('0.00'))
