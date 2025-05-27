@@ -1,61 +1,71 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getLatestMessages, getMessagesBetweenus, sendMessageToUser, IMessage } from '../../../services/chat.service'; // Update this import path
 
-// Mock API functions - replace these with your actual API calls
-const fetchUsers = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return [
-    { id: 1, name: "Dr. Hello", avatar: "https://i.pravatar.cc/150?img=1", lastMessage: "Hi, how are you? I wish you...", time: "18:30", unreadCount: 2, lastSeen: "5 mins ago" },
-    { id: 2, name: "David Moore", avatar: "https://i.pravatar.cc/150?img=6", lastMessage: "OMG 😂 do you remember what you did...", time: "18:16", unreadCount: 0, lastSeen: "2 mins ago" },
-    { id: 3, name: "Sarah Wilson", avatar: "https://i.pravatar.cc/150?img=3", lastMessage: "See you tomorrow!", time: "17:45", unreadCount: 1, lastSeen: "10 mins ago" },
-    { id: 4, name: "Mike Johnson", avatar: "https://i.pravatar.cc/150?img=4", lastMessage: "Thanks for the help", time: "16:20", unreadCount: 0, lastSeen: "1 hour ago" },
-    { id: 5, name: "Emma Davis", avatar: "https://i.pravatar.cc/150?img=5", lastMessage: "Let's meet for coffee", time: "15:30", unreadCount: 3, lastSeen: "30 mins ago" },
-  ];
-};
+// Interface for your API
+interface ICreateMessageDTO {
+  Content: string;
+  Receiver: number;
+}
 
-const fetchMessages = async (userId) => {
-  // Simulate API delay
+// Extended message interface for UI state
+interface IExtendedMessage extends IMessage {
+  isOwn?: boolean;
+  isOptimistic?: boolean;
+}
+
+interface IUser {
+  id: number;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  time: string;
+  lastSeen: string;
+  unreadCount: number;
+}
+
+// Mock function for users - replace with your actual user fetching service
+const fetchUsers = async (): Promise<IUser[]> => {
+  // This should be replaced with your actual user fetching API call
   await new Promise(resolve => setTimeout(resolve, 300));
 
-  const mockMessages = {
-    2: [
-      { id: 1, senderId: 2, receiverId: 'currentUser', content: "OMG 😂 do you remember what you did last night at the work night out?", timestamp: "18:12", isOwn: false },
-      { id: 2, senderId: 'currentUser', receiverId: 2, content: "no haha 😂", timestamp: "18:16", isOwn: true },
-      { id: 3, senderId: 2, receiverId: 'currentUser', content: "i don't remember anything 😂", timestamp: "18:16", isOwn: false },
-    ],
-    1: [
-      { id: 4, senderId: 1, receiverId: 'currentUser', content: "Hi, how are you? I wish you all the best!", timestamp: "18:30", isOwn: false },
-    ],
-    3: [
-      { id: 5, senderId: 3, receiverId: 'currentUser', content: "See you tomorrow!", timestamp: "17:45", isOwn: false },
-    ]
-  };
-
-  return mockMessages[userId] || [];
-};
-
-const sendMessage = async ({ receiverId, content }) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
-
-  const newMessage = {
-    id: Date.now(),
-    senderId: 'currentUser',
-    receiverId,
-    content,
-    timestamp: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-    isOwn: true
-  };
-
-  return newMessage;
+  return [
+    {
+      id: 1,
+      name: "Alice Johnson",
+      avatar: "https://i.pravatar.cc/150?img=1",
+      lastMessage: "Hi, how are you? I wish you all the best!",
+      time: "18:30",
+      lastSeen: "2 hours ago",
+      unreadCount: 1
+    },
+    {
+      id: 2,
+      name: "Bob Smith",
+      avatar: "https://i.pravatar.cc/150?img=2",
+      lastMessage: "i don't remember anything 😂",
+      time: "18:16",
+      lastSeen: "30 minutes ago",
+      unreadCount: 2
+    },
+    {
+      id: 3,
+      name: "Carol Davis",
+      avatar: "https://i.pravatar.cc/150?img=3",
+      lastMessage: "See you tomorrow!",
+      time: "17:45",
+      lastSeen: "1 hour ago",
+      unreadCount: 0
+    }
+  ];
 };
 
 export default function Messages() {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(2);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<number>(1); // You should get this from your auth context
 
   const queryClient = useQueryClient();
 
@@ -67,38 +77,66 @@ export default function Messages() {
     staleTime: 0,
   });
 
-  // Fetch messages for selected user
-  const { data: messages = [], isLoading: messagesLoading } = useQuery({
+  // Fetch latest messages (for sidebar preview)
+  const { data: latestMessages = [], isLoading: latestMessagesLoading } = useQuery({
+    queryKey: ['latestMessages'],
+    queryFn: getLatestMessages,
+    refetchInterval: 3000 * 20, // 3 seconds for live updates
+    staleTime: 0,
+  });
+
+  // Fetch messages between current user and selected user
+  const { data: rawMessages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ['messages', selectedUserId],
-    queryFn: () => fetchMessages(selectedUserId),
+    queryFn: () => getMessagesBetweenus(selectedUserId!),
     enabled: !!selectedUserId,
     refetchInterval: 3000, // 3 seconds for live updates
     staleTime: 0,
   });
+  console.log("raw messages ======== ", rawMessages)
+
+  // Transform messages to include isOwn property
+  const messages: IExtendedMessage[] = useMemo(() => {
+    return rawMessages.map(msg => ({
+      ...msg,
+      isOwn: msg.Sender === currentUserId
+    }));
+  }, [rawMessages, currentUserId]);
+  console.log("the messages =======", messages)
+
+  useEffect(() => {
+    if (latestMessages && latestMessages.length > 0)
+      setCurrentUserId(latestMessages[0].Sender)
+
+  }, [latestMessages])
+
 
   // Send message mutation with optimistic updates
   const sendMessageMutation = useMutation({
-    mutationFn: sendMessage,
-    onMutate: async ({ receiverId, content }) => {
+    mutationFn: (data: ICreateMessageDTO) => sendMessageToUser(data),
+    onMutate: async ({ Receiver, Content }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['messages', receiverId] });
+      await queryClient.cancelQueries({ queryKey: ['messages', Receiver] });
 
       // Snapshot previous value
-      const previousMessages = queryClient.getQueryData(['messages', receiverId]);
+      const previousMessages = queryClient.getQueryData(['messages', Receiver]);
 
       // Optimistically update
-      const optimisticMessage = {
-        id: Date.now(),
-        senderId: 'currentUser',
-        receiverId,
-        content,
-        timestamp: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      const optimisticMessage: IExtendedMessage = {
+        id: Math.random() * 1000,
+        sender_username: "You", // You should get this from your auth context
+        receiver_username: selectedUser?.name || "",
+        receiver_avatar: selectedUser?.avatar || null,
+        Sender: currentUserId,
+        Receiver,
+        Content,
+        Time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
         isOwn: true,
         isOptimistic: true
       };
 
-      queryClient.setQueryData(['messages', receiverId], old => [
-        ...(old || []),
+      queryClient.setQueryData(['messages', Receiver], (old: IMessage[] = []) => [
+        ...old,
         optimisticMessage
       ]);
 
@@ -107,44 +145,39 @@ export default function Messages() {
     onError: (err, variables, context) => {
       // Rollback on error
       if (context?.previousMessages) {
-        queryClient.setQueryData(['messages', variables.receiverId], context.previousMessages);
+        queryClient.setQueryData(['messages', variables.Receiver], context.previousMessages);
       }
     },
     onSettled: () => {
       // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: ['messages', selectedUserId] });
+      queryClient.invalidateQueries({ queryKey: ['latestMessages'] });
     },
   });
 
   // Filter users based on search query
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return users;
-    return users.filter(user =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [users, searchQuery]);
 
   // Get selected user info
-  const selectedUser = users.find(user => user.id === selectedUserId);
+  const selectedUser = latestMessages.find(msg => msg.Receiver === selectedUserId);
 
   // Handle sending the message
   const handleSend = () => {
     if (message.trim() && selectedUserId) {
       sendMessageMutation.mutate({
-        receiverId: selectedUserId,
-        content: message.trim()
+        Receiver: selectedUserId,
+        Content: message.trim()
       });
       setMessage(""); // Clear the input field
     }
   };
 
   // Handle emoji selection
-  const handleEmojiClick = (emojiData) => {
+  const handleEmojiClick = (emojiData: { emoji: string }) => {
     setMessage((prevMessage) => prevMessage + emojiData.emoji);
   };
 
   // Handle Enter key press
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -166,44 +199,39 @@ export default function Messages() {
         </div>
 
         {/* Loading state */}
-        {usersLoading && (
+        {latestMessagesLoading && (
           <div className="p-4 text-center text-gray-500">Loading users...</div>
         )}
 
         {/* Chat Items */}
         <div className="space-y-2">
-          {filteredUsers.map((user) => (
+          {latestMessages.map((msg) => (
             <div
-              key={user.id}
-              onClick={() => setSelectedUserId(user.id)}
-              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-blue-50 border-r-4 border-blue-500' : ''
+              key={msg.id}
+              onClick={() => setSelectedUserId(msg.Receiver)}
+              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${selectedUserId === msg.Sender ? 'bg-blue-50 border-r-4 border-blue-500' : ''
                 }`}
             >
               <img
                 alt="User Avatar"
-                src={user.avatar}
+                src={msg.receiver_avatar ?? ""}
                 className="w-12 h-12 rounded-full mr-4"
               />
               <div className="flex-1">
-                <p className="font-bold text-sm">{user.name}</p>
+                <p className="font-bold text-sm">{msg.receiver_username}</p>
                 <p className="text-xs text-gray-500 truncate">
-                  {user.lastMessage}
+                  {msg.Content}
                 </p>
               </div>
               <div className="flex flex-col items-end space-y-1">
-                <p className="text-xs text-gray-500">{user.time}</p>
-                {user.unreadCount > 0 && (
-                  <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                    {user.unreadCount}
-                  </span>
-                )}
+                <p className="text-xs text-gray-500">{msg.Time}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* No results */}
-        {!usersLoading && filteredUsers.length === 0 && (
+        {!latestMessagesLoading && latestMessages && latestMessages.length === 0 && (
           <div className="p-4 text-center text-gray-500">
             {searchQuery ? 'No users found' : 'No users available'}
           </div>
@@ -235,12 +263,12 @@ export default function Messages() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'} items-end`}>
+                  {messages.map((msg, index) => (
+                    <div key={`${msg.Sender}-${msg.Receiver}-${index}`} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'} items-end`}>
                       {!msg.isOwn && (
                         <img
                           alt="User Avatar"
-                          src={selectedUser.avatar}
+                          src={msg.receiver_avatar || selectedUser?.avatar || "https://i.pravatar.cc/150?img=1"}
                           className="w-8 h-8 rounded-full mr-2"
                         />
                       )}
@@ -248,10 +276,10 @@ export default function Messages() {
                         ? `bg-blue-500 text-white ${msg.isOptimistic ? 'opacity-70' : ''}`
                         : 'bg-gray-100'
                         }`}>
-                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-sm">{msg.Content}</p>
                         <div className="flex items-center space-x-2 mt-1">
                           <span className={`text-xs ${msg.isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
-                            {msg.timestamp}
+                            {msg.Time}
                           </span>
                           {msg.isOwn && (
                             <div className="flex space-x-1">
