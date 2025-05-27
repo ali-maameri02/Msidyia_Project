@@ -43,14 +43,14 @@ const GroupClasses = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Cart context
-  const { addToCart } = useCart();
+  const { addToCart, inCart } = useCart();
 
   // State for filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTutor, setSelectedTutor] = useState('');
   const [minRating, setMinRating] = useState<number | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]); // Price range state
-const navigate = useNavigate()
+  const navigate = useNavigate()
   // Fetch group classes, reviews, and tutors from the Django backend
   useEffect(() => {
     const fetchData = async () => {
@@ -220,7 +220,7 @@ const navigate = useNavigate()
                   className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer"
                   onClick={() => navigate(`/group-class/${groupClass.id}`)}
 
-             >
+                >
                   {/* Main Image */}
                   <img
                     src={groupClass.main_image}
@@ -247,7 +247,8 @@ const navigate = useNavigate()
 
                     {/* Book Now Button */}
                     <button
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation()
                         addToCart({
                           id: groupClass.id,
                           title: groupClass.title,
@@ -255,9 +256,10 @@ const navigate = useNavigate()
                           main_image: groupClass.main_image,
                         })
                       }
-                      className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
+                      }
+                      className={`mt-4 w-full ${inCart(groupClass.id) ? "bg-red-500" : "bg-blue-500"} text-white py-2 rounded hover:bg-blue-600 transition-colors`}
                     >
-                      Book Now
+                      {inCart(groupClass.id) ? "Remove" : "Book Now"}
                     </button>
                   </div>
                 </div>
@@ -265,7 +267,7 @@ const navigate = useNavigate()
             })}
           </div>
         </div>
-      </div>
+      </div >
 
       <Footer />
     </>

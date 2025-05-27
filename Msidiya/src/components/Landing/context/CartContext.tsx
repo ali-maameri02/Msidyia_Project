@@ -13,6 +13,7 @@ interface CartContextType {
   removeFromCart: (itemId: number) => void;
   clearCart: () => void;
   totalPrice: number;
+  inCart: (id: number) => boolean;
 }
 
 const CartContext = createContext<CartContextType>({
@@ -21,6 +22,7 @@ const CartContext = createContext<CartContextType>({
   removeFromCart: () => { },
   clearCart: () => { },
   totalPrice: 0,
+  inCart: (id: number) => false,
 });
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
@@ -30,6 +32,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return storedCart ? JSON.parse(storedCart) : [];
   });
   const [totalPrice, setTotalPrice] = useState(0)
+
+  const inCart = (id: number): boolean => {
+    return cartItems.some(item => item.id == id)
+  }
 
   // Save cartItems to localStorage whenever it changes
   useEffect(() => {
@@ -51,7 +57,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       // Check if the item already exists in the cart
       const existingItem = prev.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
-        return prev; // Do not add duplicates
+        return prev.filter(i => i.id != item.id); // Do not add duplicates
       } else {
         return [...prev, item];
       }
@@ -69,7 +75,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, totalPrice }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, totalPrice, inCart }}>
       {children}
     </CartContext.Provider>
   );
