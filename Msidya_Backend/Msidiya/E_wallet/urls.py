@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import WalletViewSet, PaymentViewSet, TransactionViewSet, Chargily_webhook, initiate_payment, enroll_class, transfer_coins, request_refund
+from .views import WalletViewSet, PaymentViewSet, TransactionViewSet, Chargily_webhook, initiate_payment, enroll_class, transfer_coins, request_refund,group_class_transactions,group_class_transactions_stats
 
 urlpatterns = [
     # Wallet URLs (ReadOnly)
@@ -20,6 +20,8 @@ urlpatterns = [
     path('transactions/enroll_class/', enroll_class, name='enroll_class'),
     path('transactions/transfer_coins/', transfer_coins, name='transfer_coins'),
     path('transactions/request_refund/', request_refund, name='request_refund'),
+    path('group-class-transactions/', group_class_transactions, name='group_class_transactions'),
+    path('group-class-transactions/stats/', group_class_transactions_stats, name='group_class_transactions_stats'),
 
     # Chargily URLs Webhook
     path('webhook', Chargily_webhook, name='chargily_webhook'),

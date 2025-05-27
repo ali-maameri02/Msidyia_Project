@@ -40,6 +40,52 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 
+
+class GroupClassTransactionSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    course_name = serializers.SerializerMethodField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='amount')
+    earnings = serializers.SerializerMethodField()
+    created_on = serializers.DateTimeField(source='created_at', format='%b %d, %Y')
+    
+    class Meta:
+        model = Transaction
+        fields = [
+            'id',
+            'user_name',
+            'course_name', 
+            'price',
+            'earnings',
+            'created_on',
+            'note'
+        ]
+    
+    def get_user_name(self, obj):
+        """Return the student's name who enrolled in the class"""
+        if obj.sender:
+            return obj.sender.username
+        return "Unknown Student"
+    
+    def get_course_name(self, obj):
+        """Extract course name from the transaction note"""
+        if obj.note and "Enrollment in class" in obj.note:
+            try:
+                start = obj.note.find("'") + 1
+                end = obj.note.find("'", start)
+                if start > 0 and end > start:
+                    return obj.note[start:end]
+            except:
+                pass
+        return "Unknown Course"
+    
+    def get_earnings(self, obj):
+        """Calculate earnings (assuming some commission or fee structure)"""
+        # You can modify this logic based on your business rules
+        # For now, I'm assuming earnings = 90% of the price (10% platform fee)
+        earnings_percentage = 0.9
+        return round(obj.amount * earnings_percentage, 2)
+
+
 class EnrollClassItemSerializer(serializers.Serializer):
     class_id = serializers.IntegerField(min_value=1)
 

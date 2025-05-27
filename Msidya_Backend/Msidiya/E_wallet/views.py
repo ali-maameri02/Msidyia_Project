@@ -1,3 +1,4 @@
+from asyncio import wait
 from rest_framework import viewsets, permissions
 from django.db.models import Q
 from decimal import Decimal 
@@ -26,7 +27,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Wallet, Transaction
-from .serializers import EnrollClassListSerializer
+from .serializers import EnrollClassListSerializer,GroupClassTransactionSerializer
 
 User = get_user_model()
 
@@ -328,3 +329,77 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
         return Transaction.objects.filter(
             Q(sender=user) | Q(receiver=user)
         ).order_by('-created_at')
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_class_transactions(request):
+    """
+    Returns transactions related to group class enrollments for the authenticated teacher.
+    Only shows 'enroll' type transactions where the teacher is the receiver.
+    """
+    teacher = request.user
+    
+    search_query = request.GET.get('search', '').strip()
+    
+    queryset = Transaction.objects.filter(
+        receiver=teacher,
+        type='enroll'
+    ).order_by('-created_at')
+    
+    if search_query:
+        queryset = queryset.filter(
+            Q(sender__username__icontains=search_query) |
+            Q(note__icontains=search_query)
+        )
+    
+    serializer = GroupClassTransactionSerializer(queryset, many=True)
+    
+    return Response({
+        'success': True,
+        'data': serializer.data,
+        'total_count': queryset.count()
+    }, status=status.HTTP_200_OK)
+
+
+# Returns statistics for the teacher's group class transactions.
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_class_transactions_stats(request):
+    teacher = request.user
+    
+    # Get all enrollment transactions for this teacher
+    transactions = Transaction.objects.filter(
+        receiver=teacher,
+        type='enroll'
+    )
+    
+    # Calculate statistics
+    total_transactions = transactions.count()
+    total_revenue = sum(transaction.amount for transaction in transactions)
+    total_earnings = total_revenue * 0.9  # Assuming 10% platform fee
+    
+    # Get monthly breakdown (you can expand this as needed)
+    from django.db.models import Count, Sum
+    from django.utils import timezone
+    from datetime import datetime, timedelta
+    
+    # Last 6 months data
+    six_months_ago = timezone.now() - timedelta(days=180)
+    monthly_stats = transactions.filter(
+        created_at__gte=six_months_ago
+    ).extra(
+        select={'month': "DATE_FORMAT(created_at, '%%Y-%%m')"}
+    ).values('month').annotate(
+        count=Count('id'),
+        revenue=Sum('amount')
+    ).order_by('month')
+    
+    return Response({
+        'success': True,
+        'stats': {
+            'total_transactions': total_transactions,
+            'total_revenue': float(total_revenue),
+            'total_earnings': float(total_earnings),
+            'monthly_breakdown': list(monthly_stats)
+            }},status=status.HTTP_200_OK)
