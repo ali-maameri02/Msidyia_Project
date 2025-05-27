@@ -22,29 +22,28 @@ const DashboardRoutes: React.FC = () => {
   };
   return (
     <div className="flex flex-col lg:flex-row h-screen">
-    <SidebarApp isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-    <div
-      className={`flex-1 flex flex-col transition-all duration-300 ${
-        isSidebarOpen ? "ml-64" : "ml-0"
-      }`}
-    >
-      <Navbar />
-      <main className="flex-1 p-4 overflow-y-scroll w-100"> <Routes>
-            <Route path="student" element={<Student />} />
-            <Route path="student/profile" element={<UserProfile />} />
-            <Route path="student/Upcoming-Appointments" element={<UpcomingAppointments />} />
-            <Route path="student/Favorite-tutor" element={<FavoriteTutor />} />
-            <Route path="student/Favorite-Groupe-Class" element={<FavoriteGroupeClass/>}/> 
-            <Route path="student/Favorite-Course" element={<FavoriteCourse/>} />
-            <Route path="student/My-Courses" element={<MyCourses/>}/>
-            <Route path="student/My-Transaction" element={<MyTransaction/>}  />
-            <Route path="student/Refund-Request" element={<RefundRequest/>}  />
-            <Route path="student/Notification" element={<Notification/>} />
-            <Route path="student/messages" element={<Messages/>} />
-            <Route path="student/Shopping-Cart" element={<CartPage/>} />
+      <SidebarApp isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"
+          }`}
+      >
+        <Navbar />
+        <main className="flex-1 p-4 overflow-y-scroll w-100"> <Routes>
+          <Route path="student" element={<Student />} />
+          <Route path="student/profile" element={<UserProfile />} />
+          <Route path="student/Upcoming-Appointments" element={<UpcomingAppointments />} />
+          <Route path="student/Favorite-tutor" element={<FavoriteTutor />} />
+          <Route path="student/Favorite-Groupe-Class" element={<FavoriteGroupeClass />} />
+          <Route path="student/Favorite-Course" element={<FavoriteCourse />} />
+          <Route path="student/My-Courses" element={<MyCourses />} />
+          <Route path="student/My-Transaction" element={<MyTransaction />} />
+          <Route path="student/Refund-Request" element={<RefundRequest />} />
+          <Route path="student/Notification" element={<Notification />} />
+          <Route path="student/messages" element={<Messages />} />
+          <Route path="student/Shopping-Cart" element={<CartPage />} />
 
-            {/* Uncomment these as needed */}
-            {/* <Route path="student/set-price" element={<SetPrice />} />
+          {/* Uncomment these as needed */}
+          {/* <Route path="student/set-price" element={<SetPrice />} />
             <Route path="student/group-classes" element={<GroupClasses />} />
             <Route path="student/set-availability" element={<SetAvailability />} />
             <Route path="student/courses-manager" element={<CoursesManager />} />
@@ -53,7 +52,7 @@ const DashboardRoutes: React.FC = () => {
             <Route path="student/coupons-manager" element={<CouponsManager />} />
             <Route path="student/payment" element={<Payment />} />
             <Route path="student/payout" element={<Payout />} /> */}
-          </Routes>
+        </Routes>
         </main>
       </div>
     </div>
