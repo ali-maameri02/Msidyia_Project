@@ -1,11 +1,24 @@
 from rest_framework import serializers
 from .models import Chat, Language, Notification, Qualification, Transaction, User, Tutor, Student, Ms_Seller
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'Role',
+            'Gender',
+            'Phone_number',
+            'Paypal_Email',
+            'Address',
+            'Zip_code',
+            'Picture',
+        ]
+        read_only_fields = ['id', 'username', 'email', 'Role', 'Picture']
         
         
 class UserregisterSerializer(serializers.ModelSerializer):

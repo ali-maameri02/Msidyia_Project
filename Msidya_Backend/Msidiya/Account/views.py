@@ -35,6 +35,12 @@ class RegisterUserView(generics.CreateAPIView):
             # print("Serializer errors:")
             # print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class CurrentUserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
             
 @api_view(['POST'])
 def user_login(request):
