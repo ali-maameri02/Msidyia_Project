@@ -184,6 +184,8 @@ class UserChatHistoryView(generics.ListCreateAPIView):
         current_user = self.request.user
         query = self.request.query_params.get('q', None)
 
+        # Subquery to get the latest chat information for a given user (OuterRef('pk'))
+        # with the current_user
         latest_chat_subquery = Chat.objects.filter(
             (Q(Sender=OuterRef('pk'), Receiver=current_user) | 
              Q(Sender=current_user, Receiver=OuterRef('pk')))
@@ -195,6 +197,9 @@ class UserChatHistoryView(generics.ListCreateAPIView):
                 Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
                 # Add other searchable fields if necessary
             ).exclude(pk=current_user.pk).distinct()
+            print("---------------------")
+            print(users_queryset)
+            print("---------------------")
             
             users_queryset = users_queryset.annotate(
                 last_message=Subquery(latest_chat_subquery.values('Content')[:1]),
@@ -229,7 +234,7 @@ class UserChatHistoryView(generics.ListCreateAPIView):
             return users_queryset.filter(last_message_time__isnull=False).order_by('-last_message_time', 'username')
 
     def perform_create(self, serializer):
-       receiver = serializer.validated_data.get('Receiver')
+        receiver = serializer.validated_data.get('Receiver')
         if receiver == self.request.user:
             raise serializers.ValidationError({"Receiver": "You cannot send a message to yourself."})
 
@@ -240,8 +245,10 @@ class UserChatHistoryView(generics.ListCreateAPIView):
             Notification.objects.create(
                 User=chat_instance.Receiver, # The user receiving the message
                 Message=f"New message from {chat_instance.Sender.username}: {chat_instance.Content[:50]}..." # Truncate for notification
+                # Add other relevant fields to Notification like 'related_chat_id=chat_instance.id' if needed
             )
 
+# Your existing ChatBetweenUsersView would remain separate as it serves a different purpose (getting all messages with one specific user)
 class ChatBetweenUsersView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, user_id):
