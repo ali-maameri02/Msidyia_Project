@@ -190,6 +190,15 @@ class ChatSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['Sender', 'Time', 'sender_username', 'receiver_username',  'receiver_avatar']
 
+class UserwithLatestChatSerializer(serializers.Serializer):
+    """
+    Serializer for returning a User plus the latest Chat message (if any)
+    between that user and the current authenticated user.
+    """
+    user = UserSerializer(read_only=True, source='*')
+    last_message = serializers.CharField(read_only=True, allow_null=True)
+    last_message_time = serializers.DateTimeField(read_only=True, allow_null=True)
+
 class Ms_WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ms_Seller
@@ -199,6 +208,7 @@ class TutorslistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tutor
         fields = '__all__'
+
 
 
 

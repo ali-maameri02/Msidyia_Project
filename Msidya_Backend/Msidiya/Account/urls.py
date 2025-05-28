@@ -14,7 +14,7 @@ urlpatterns = [
 
     path('chat/sent', SentMessageView.as_view(), name='update'), # we dont need it for know but i kept it for future development if needed
 
-    path('chats/', ChatListCreateView.as_view(), name='chat-list-create'),
+    path('chats/', UserChatHistoryView.as_view(), name='chat-list-create'),
     path('chats/with/<int:user_id>/', ChatBetweenUsersView.as_view(), name='chat-with-user'),
 
     path('notifications/', NotificationListView.as_view(), name='notification-list'),

@@ -1,5 +1,5 @@
 import json
-from django.db.models import F, Q
+from django.db.models import F, Q, OuterRef, Subquery
 import requests
 from rest_framework.response import Response
 from rest_framework import generics
@@ -171,54 +171,90 @@ class SentMessageView(generics.ListCreateAPIView):
         )
 # this view will return the latest chat from unique users and 
 # will create a chat between the current logged in user and a sender 
-class ChatListCreateView(generics.ListCreateAPIView):
-    serializer_class = ChatSerializer
+class UserChatHistoryView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+    # Default serializer_class, will be overridden by get_serializer_class
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ChatSerializer
+        return UserwithLatestChatSerializer
 
     def get_queryset(self):
-        user = self.request.user
+        current_user = self.request.user
+        query = self.request.query_params.get('q', None)
 
-        # Get all messages where the user is either sender or receiver, but exclude self-messages
-        chats = Chat.objects.filter(
-            (Q(Sender=user) | Q(Receiver=user)) & ~Q(Sender=F('Receiver'))
+        latest_chat_subquery = Chat.objects.filter(
+            (Q(Sender=OuterRef('pk'), Receiver=current_user) | 
+             Q(Sender=current_user, Receiver=OuterRef('pk')))
         ).order_by('-Time')
 
-        latest_by_user = {}
+        if query:
+            # Search mode: Find users matching the query
+            users_queryset = User.objects.filter(
+                Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+                # Add other searchable fields if necessary
+            ).exclude(pk=current_user.pk).distinct()
+            
+            users_queryset = users_queryset.annotate(
+                last_message=Subquery(latest_chat_subquery.values('Content')[:1]),
+                last_message_time=Subquery(latest_chat_subquery.values('Time')[:1]),
+            )
+            return users_queryset.order_by('-last_message_time', 'username')
 
-        for chat in chats:
-            # Identify the other user
-            other_user = chat.Receiver if chat.Sender == user else chat.Sender
+        else:
+            interacted_user_ids = Chat.objects.filter(
+                Q(Sender=current_user) | Q(Receiver=current_user)
+            ).exclude( # Exclude self-chats if they were possible or make sense in your model
+                Sender=current_user, Receiver=current_user 
+            ).values_list('Sender_id', 'Receiver_id')
 
-            # If this is the first time we encounter this user, store the chat (latest due to ordering)
-            if other_user.id not in latest_by_user:
-                latest_by_user[other_user.id] = chat
+            partner_ids = set()
+            for sender_id, receiver_id in interacted_user_ids:
+                if sender_id == current_user.id:
+                    partner_ids.add(receiver_id)
+                else:
+                    partner_ids.add(sender_id)
+            
+            if not partner_ids:
+                return User.objects.none()
 
-        return list(latest_by_user.values())
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+            users_queryset = User.objects.filter(id__in=list(partner_ids))
+            
+            users_queryset = users_queryset.annotate(
+                last_message=Subquery(latest_chat_subquery.values('Content')[:1]),
+                last_message_time=Subquery(latest_chat_subquery.values('Time')[:1]),
+            )
+            # We expect these users to have a last_message_time because they are derived from chats
+            return users_queryset.filter(last_message_time__isnull=False).order_by('-last_message_time', 'username')
 
     def perform_create(self, serializer):
-        chat_instance = serializer.save(Sender=self.request.user)
+       receiver = serializer.validated_data.get('Receiver')
+        if receiver == self.request.user:
+            raise serializers.ValidationError({"Receiver": "You cannot send a message to yourself."})
 
-        Notification.objects.create(
-            User=chat_instance.Receiver,
-            Message=f"New message from {chat_instance.Sender.username}: {chat_instance.Content}")
+        chat_instance = serializer.save(Sender=self.request.user)
+        
+        # Create Notification
+        if hasattr(chat_instance.Receiver, 'username'): # Check if Receiver is a valid user object
+            Notification.objects.create(
+                User=chat_instance.Receiver, # The user receiving the message
+                Message=f"New message from {chat_instance.Sender.username}: {chat_instance.Content[:50]}..." # Truncate for notification
+            )
 
 class ChatBetweenUsersView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request, user_id):
         current_user = request.user
+        # Ensure user_id is not the current_user's id if you want to prevent fetching self-chats,
+        # or handle as per your application logic.
         chats = Chat.objects.filter(
             Q(Sender=current_user, Receiver__id=user_id) |
             Q(Sender__id=user_id, Receiver=current_user)
         ).order_by('Time')
-
         serializer = ChatSerializer(chats, many=True, context={'request': request})
         return Response(serializer.data)
+
             
 
 class TutorList(generics.ListAPIView):
