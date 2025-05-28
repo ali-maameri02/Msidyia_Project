@@ -7,13 +7,16 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
+import { AuthContextProvider } from './contet/AuthContext';
 
 export const queryClient = new QueryClient()
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <AuthContextProvider>
+          <App />
+        </AuthContextProvider>
       </QueryClientProvider >
     </BrowserRouter>
   </React.StrictMode>,

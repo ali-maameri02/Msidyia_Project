@@ -1,10 +1,6 @@
 import { axiosClient } from "../assets/lib/axiosClient";
+import { IUser } from "../interfaces/IUser";
 
-export interface IUser {
-  id: number;
-  username: string;
-  Picture: string;
-}
 
 export const getAllUsers = async () => {
   const response = await axiosClient.get("/api/users/");

@@ -1,136 +1,150 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getLatestMessages, getMessagesBetweenus, sendMessageToUser, IMessage } from '../../../services/chat.service'; // Update this import path
+import { getLatestMessages, getMessagesBetweenus, sendMessageToUser, searchUsers } from '../../../services/chat.service';
+import { useAuth } from "../../../hooks/useAuth";
+import { queryClient } from "../../../main";
 
-// Interface for your API
+// Interfaces
+interface IMessage {
+  id: number;
+  Content: string;
+  Sender: number;
+  Receiver: number;
+  sender_username: string;
+  receiver_username: string;
+  receiver_avatar: string | null;
+  Time: string;
+}
+
 interface ICreateMessageDTO {
   Content: string;
   Receiver: number;
 }
 
-// Extended message interface for UI state
 interface IExtendedMessage extends IMessage {
   isOwn?: boolean;
   isOptimistic?: boolean;
 }
 
-interface IUser {
-  id: number;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  lastSeen: string;
-  unreadCount: number;
+interface IUserWithChat {
+  user: {
+    id: number;
+    username: string;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+    Picture: string | null;
+    Phone_number?: string;
+    Role?: string;
+  };
+  last_message: string | null;
+  last_message_time: string | null;
 }
 
-// Mock function for users - replace with your actual user fetching service
-const fetchUsers = async (): Promise<IUser[]> => {
-  // This should be replaced with your actual user fetching API call
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  return [
-    {
-      id: 1,
-      name: "Alice Johnson",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      lastMessage: "Hi, how are you? I wish you all the best!",
-      time: "18:30",
-      lastSeen: "2 hours ago",
-      unreadCount: 1
-    },
-    {
-      id: 2,
-      name: "Bob Smith",
-      avatar: "https://i.pravatar.cc/150?img=2",
-      lastMessage: "i don't remember anything 😂",
-      time: "18:16",
-      lastSeen: "30 minutes ago",
-      unreadCount: 2
-    },
-    {
-      id: 3,
-      name: "Carol Davis",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      lastMessage: "See you tomorrow!",
-      time: "17:45",
-      lastSeen: "1 hour ago",
-      unreadCount: 0
-    }
-  ];
-};
+interface IChatUser {
+  id: number;
+  username: string;
+  avatar: string | null;
+  lastMessage: string | null;
+  lastMessageTime: string | null;
+  displayName: string;
+}
 
 export default function Messages() {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<number>(1); // You should get this from your auth context
+  const { user: currentUser, isLoading: isUserLoading } = useAuth();
 
-  const queryClient = useQueryClient();
-
-  // Fetch users with 3-second refetch interval
-  const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['users'],
-    queryFn: fetchUsers,
-    refetchInterval: 3000, // 3 seconds
+  // Fetch latest messages (users with recent conversations) - now returns IUserWithChat[]
+  const { data: latestChats = [], isLoading: latestChatsLoading } = useQuery({
+    queryKey: ['latestChats'],
+    queryFn: getLatestMessages,
+    refetchInterval: 3000,
     staleTime: 0,
+    enabled: !!currentUser,
   });
 
-  // Fetch latest messages (for sidebar preview)
-  const { data: latestMessages = [], isLoading: latestMessagesLoading } = useQuery({
-    queryKey: ['latestMessages'],
-    queryFn: getLatestMessages,
-    refetchInterval: 3000 * 20, // 3 seconds for live updates
-    staleTime: 0,
+  // Search users when search query exists
+  const { data: searchResults = [], isLoading: searchLoading } = useQuery({
+    queryKey: ['searchUsers', searchQuery],
+    queryFn: () => searchUsers(searchQuery),
+    enabled: !!searchQuery.trim() && searchQuery.length > 2,
+    staleTime: 1000 * 30, // 30 seconds
   });
 
   // Fetch messages between current user and selected user
   const { data: rawMessages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ['messages', selectedUserId],
     queryFn: () => getMessagesBetweenus(selectedUserId!),
-    enabled: !!selectedUserId,
-    refetchInterval: 3000, // 3 seconds for live updates
+    enabled: !!selectedUserId && !!currentUser,
+    refetchInterval: 3000,
     staleTime: 0,
   });
-  console.log("raw messages ======== ", rawMessages)
 
-  // Transform messages to include isOwn property
+  // Transform raw messages to include isOwn property
   const messages: IExtendedMessage[] = useMemo(() => {
+    if (!currentUser) return [];
     return rawMessages.map(msg => ({
       ...msg,
-      isOwn: msg.Sender === currentUserId
+      isOwn: msg.Sender === currentUser.id
     }));
-  }, [rawMessages, currentUserId]);
-  console.log("the messages =======", messages)
+  }, [rawMessages, currentUser]);
 
-  useEffect(() => {
-    if (latestMessages && latestMessages.length > 0)
-      setCurrentUserId(latestMessages[0].Sender)
+  // Transform latest chats to IChatUser format - updated for IUserWithChat[]
+  const chatUsers: IChatUser[] = useMemo(() => {
+    return latestChats.map((chat: IUserWithChat) => ({
+      id: chat.user.id,
+      username: chat.user.username,
+      avatar: chat.user.Picture,
+      lastMessage: chat.last_message,
+      lastMessageTime: chat.last_message_time,
+      displayName: chat.user.first_name && chat.user.last_name
+        ? `${chat.user.first_name} ${chat.user.last_name}`
+        : chat.user.username
+    }));
+  }, [latestChats]);
 
-  }, [latestMessages])
+  // Transform search results to IChatUser format
+  const searchChatUsers: IChatUser[] = useMemo(() => {
+    return searchResults.map((result: IUserWithChat) => ({
+      id: result.user.id,
+      username: result.user.username,
+      avatar: result.user.Picture,
+      lastMessage: result.last_message,
+      lastMessageTime: result.last_message_time,
+      displayName: result.user.first_name && result.user.last_name
+        ? `${result.user.first_name} ${result.user.last_name}`
+        : result.user.username
+    }));
+  }, [searchResults]);
 
+  // Determine which users to display
+  const displayUsers = searchQuery.trim() ? searchChatUsers : chatUsers;
+  const isLoadingUsers = searchQuery.trim() ? searchLoading : latestChatsLoading;
+
+  // Get selected user info
+  const selectedUser = displayUsers.find(user => user.id === selectedUserId);
 
   // Send message mutation with optimistic updates
   const sendMessageMutation = useMutation({
     mutationFn: (data: ICreateMessageDTO) => sendMessageToUser(data),
     onMutate: async ({ Receiver, Content }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['messages', Receiver] });
+      if (!currentUser) return;
 
-      // Snapshot previous value
+      await queryClient.cancelQueries({ queryKey: ['messages', Receiver] });
       const previousMessages = queryClient.getQueryData(['messages', Receiver]);
 
-      // Optimistically update
       const optimisticMessage: IExtendedMessage = {
         id: Math.random() * 1000,
-        sender_username: "You", // You should get this from your auth context
-        receiver_username: selectedUser?.name || "",
+        sender_username: currentUser.username,
+        receiver_username: selectedUser?.username || "",
         receiver_avatar: selectedUser?.avatar || null,
-        Sender: currentUserId,
+        Sender: currentUser.id,
         Receiver,
         Content,
-        Time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        Time: new Date().toISOString(),
         isOwn: true,
         isOptimistic: true
       };
@@ -143,31 +157,24 @@ export default function Messages() {
       return { previousMessages };
     },
     onError: (err, variables, context) => {
-      // Rollback on error
       if (context?.previousMessages) {
         queryClient.setQueryData(['messages', variables.Receiver], context.previousMessages);
       }
     },
     onSettled: () => {
-      // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: ['messages', selectedUserId] });
-      queryClient.invalidateQueries({ queryKey: ['latestMessages'] });
+      queryClient.invalidateQueries({ queryKey: ['latestChats'] });
     },
   });
 
-  // Filter users based on search query
-
-  // Get selected user info
-  const selectedUser = latestMessages.find(msg => msg.Receiver === selectedUserId);
-
-  // Handle sending the message
+  // Handle sending message
   const handleSend = () => {
-    if (message.trim() && selectedUserId) {
+    if (message.trim() && selectedUserId && currentUser) {
       sendMessageMutation.mutate({
         Receiver: selectedUserId,
         Content: message.trim()
       });
-      setMessage(""); // Clear the input field
+      setMessage("");
     }
   };
 
@@ -184,56 +191,131 @@ export default function Messages() {
     }
   };
 
+  // Format time helper
+  const formatTime = (timeString: string) => {
+    try {
+      const date = new Date(timeString);
+      return date.toLocaleTimeString('en-US', {
+        hour12: true,
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    } catch {
+      return timeString;
+    }
+  };
+
+  // Show loading state if user is loading
+  if (isUserLoading) {
+    return (
+      <div className="flex h-screen mt-16 px-10 items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if no current user
+  if (!currentUser) {
+    return (
+      <div className="flex h-screen mt-16 px-10 items-center justify-center">
+        <div className="text-center text-red-500">
+          <p>Please log in to access messages</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="flex h-screen mt-16 px-10">
       {/* Sidebar: Chat List */}
       <div className="w-1/3 ml-5 bg-white border-r border-gray-200 overflow-y-auto">
-        <div className="p-4 flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 p-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
-          />
+        {/* Search Input */}
+        <div className="p-4 flex items-center space-x-2 border-b border-gray-100">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
+            />
+            <svg className="w-4 h-4 absolute left-2 top-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="p-2 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* Loading state */}
-        {latestMessagesLoading && (
-          <div className="p-4 text-center text-gray-500">Loading users...</div>
+        {isLoadingUsers && (
+          <div className="p-4 text-center text-gray-500">
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            {searchQuery ? 'Searching users...' : 'Loading chats...'}
+          </div>
         )}
 
         {/* Chat Items */}
-        <div className="space-y-2">
-          {latestMessages.map((msg) => (
+        <div className="space-y-1">
+          {displayUsers.map((user) => (
             <div
-              key={msg.id}
-              onClick={() => setSelectedUserId(msg.Receiver)}
-              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${selectedUserId === msg.Sender ? 'bg-blue-50 border-r-4 border-blue-500' : ''
+              key={user.id}
+              onClick={() => setSelectedUserId(user.id)}
+              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-blue-50 border-r-4 border-blue-500' : ''
                 }`}
             >
-              <img
-                alt="User Avatar"
-                src={msg.receiver_avatar ?? ""}
-                className="w-12 h-12 rounded-full mr-4"
-              />
-              <div className="flex-1">
-                <p className="font-bold text-sm">{msg.receiver_username}</p>
+              <div className="relative">
+                <img
+                  alt="User Avatar"
+                  src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=3b82f6&color=fff`}
+                  className="w-12 h-12 rounded-full mr-4 object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm text-gray-900 truncate">
+                  {user.displayName}
+                </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {msg.Content}
+                  {user.lastMessage || (searchQuery ? 'Start a conversation' : 'No messages yet')}
                 </p>
               </div>
               <div className="flex flex-col items-end space-y-1">
-                <p className="text-xs text-gray-500">{msg.Time}</p>
+                {user.lastMessageTime && (
+                  <p className="text-xs text-gray-400">
+                    {formatTime(user.lastMessageTime)}
+                  </p>
+                )}
               </div>
             </div>
           ))}
         </div>
 
         {/* No results */}
-        {!latestMessagesLoading && latestMessages && latestMessages.length === 0 && (
+        {!isLoadingUsers && displayUsers.length === 0 && (
           <div className="p-4 text-center text-gray-500">
-            {searchQuery ? 'No users found' : 'No users available'}
+            <div className="text-4xl mb-2">💬</div>
+            <p className="text-sm">
+              {searchQuery
+                ? `No users found for "${searchQuery}"`
+                : 'No conversations yet'
+              }
+            </p>
+            {!searchQuery && (
+              <p className="text-xs text-gray-400 mt-1">
+                Search for users to start chatting
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -243,51 +325,61 @@ export default function Messages() {
         {selectedUser ? (
           <>
             {/* Header */}
-            <div className="flex items-center p-4 border-b border-gray-200 bg-white">
+            <div className="flex items-center p-4 border-b border-gray-200 bg-white shadow-sm">
               <img
                 alt="Chat User"
-                src={selectedUser.avatar}
-                className="w-12 h-12 rounded-full mr-4"
+                src={selectedUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.displayName)}&background=3b82f6&color=fff`}
+                className="w-12 h-12 rounded-full mr-4 object-cover"
               />
               <div>
-                <p className="font-bold">{selectedUser.name}</p>
-                <p className="text-xs text-gray-500">Last seen {selectedUser.lastSeen}</p>
+                <p className="font-semibold text-gray-900">{selectedUser.displayName}</p>
+                <p className="text-xs text-gray-500">@{selectedUser.username}</p>
               </div>
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 p-4 overflow-y-auto bg-white">
+            <div className="flex-1 p-4 overflow-y-auto bg-white bg-opacity-95">
               {messagesLoading && messages.length === 0 ? (
                 <div className="flex justify-center items-center h-full">
-                  <div className="text-gray-500">Loading messages...</div>
+                  <div className="text-center text-gray-500">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    Loading messages...
+                  </div>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex justify-center items-center h-full">
+                  <div className="text-center text-gray-500">
+                    <div className="text-4xl mb-2">👋</div>
+                    <p>No messages yet. Start the conversation!</p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {messages.map((msg, index) => (
-                    <div key={`${msg.Sender}-${msg.Receiver}-${index}`} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'} items-end`}>
+                    <div key={`${msg.id}-${index}`} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'} items-end`}>
                       {!msg.isOwn && (
                         <img
                           alt="User Avatar"
-                          src={msg.receiver_avatar || selectedUser?.avatar || "https://i.pravatar.cc/150?img=1"}
-                          className="w-8 h-8 rounded-full mr-2"
+                          src={selectedUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.displayName)}&background=3b82f6&color=fff`}
+                          className="w-8 h-8 rounded-full mr-2 object-cover"
                         />
                       )}
-                      <div className={`p-3 rounded-lg max-w-xs ${msg.isOwn
+                      <div className={`p-3 rounded-lg max-w-xs break-words ${msg.isOwn
                         ? `bg-blue-500 text-white ${msg.isOptimistic ? 'opacity-70' : ''}`
-                        : 'bg-gray-100'
+                        : 'bg-gray-100 text-gray-900'
                         }`}>
                         <p className="text-sm">{msg.Content}</p>
                         <div className="flex items-center space-x-2 mt-1">
                           <span className={`text-xs ${msg.isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
-                            {msg.Time}
+                            {formatTime(msg.Time)}
                           </span>
                           {msg.isOwn && (
                             <div className="flex space-x-1">
-                              <svg className={`h-4 w-4 ${msg.isOptimistic ? 'text-blue-200' : 'text-blue-100'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className={`h-3 w-3 ${msg.isOptimistic ? 'text-blue-200' : 'text-blue-100'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                               {!msg.isOptimistic && (
-                                <svg className="h-4 w-4 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="h-3 w-3 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                               )}
@@ -298,8 +390,8 @@ export default function Messages() {
                       {msg.isOwn && (
                         <img
                           alt="Your Avatar"
-                          src="https://i.pravatar.cc/150?img=7"
-                          className="w-8 h-8 rounded-full ml-2"
+                          src={currentUser.Picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=059669&color=fff`}
+                          className="w-8 h-8 rounded-full ml-2 object-cover"
                         />
                       )}
                     </div>
@@ -312,7 +404,7 @@ export default function Messages() {
             <div className="p-4 bg-white border-t border-gray-200 relative">
               <div className="relative flex items-center space-x-2">
                 <button
-                  className="p-3 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                  className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 >
                   😊
@@ -332,9 +424,9 @@ export default function Messages() {
                   disabled={sendMessageMutation.isPending || !message.trim()}
                 >
                   {sendMessageMutation.isPending ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
                   )}
@@ -343,13 +435,16 @@ export default function Messages() {
 
               {/* Simple Emoji Picker */}
               {showEmojiPicker && (
-                <div className="absolute bottom-14 left-0 bg-white border border-gray-200 rounded-lg p-4 shadow-lg z-10">
+                <div className="absolute bottom-16 left-4 bg-white border border-gray-200 rounded-lg p-4 shadow-lg z-10">
                   <div className="grid grid-cols-8 gap-2">
                     {['😀', '😂', '😍', '🥰', '😊', '😎', '🤔', '😮', '😢', '😡', '👍', '👎', '❤️', '🔥', '💯', '🎉'].map((emoji) => (
                       <button
                         key={emoji}
-                        onClick={() => handleEmojiClick({ emoji })}
-                        className="p-2 hover:bg-gray-100 rounded text-xl"
+                        onClick={() => {
+                          handleEmojiClick({ emoji });
+                          setShowEmojiPicker(false);
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded text-lg transition"
                       >
                         {emoji}
                       </button>
@@ -360,10 +455,13 @@ export default function Messages() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-white">
+          <div className="flex-1 flex items-center justify-center bg-white bg-opacity-95">
             <div className="text-center text-gray-500">
               <div className="text-6xl mb-4">💬</div>
-              <p className="text-xl">Select a user to start messaging</p>
+              <p className="text-xl mb-2">Select a user to start messaging</p>
+              <p className="text-sm text-gray-400">
+                {searchQuery ? 'Choose from search results' : 'Pick from your recent conversations'}
+              </p>
             </div>
           </div>
         )}
