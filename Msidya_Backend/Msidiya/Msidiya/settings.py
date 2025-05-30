@@ -52,7 +52,7 @@ CSRF_COOKIE_SECURE = False  # Set to True only in production
 
 INSTALLED_APPS = [
     # 'jazzmin',
-    "unfold", 
+    # "unfold", 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

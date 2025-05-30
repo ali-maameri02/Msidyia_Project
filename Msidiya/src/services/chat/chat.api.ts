@@ -1,7 +1,36 @@
-import { axiosClient } from "../assets/lib/axiosClient";
-import { IMessage } from "../interfaces/IMessage";
-import { ICreateMessageDTO, IUserWithChat } from "./chat/chat.api";
+import { axiosClient } from "../../assets/lib/axiosClient";
 
+
+export interface IMessage {
+  id: number;
+  Content: string;
+  Sender: number;
+  Receiver: number;
+  sender_username: string;
+  receiver_username: string;
+  receiver_avatar: string | null;
+  Time: string;
+}
+
+export interface ICreateMessageDTO {
+  Content: string;
+  Receiver: number;
+}
+
+export interface IUserWithChat {
+  user: {
+    id: number;
+    username: string;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+    Picture: string | null;
+    Phone_number?: string;
+    Role?: string;
+  };
+  last_message: string | null;
+  last_message_time: string | null;
+}
 
 // Get latest messages/conversations for the current user
 // Returns IUserWithChat[] - users with their latest chat info

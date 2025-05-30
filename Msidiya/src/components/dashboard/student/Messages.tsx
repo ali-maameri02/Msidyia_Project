@@ -1,54 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getLatestMessages, getMessagesBetweenus, sendMessageToUser, searchUsers } from '../../../services/chat.service';
 import { useAuth } from "../../../hooks/useAuth";
 import { queryClient } from "../../../main";
+import { useLatestMessagesQuery, useMessagesBetweenUsQuery, useSearchMessagesUsersQuery, useSendMessageMutatoin } from "../../../services/chat/chat.queries";
+import { IExtendedMessage } from "../../../interfaces/IExtendedMessage";
+import { IChatUser } from "../../../interfaces/IChatUser";
+import { IUserWithChat } from "../../../interfaces/IUserWithChat";
 
-// Interfaces
-interface IMessage {
-  id: number;
-  Content: string;
-  Sender: number;
-  Receiver: number;
-  sender_username: string;
-  receiver_username: string;
-  receiver_avatar: string | null;
-  Time: string;
-}
-
-interface ICreateMessageDTO {
-  Content: string;
-  Receiver: number;
-}
-
-interface IExtendedMessage extends IMessage {
-  isOwn?: boolean;
-  isOptimistic?: boolean;
-}
-
-interface IUserWithChat {
-  user: {
-    id: number;
-    username: string;
-    email?: string;
-    first_name?: string;
-    last_name?: string;
-    Picture: string | null;
-    Phone_number?: string;
-    Role?: string;
-  };
-  last_message: string | null;
-  last_message_time: string | null;
-}
-
-interface IChatUser {
-  id: number;
-  username: string;
-  avatar: string | null;
-  lastMessage: string | null;
-  lastMessageTime: string | null;
-  displayName: string;
-}
 
 export default function Messages() {
   const [message, setMessage] = useState("");
@@ -58,32 +15,14 @@ export default function Messages() {
   const { user: currentUser, isLoading: isUserLoading } = useAuth();
 
   // Fetch latest messages (users with recent conversations) - now returns IUserWithChat[]
-  const { data: latestChats = [], isLoading: latestChatsLoading } = useQuery({
-    queryKey: ['latestChats'],
-    queryFn: getLatestMessages,
-    refetchInterval: 3000,
-    staleTime: 0,
-    enabled: !!currentUser,
-  });
+  const { data: latestChats = [], isLoading: latestChatsLoading } = useLatestMessagesQuery(currentUser)
 
   // Search users when search query exists
-  const { data: searchResults = [], isLoading: searchLoading } = useQuery({
-    queryKey: ['searchUsers', searchQuery],
-    queryFn: () => searchUsers(searchQuery),
-    enabled: !!searchQuery.trim() && searchQuery.length > 2,
-    staleTime: 1000 * 30, // 30 seconds
-  });
+  const { data: searchResults = [], isLoading: searchLoading } = useSearchMessagesUsersQuery(searchQuery)
 
   // Fetch messages between current user and selected user
-  const { data: rawMessages = [], isLoading: messagesLoading } = useQuery({
-    queryKey: ['messages', selectedUserId],
-    queryFn: () => getMessagesBetweenus(selectedUserId!),
-    enabled: !!selectedUserId && !!currentUser,
-    refetchInterval: 3000,
-    staleTime: 0,
-  });
+  const { data: rawMessages = [], isLoading: messagesLoading } = useMessagesBetweenUsQuery(selectedUserId, currentUser)
 
-  // Transform raw messages to include isOwn property
   const messages: IExtendedMessage[] = useMemo(() => {
     if (!currentUser) return [];
     return rawMessages.map(msg => ({
@@ -92,7 +31,7 @@ export default function Messages() {
     }));
   }, [rawMessages, currentUser]);
 
-  // Transform latest chats to IChatUser format - updated for IUserWithChat[]
+
   const chatUsers: IChatUser[] = useMemo(() => {
     return latestChats.map((chat: IUserWithChat) => ({
       id: chat.user.id,
@@ -128,45 +67,7 @@ export default function Messages() {
   const selectedUser = displayUsers.find(user => user.id === selectedUserId);
 
   // Send message mutation with optimistic updates
-  const sendMessageMutation = useMutation({
-    mutationFn: (data: ICreateMessageDTO) => sendMessageToUser(data),
-    onMutate: async ({ Receiver, Content }) => {
-      if (!currentUser) return;
-
-      await queryClient.cancelQueries({ queryKey: ['messages', Receiver] });
-      const previousMessages = queryClient.getQueryData(['messages', Receiver]);
-
-      const optimisticMessage: IExtendedMessage = {
-        id: Math.random() * 1000,
-        sender_username: currentUser.username,
-        receiver_username: selectedUser?.username || "",
-        receiver_avatar: selectedUser?.avatar || null,
-        Sender: currentUser.id,
-        Receiver,
-        Content,
-        Time: new Date().toISOString(),
-        isOwn: true,
-        isOptimistic: true
-      };
-
-      queryClient.setQueryData(['messages', Receiver], (old: IMessage[] = []) => [
-        ...old,
-        optimisticMessage
-      ]);
-
-      return { previousMessages };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousMessages) {
-        queryClient.setQueryData(['messages', variables.Receiver], context.previousMessages);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', selectedUserId] });
-      queryClient.invalidateQueries({ queryKey: ['latestChats'] });
-    },
-  });
-
+  const sendMessageMutation = useSendMessageMutatoin(currentUser, selectedUser, selectedUserId)
   // Handle sending message
   const handleSend = () => {
     if (message.trim() && selectedUserId && currentUser) {
