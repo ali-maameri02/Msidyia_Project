@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
-// import TrafficSource from './TrafficSource';
 import { FaChalkboardTeacher, FaBookOpen, FaTasks, FaMoneyCheckAlt } from 'react-icons/fa';
-// import axios from "axios";
-import Avatar from '@mui/material/Avatar';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { Slide } from "react-awesome-reveal";
 import { fetchUserData, User } from '../../../utils/userData'; // Adjust the import path if needed
 import { getUserWalletBalance } from '../../../services/wallet.services';
-import { getUserSentMessages, IMessage } from '../../../services/chat.service';
+import { useLatestMessagesQuery } from '../../../services/chat/chat.queries';
+import { useAuth } from '../../../hooks/useAuth';
 
 const Student: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth()
   const [userBalance, setUserBalance] = useState(0)
-  const [userMessages, setUserMessages] = useState<IMessage[]>([])
+  const { data: latestMessages } = useLatestMessagesQuery(user)
 
-  const getUserData = async () => {
-    const userData = await fetchUserData();
-    setUser(userData);
-  };
   const fetchUserBalance = async () => {
     try {
 
@@ -29,15 +23,9 @@ const Student: React.FC = () => {
       console.error(err)
     }
   }
-  const fetchUserSentMessages = async () => {
-    const data = await getUserSentMessages()
-    setUserMessages(data)
-  }
 
   useEffect(() => {
-    getUserData();
     fetchUserBalance()
-    fetchUserSentMessages()
   }, []);
   return (
     <div className="flex mt-16 ml-16 ">
@@ -74,7 +62,7 @@ const Student: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Messages</p>
-              <p className="text-2xl font-bold">{userMessages.length}</p>
+              <p className="text-2xl font-bold">{latestMessages && latestMessages.length}</p>
               <div className="h-2 bg-gray-200 rounded-full mt-2">
                 <div className="h-2 bg-purple-500 rounded-full" style={{ width: '75.5%' }}></div>
               </div>
@@ -119,8 +107,8 @@ const Student: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-bold mb-4">Latest Notifications</h2>
             <ul>
-              {userMessages.map(msg => (
-                <li className="py-2 border-b">{msg.Content} from <span className="px-2">{msg.sender_username}</span></li>
+              {latestMessages && latestMessages.map(msg => (
+                <li className="py-2 border-b">{msg.last_message} from <span className="px-2">{msg.user.username}</span></li>
               ))}
             </ul>
           </div>
@@ -129,8 +117,8 @@ const Student: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-xl font-bold mb-4">Recent Messages </h2>
             <ul>
-              {userMessages.map(msg => (
-                <li className="py-2 border-b">{msg.Content} from <span className="px-2">{msg.sender_username}</span></li>
+              {latestMessages && latestMessages.map(msg => (
+                <li className="py-2 border-b">{msg.last_message} from <span className="px-2">{msg.user.username}</span></li>
               ))}
             </ul>
           </div>
