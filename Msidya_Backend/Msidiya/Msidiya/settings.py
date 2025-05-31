@@ -38,7 +38,7 @@ print("Chargily Secret:", CHARGILY_SECRET)
 SECRET_KEY = 'django-insecure-tir$wa786fanu%cfw#o+y8zd4-an1bo0qwqb&gvw%6f%ajl&m9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG",True) !="False"
 # ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 ALLOWED_HOSTS = ["*"]  # Allow all hosts for development
 # CORS_ALLOWED_ORIGINS = [

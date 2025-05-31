@@ -39,6 +39,7 @@ flexcache==0.3
 flexparser==0.4
 fsspec==2025.5.0
 greenlet==3.2.2
+gunicorn==23.0.0
 idna==3.10
 ijson==3.4.0
 inflection==0.5.1
@@ -59,6 +60,7 @@ numba==0.61.2
 numpy==1.26.4
 openpyxl==3.1.5
 ordered-set==4.1.0
+packaging==25.0
 pandas==2.2.3
 peewee==3.18.1
 pillow==11.2.1

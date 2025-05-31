@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx
+      - ./nginx/mime.types:/etc/nginx/mime.types:ro
+      - static_volume:/var/www/staticfiles
+      - media_volume:/var/www/media
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./Msidya_Backend
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    command: ["/app/entrypoint.sh"]
+    env_file:
+      - .env
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    environment:
+      - DEBUG=False
+      - DJANGO_SETTINGS_MODULE=Msidiya.settings
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c "trap exit TERM; while :; do
+        certbot renew --webroot --webroot-path=/var/www/certbot --quiet &&
+        nginx -s reload;
+        sleep 12h &
+        wait $${!};
+      done"
+    networks:
+      - app-network
+
+  certbot-init:
+    image: certbot/certbot
+    depends_on:
+      - nginx
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c "certbot certonly --webroot
+             --webroot-path=/var/www/certbot
+             --email your-email@example.com
+             --agree-tos
+             --no-eff-email
+             -d yourdomain.com -d www.yourdomain.com || true"
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  app-network:
+    driver: bridge
