@@ -13,6 +13,7 @@ interface TeacherCardProps {
 }
 
 const TeacherCard: React.FC<TeacherCardProps> = ({ image, name, rating, reviews, subjects, onClick }) => {
+  console.log(rating)
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}

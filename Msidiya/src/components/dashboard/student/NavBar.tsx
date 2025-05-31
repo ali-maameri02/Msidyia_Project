@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, fetchUserData} from '../../../utils/userData';
+import { User, fetchUserData } from '../../../utils/userData';
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
+  // const [showLogin, setShowLogin] = useState(false);
 
   // Retrieve user from localStorage on mount
   useEffect(() => {
@@ -29,11 +29,11 @@ const Navbar: React.FC = () => {
   }, []);
 
   // Callback to update user state on login success
-  const handleLoginSuccess = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-    setShowLogin(false);
-  };
+  // const handleLoginSuccess = (userData: User) => {
+  //   setUser(userData);
+  //   localStorage.setItem("user", JSON.stringify(userData));
+  //   setShowLogin(false);
+  // };
 
   return (
     <div>
@@ -121,20 +121,20 @@ const Navbar: React.FC = () => {
                   </p>
                 </div>
                 <div className="justify-center items-center flex relative">
-                {user ? (
-                <div className="relative">
-                  <img
-                    src={user.Picture || "/default-avatar.png"}
-                    alt="User Avatar"
-                    className="w-10 h-10 rounded-full cursor-pointer object-cover"
-                  />
-                 
-                </div>
-              ) : (
-                <>
-                 
-                </>
-              )}
+                  {user ? (
+                    <div className="relative">
+                      <img
+                        src={user.Picture || "/default-avatar.png"}
+                        alt="User Avatar"
+                        className="w-10 h-10 rounded-full cursor-pointer object-cover"
+                      />
+
+                    </div>
+                  ) : (
+                    <>
+
+                    </>
+                  )}
                 </div>
               </div>
             </div>

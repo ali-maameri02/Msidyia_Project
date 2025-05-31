@@ -1,18 +1,16 @@
-import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { axiosClient } from "../../assets/lib/axiosClient";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
 import { useCart } from "../Landing/context/CartContext";
 
-// CartItem remains the same for display purposes on the checkout page
-interface CartItem {
-  id: number; // Represents class_id
-  title: string;
-  price: number; // Used for display and calculating totalPrice on frontend
-  quantity: number;
-  main_image: string;
-}
+// // CartItem remains the same for display purposes on the checkout page
+// interface CartItem {
+//   id: number; // Represents class_id
+//   title: string;
+//   price: number; // Used for display and calculating totalPrice on frontend
+//   quantity: number;
+//   main_image: string;
+// }
 
 // This is what we send to the backend per item
 interface EnrollmentRequestItem {
@@ -126,7 +124,7 @@ const CheckoutPage = () => {
                       </p>
                     </div>
                   </div>
-                  <p className="text-gray-600">x{item.quantity}</p>
+                  <p className="text-gray-600">x{item.price}</p>
                 </div>
               ))}
             </div>

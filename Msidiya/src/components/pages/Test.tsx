@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 function Test() {
-  const [wallet, setWallet] = useState(null);
-  const [error, setError] = useState(null);
+  const [wallet, setWallet] = useState<{ balance: string, currency: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/e_wallet/wallet/", {
       withCredentials: true  // Important for session-authenticated APIs
     })
-    .then((res) => {
-      setWallet(res.data);
-    })
-    .catch((err) => {
-      console.error(err);
-      setError("Failed to fetch wallet. Are you logged in?");
-    });
+      .then((res) => {
+        setWallet(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to fetch wallet. Are you logged in?");
+      });
   }, []);
 
   return (

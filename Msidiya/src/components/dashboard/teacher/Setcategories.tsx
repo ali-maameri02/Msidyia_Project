@@ -36,11 +36,11 @@ interface Subject {
 }
 
 interface CategoryRow {
-  
+
   id: number;
-  tutor:number;
+  tutor: number;
   name: string;
-  logo:string;
+  logo: string;
   status: boolean;
   subjects?: Subject[];
 }
@@ -62,7 +62,7 @@ export default function Setcategories() {
   const [newCategory, setNewCategory] = React.useState('');
   const [categories, setCategories] = React.useState<CategoryRow[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<number | null>(null);
-  const [editValue, setEditValue] = useState('');
+  // const [editValue, setEditValue] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null); // State for storing the logo file
 
   const fetchCategories = async () => {
@@ -93,8 +93,8 @@ export default function Setcategories() {
   }, []);
 
 
-  
-  
+
+
   const handleOpen = (row: CategoryRow) => {
     setSelectedCategoryId(row.id); // Store the category ID
     axios.get(`http://127.0.0.1:8000/api/categories/${row.id}/subjects/`)
@@ -104,8 +104,8 @@ export default function Setcategories() {
       })
       .catch(error => console.error("Error fetching subjects:", error));
   };
-  
-  
+
+
 
   const handleClose = () => {
     setOpen(false);
@@ -125,103 +125,103 @@ export default function Setcategories() {
     setNewValue('');
   };
 
- // Add a new subject to the selected category
- const handleAddSubject = async () => {
-  if (!selectedCategoryId || !newValue.trim()) {
-    alert('Please select a category and enter a subject name.');
-    return;
-  }
+  // Add a new subject to the selected category
+  const handleAddSubject = async () => {
+    if (!selectedCategoryId || !newValue.trim()) {
+      alert('Please select a category and enter a subject name.');
+      return;
+    }
 
-  try {
-    await axios.post(
-      `http://127.0.0.1:8000/api/categories/${selectedCategoryId}/create_subject/`,
-      { name: newValue, category_id: selectedCategoryId },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    try {
+      await axios.post(
+        `http://127.0.0.1:8000/api/categories/${selectedCategoryId}/create_subject/`,
+        { name: newValue, category_id: selectedCategoryId },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-    // Fetch the updated subjects list immediately
-    const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
-    setSelectedSubjects(response.data);
+      // Fetch the updated subjects list immediately
+      const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+      setSelectedSubjects(response.data);
 
-    setNewValue('');
-    setAddModalOpen(false);
-  } catch (error) {
-    console.error("Error adding subject:", error);
-  }
-};
-// Update a subject (for example, update its name)
-const handleUpdateSubject = async (subjectId: number, updatedName: string) => {
-  try {
-    await axios.patch(
-      `http://127.0.0.1:8000/api/subjects/${subjectId}/`,
-      { name: updatedName },
-      { headers: { "Content-Type": "application/json" } }
-    );
-    // Re-fetch updated subjects list
-    const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
-    setSelectedSubjects(response.data);
-  } catch (error) {
-    console.error("Error updating subject:", error);
-  }
-};
+      setNewValue('');
+      setAddModalOpen(false);
+    } catch (error) {
+      console.error("Error adding subject:", error);
+    }
+  };
+  // Update a subject (for example, update its name)
+  const handleUpdateSubject = async (subjectId: number, updatedName: string) => {
+    try {
+      await axios.patch(
+        `http://127.0.0.1:8000/api/subjects/${subjectId}/`,
+        { name: updatedName },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      // Re-fetch updated subjects list
+      const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+      setSelectedSubjects(response.data);
+    } catch (error) {
+      console.error("Error updating subject:", error);
+    }
+  };
 
-// Delete a subject
-const handleDeleteSubject = async (subjectId: number) => {
-  try {
-    await axios.delete(`http://127.0.0.1:8000/api/subjects/${subjectId}/`);
-    // Re-fetch updated subjects list
-    const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
-    setSelectedSubjects(response.data);
-  } catch (error) {
-    console.error("Error deleting subject:", error);
-  }
-};
+  // Delete a subject
+  const handleDeleteSubject = async (subjectId: number) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/subjects/${subjectId}/`);
+      // Re-fetch updated subjects list
+      const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+      setSelectedSubjects(response.data);
+    } catch (error) {
+      console.error("Error deleting subject:", error);
+    }
+  };
 
- // Update category (e.g. update its name)
- const handleAddCategory = async () => {
-  if (!newCategory.trim()) {
-    alert('Please enter a category name.');
-    return;
-  }
+  // Update category (e.g. update its name)
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) {
+      alert('Please enter a category name.');
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append('name', newCategory.trim());
-  if (logoFile) {
-    formData.append('logo', logoFile); // Append the logo file
-  }
+    const formData = new FormData();
+    formData.append('name', newCategory.trim());
+    if (logoFile) {
+      formData.append('logo', logoFile); // Append the logo file
+    }
 
-  try {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return;
-    const loggedInUser = JSON.parse(storedUser);
-    const tutorId = loggedInUser?.id;
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) return;
+      const loggedInUser = JSON.parse(storedUser);
+      const tutorId = loggedInUser?.id;
 
-    formData.append('tutor', tutorId.toString());
+      formData.append('tutor', tutorId.toString());
 
-    const response = await axios.post(
-      'http://127.0.0.1:8000/api/categories/',
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/categories/',
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-    setCategories([...categories, response.data]);
-    setNewCategory('');
-    setLogoFile(null); // Reset the logo file state
-    setOpenAddCategoryModal(false);
-  } catch (error) {
-    console.error("Error adding category:", error);
-  }
-};
+      setCategories([...categories, response.data]);
+      setNewCategory('');
+      setLogoFile(null); // Reset the logo file state
+      setOpenAddCategoryModal(false);
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
 
-// Delete a category
-const handleDeleteCategory = async (categoryId: number) => {
-  try {
-    await axios.delete(`http://127.0.0.1:8000/api/categories/${categoryId}/`);
-    await fetchCategories();
-  } catch (error) {
-    console.error("Error deleting category:", error);
-  }
-};
+  // Delete a category
+  const handleDeleteCategory = async (categoryId: number) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/categories/${categoryId}/`);
+      await fetchCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
+  };
 
 
   const handleAddTopic = async () => {
@@ -229,28 +229,28 @@ const handleDeleteCategory = async (categoryId: number) => {
       alert('Please select a subject and enter a topic name.');
       return;
     }
-  
+
     try {
       await axios.post(
         `http://127.0.0.1:8000/api/subjects/${selectedSubject.id}/add_topic/`,
         { name: newValue },
         { headers: { "Content-Type": "application/json" } }
       );
-  
+
       // Fetch updated topics immediately
       const response = await axios.get(
         `http://127.0.0.1:8000/api/subjects/${selectedSubject.id}/`
       );
       setSelectedTopics(response.data.topics);
-  
+
       setNewValue('');
       setAddModalOpen(false);
     } catch (error) {
       console.error("Error adding topic:", error);
     }
   };
-   // Update a topic
-   const handleUpdateTopic = async (topicId: number, updatedName: string) => {
+  // Update a topic
+  const handleUpdateTopic = async (topicId: number, updatedName: string) => {
     try {
       await axios.patch(
         `http://127.0.0.1:8000/api/topics/${topicId}/`,
@@ -294,44 +294,44 @@ const handleDeleteCategory = async (categoryId: number) => {
       console.error("Error deleting topic:", error);
     }
   };
-  
-const columns: GridColDef[] = [
-  
-  { field: 'name', headerName: 'Category Name', width: 200 },
-  {
-    field: 'status',
-    headerName: 'Status',
-    width: 150,
-    renderCell: (params) => {
-      let color = 'black'; // Default color
-      let statusText = params.value; // Status from API
 
-      if (statusText === 'in progress') {
-        color = 'blue';
-      } else if (statusText === 'accepted') {
-        color = 'green';
-      } else if (statusText === 'refused') {
-        color = 'red';
-      }
+  const columns: GridColDef[] = [
 
-      return <span style={{ color, fontWeight: 'bold' }}>{statusText}</span>;
+    { field: 'name', headerName: 'Category Name', width: 200 },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 150,
+      renderCell: (params) => {
+        let color = 'black'; // Default color
+        const statusText = params.value; // Status from API
+
+        if (statusText === 'in progress') {
+          color = 'blue';
+        } else if (statusText === 'accepted') {
+          color = 'green';
+        } else if (statusText === 'refused') {
+          color = 'red';
+        }
+
+        return <span style={{ color, fontWeight: 'bold' }}>{statusText}</span>;
+      },
     },
-  },
-  {
-    field: 'actions',
-    headerName: 'Actions',
-    width: 200,
-    sortable: false,
-    renderCell: (params) => (
-      <div>
-        <IconButton
-          color="primary"
-          title="List Subjects"
-          onClick={() => params.row.onListSubjects?.(params.row)}
-        >
-          <ListIcon />
-        </IconButton>
-        <IconButton
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 200,
+      sortable: false,
+      renderCell: (params) => (
+        <div>
+          <IconButton
+            color="primary"
+            title="List Subjects"
+            onClick={() => params.row.onListSubjects?.(params.row)}
+          >
+            <ListIcon />
+          </IconButton>
+          <IconButton
             color="secondary"
             title="Modify"
             onClick={() => {
@@ -350,10 +350,10 @@ const columns: GridColDef[] = [
           >
             <DeleteIcon />
           </IconButton>
-      </div>
-    ),
-  },
-];
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="ml-16 mt-16">
@@ -367,18 +367,18 @@ const columns: GridColDef[] = [
         </Button>
       </div>
       <Paper sx={{ height: 400, width: '95%' }}>
-      <DataGrid
-  rows={categories.map((row) => ({
-    id: row.id, 
-    name: row.name.toString(), // Ensure name is a string
-    status: row.status.toString(), // Ensure status is a string
-    onListSubjects: () => handleOpen(row),
-  }))}
-  columns={columns}
-  pageSizeOptions={[5, 10]}
-  checkboxSelection
-  sx={{ border: 0  }}
-/>
+        <DataGrid
+          rows={categories.map((row) => ({
+            id: row.id,
+            name: row.name.toString(), // Ensure name is a string
+            status: row.status.toString(), // Ensure status is a string
+            onListSubjects: () => handleOpen(row),
+          }))}
+          columns={columns}
+          pageSizeOptions={[5, 10]}
+          checkboxSelection
+          sx={{ border: 0 }}
+        />
 
 
       </Paper>
@@ -409,23 +409,23 @@ const columns: GridColDef[] = [
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                    <Button variant='contained' onClick={() => { setIsAddingSubject(true); setAddModalOpen(true); selectedCategoryId}}>
-  Add Subject
-</Button>
+                      <Button variant='contained' onClick={() => { setIsAddingSubject(true); setAddModalOpen(true); selectedCategoryId }}>
+                        Add Subject
+                      </Button>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-  {selectedSubjects.map((subject, index) => (
-    <TableRow
-      key={subject.id || `subject-${index}`} // Fallback to index if id is missing
-      hover
-      selected={subject.id === selectedSubject?.id}
-      onClick={() => handleSubjectClick(subject)}
-      sx={{ cursor: 'pointer' }}
-    >
-      <TableCell>{subject.name}</TableCell>
-      <TableCell align="right">
+                  {selectedSubjects.map((subject, index) => (
+                    <TableRow
+                      key={subject.id || `subject-${index}`} // Fallback to index if id is missing
+                      hover
+                      selected={subject.id === selectedSubject?.id}
+                      onClick={() => handleSubjectClick(subject)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      <TableCell>{subject.name}</TableCell>
+                      <TableCell align="right">
                         <IconButton
                           color="secondary"
                           title="Modify"
@@ -446,9 +446,9 @@ const columns: GridColDef[] = [
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+                    </TableRow>
+                  ))}
+                </TableBody>
 
               </Table>
             </TableContainer>
@@ -544,12 +544,12 @@ const columns: GridColDef[] = [
               Cancel
             </Button>
             <Button
-  variant="contained"
-  color="primary"
-  onClick={isAddingSubject ? handleAddSubject : handleAddTopic}
->
-  {isAddingSubject ? "Add Subject" : "Add Topic"}
-</Button>
+              variant="contained"
+              color="primary"
+              onClick={isAddingSubject ? handleAddSubject : handleAddTopic}
+            >
+              {isAddingSubject ? "Add Subject" : "Add Topic"}
+            </Button>
           </div>
         </Box>
       </Modal>

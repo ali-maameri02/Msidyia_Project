@@ -56,6 +56,7 @@ const teachers = [
 const TeachersList: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
+  console.log(scrollPosition)
 
   useEffect(() => {
     const container = containerRef.current;

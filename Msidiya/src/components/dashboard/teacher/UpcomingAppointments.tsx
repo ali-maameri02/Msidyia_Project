@@ -19,6 +19,7 @@ const UpcomingAppointments: React.FC = () => {
   const [oneOnOneRows, setOneOnOneRows] = useState<any[]>([]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log(event)
     setActiveTab(newValue);
   };
 
@@ -29,13 +30,13 @@ const UpcomingAppointments: React.FC = () => {
         // Get the logged-in tutor's ID from localStorage
         const storedUser = localStorage.getItem("user");
         if (!storedUser) return; // If no user found, exit
-  
+
         const loggedInUser = JSON.parse(storedUser);
         const tutorId = loggedInUser?.id; // Ensure `id` exists
-  
+
         const response = await axios.get("http://127.0.0.1:8000/api/schedules/");
         const schedules = response.data;
-  
+
         const groupClasses = schedules
           .filter((schedule: any) => schedule.group_class.tutor === tutorId) // 🔹 Filter by tutor
           .map((schedule: any) => ({
@@ -54,7 +55,7 @@ const UpcomingAppointments: React.FC = () => {
             schedule_date: new Date(schedule.date).toLocaleString(),
             duration: schedule.duration,
           }));
-  
+
         // Separate Group Classes and One-on-One Sessions
         setGroupClassRows(groupClasses.filter((cls: { max_book: number; }) => cls.max_book !== 1));
         setOneOnOneRows(groupClasses.filter((cls: { max_book: number; }) => cls.max_book === 1));
@@ -62,10 +63,10 @@ const UpcomingAppointments: React.FC = () => {
         console.error("Error fetching schedules:", error);
       }
     };
-  
+
     fetchSchedules();
   }, []);
-  
+
   const columns: GridColDef[] = [
     // { field: "tutor", headerName: "Tutor", flex: 1 },
     { field: "title", headerName: "Group Class Title", flex: 1.5 },
@@ -136,7 +137,7 @@ const UpcomingAppointments: React.FC = () => {
           <DataGrid
             rows={activeTab === 0 ? oneOnOneRows : groupClassRows} // Filtered Data
             columns={columns}
-          sx={{width:'55rem'}}
+            sx={{ width: '55rem' }}
             autoHeight
           />
         </Box>

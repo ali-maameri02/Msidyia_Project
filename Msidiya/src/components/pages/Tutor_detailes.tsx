@@ -7,8 +7,6 @@ import {
   Button,
   CardActionArea,
   Rating,
-  TextField,
-  MenuItem,
 } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import EmailIcon from "@mui/icons-material/Email";

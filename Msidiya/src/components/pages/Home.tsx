@@ -1,7 +1,5 @@
 import React from 'react';
-import BookingSteps from '../Landing/BookingSteps';
 import HeroSection from '../Landing/HeroSection';
-import NewsLetter from '../Landing/NewsLetter';
 import TeachersList from '../Landing/TeachersList';
 import Services from '../Landing/Services';
 import Testimonials from '../Landing/Testimonials';

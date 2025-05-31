@@ -4,7 +4,6 @@ import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { Slide } from "react-awesome-reveal";
-import { fetchUserData, User } from '../../../utils/userData'; // Adjust the import path if needed
 import { getUserWalletBalance } from '../../../services/wallet.services';
 import { useLatestMessagesQuery } from '../../../services/chat/chat.queries';
 import { useAuth } from '../../../hooks/useAuth';

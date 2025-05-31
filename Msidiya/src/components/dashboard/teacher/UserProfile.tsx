@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { CameraAlt, Edit } from '@mui/icons-material';
+import { CameraAlt } from '@mui/icons-material';
 import { TextField, Button, Box, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
-import Webcam from "react-webcam";
 import axios from 'axios';
 interface UserProfile {
   id: number;
@@ -39,10 +38,10 @@ const UserProfile: React.FC = () => {
       languages: [],
     },
   });
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // State for video preview
-  const [videoPreview, setVideoPreview] = useState<string| null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
   // State for educational qualifications
   const [qualifications, setQualifications] = useState<string[]>(['']);
@@ -81,7 +80,7 @@ const UserProfile: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -89,12 +88,12 @@ const UserProfile: React.FC = () => {
       tutor: {
         ...formData.tutor,
         [e.target.name]: e.target.value,
-      },        [e.target.name]: e.target.value,
+      }, [e.target.name]: e.target.value,
 
     });
   };
-  
-  
+
+
 
   const handleUpdate = async () => {
     if (!user) return;
@@ -118,9 +117,9 @@ const UserProfile: React.FC = () => {
           languages: formData.tutor?.languages ?? user.tutor?.languages,
         },
       };
-  
+
       const form = new FormData();
-  
+
       // Append top-level fields.
       form.append("username", updatedData.username!);
       form.append("email", updatedData.email!);
@@ -129,13 +128,13 @@ const UserProfile: React.FC = () => {
       form.append("Address", updatedData.Address || "");
       form.append("Zip_code", updatedData.Zip_code ? String(updatedData.Zip_code) : "");
       form.append("Gender", updatedData.Gender || "");
-  
+
       // Append nested tutor fields individually.
       if (updatedData.tutor) {
         form.append("tutor[Description]", updatedData.tutor.Description || "");
         form.append("tutor[Intro_video]", updatedData.tutor.Intro_video || "");
         form.append("tutor[Verification_Id]", String(updatedData.tutor.Verification_Id || false));
-  
+
         // Append each qualification
         if (updatedData.tutor.qualifications) {
           updatedData.tutor.qualifications.forEach((qual, index) => {
@@ -149,7 +148,7 @@ const UserProfile: React.FC = () => {
           });
         }
       }
-  
+
       // Append file fields if new files are selected.
       if (profileFile) {
         form.append("Picture", profileFile);
@@ -157,13 +156,13 @@ const UserProfile: React.FC = () => {
       if (coverFile) {
         form.append("tutor[Cover]", coverFile);
       }
-  
+
       const response = await axios.patch(
         `http://127.0.0.1:8000/api/users/${user.id}/update/`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-  
+
       setUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data));
       alert("Profile updated successfully!");
@@ -172,10 +171,10 @@ const UserProfile: React.FC = () => {
       setError("Failed to update profile");
     }
   };
-  
-  
-  
-  
+
+
+
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   const handleTabClick = (tab: string) => {
@@ -189,17 +188,17 @@ const UserProfile: React.FC = () => {
       setProfileImage(URL.createObjectURL(file)); // Preview new image
     }
   };
-  
-  
+
+
 
   const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setcoverFile(file); // Store file separately for upload
-      setCoverImage(URL.createObjectURL(file)); 
+      setCoverImage(URL.createObjectURL(file));
     }// Preview new image
   };
-  
+
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -207,7 +206,7 @@ const UserProfile: React.FC = () => {
       if (videoPreview) {
         URL.revokeObjectURL(videoPreview);
       }
-      
+
       const newVideo = URL.createObjectURL(event.target.files[0]);
       setVideoPreview(newVideo);
     }
@@ -222,11 +221,11 @@ const UserProfile: React.FC = () => {
     updatedQualifications[index] = value;
     setQualifications(updatedQualifications);
   };
-  
+
   const handleAddQualification = () => {
     setQualifications([...qualifications, '']);
   };
-  
+
   const handleRemoveQualification = (index: number) => {
     const updatedQualifications = qualifications.filter((_, i) => i !== index);
     setQualifications(updatedQualifications);
@@ -277,12 +276,12 @@ const UserProfile: React.FC = () => {
               <CameraAlt className="h-6 w-6" />
             </label>
           </div>
-          
+
         </div>
 
         <div className="lg:w-2/3 p-4 lg:pl-8">
           <div className="border-b border-gray-200 mb-4">
-            
+
             <ul className="flex space-x-6">
               <li
                 className={`cursor-pointer ${activeTab === 'General Information' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`}
@@ -317,19 +316,19 @@ const UserProfile: React.FC = () => {
                 InputProps={{ readOnly: !isEditable }}
 
               />
-          <FormControl fullWidth variant="outlined">
-  <InputLabel>Gender</InputLabel>
-  <Select
-  name='Gender'
-    value={formData.Gender || ''}
-    onChange={(e) => setFormData({ ...formData, Gender: e.target.value })}
-    label="Gender"
-    disabled={!isEditable}
-  >
-    <MenuItem value="Male">Male</MenuItem>
-    <MenuItem value="Female">Female</MenuItem>
-  </Select>
-</FormControl>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Gender</InputLabel>
+                <Select
+                  name='Gender'
+                  value={formData.Gender || ''}
+                  onChange={(e) => setFormData({ ...formData, Gender: e.target.value })}
+                  label="Gender"
+                  disabled={!isEditable}
+                >
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                </Select>
+              </FormControl>
 
               <TextField
                 label="Email"
@@ -362,7 +361,7 @@ const UserProfile: React.FC = () => {
                 defaultValue="Vienna"
               /> */}
               <TextField
-              name='Address'
+                name='Address'
                 label="Address"
                 variant="outlined"
                 fullWidth
@@ -373,73 +372,73 @@ const UserProfile: React.FC = () => {
                 }}
                 defaultValue="2707 Pleasantdale Ro..."
               />
-            <Box sx={{ gridColumn: 'span 2' }}>
-  <Typography variant="h6" gutterBottom>
-    Languages
-  </Typography>
-  {formData.tutor?.languages?.map((language, index) => (
-  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-    <TextField
-      label={`Language ${index + 1}`}
-      variant="outlined"
-      fullWidth
-      value={language}
-      onChange={(e) => {
-        const updatedLanguages = [...(formData.tutor?.languages || [])];
-        updatedLanguages[index] = e.target.value;
-        setFormData({
-          ...formData,
-          tutor: { ...formData.tutor, languages: updatedLanguages },
-        });
-      }}
-      InputProps={{
-        readOnly: !isEditable,
-      }}
-    />
-    <IconButton
-      onClick={() => {
-        const updatedLanguages =
-          formData.tutor?.languages?.filter((_, i) => i !== index) || [];
-        setFormData({
-          ...formData,
-          tutor: { ...formData.tutor, languages: updatedLanguages },
-        });
-      }}
-      color="error"
-      disabled={formData.tutor?.languages?.length === 1}
-    >
-      <Remove />
-    </IconButton>
-  </Box>
-))}
-<Button
-  variant="outlined"
-  startIcon={<Add />}
-  onClick={() => {
-    const updatedLanguages = [...(formData.tutor?.languages || []), ''];
-    setFormData({
-      ...formData,
-      tutor: { ...formData.tutor, languages: updatedLanguages },
-    });
-  }}
->
-  Add Language
-</Button>
+              <Box sx={{ gridColumn: 'span 2' }}>
+                <Typography variant="h6" gutterBottom>
+                  Languages
+                </Typography>
+                {formData.tutor?.languages?.map((language, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TextField
+                      label={`Language ${index + 1}`}
+                      variant="outlined"
+                      fullWidth
+                      value={language}
+                      onChange={(e) => {
+                        const updatedLanguages = [...(formData.tutor?.languages || [])];
+                        updatedLanguages[index] = e.target.value;
+                        setFormData({
+                          ...formData,
+                          tutor: { ...formData.tutor, languages: updatedLanguages },
+                        });
+                      }}
+                      InputProps={{
+                        readOnly: !isEditable,
+                      }}
+                    />
+                    <IconButton
+                      onClick={() => {
+                        const updatedLanguages =
+                          formData.tutor?.languages?.filter((_, i) => i !== index) || [];
+                        setFormData({
+                          ...formData,
+                          tutor: { ...formData.tutor, languages: updatedLanguages },
+                        });
+                      }}
+                      color="error"
+                      disabled={formData.tutor?.languages?.length === 1}
+                    >
+                      <Remove />
+                    </IconButton>
+                  </Box>
+                ))}
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={() => {
+                    const updatedLanguages = [...(formData.tutor?.languages || []), ''];
+                    setFormData({
+                      ...formData,
+                      tutor: { ...formData.tutor, languages: updatedLanguages },
+                    });
+                  }}
+                >
+                  Add Language
+                </Button>
 
-  <Button
-    variant="outlined"
-    startIcon={<Add />}
-    onClick={() => {
-      const updatedLanguages = [...(formData.tutor?.languages || []), ''];
-      setFormData({
-        ...formData,
-        tutor: { ...formData.tutor, languages: updatedLanguages },
-      });
-    }}
-  >
-    Add Language
-  </Button>
-</Box>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={() => {
+                    const updatedLanguages = [...(formData.tutor?.languages || []), ''];
+                    setFormData({
+                      ...formData,
+                      tutor: { ...formData.tutor, languages: updatedLanguages },
+                    });
+                  }}
+                >
+                  Add Language
+                </Button>
+              </Box>
 
               <TextField
                 label="Zip Code"
@@ -461,40 +460,40 @@ const UserProfile: React.FC = () => {
                 }}
                 value={formData.Paypal_Email || ''} onChange={handleChange}
               />
-            
-            <Box sx={{ gridColumn: 'span 2' }}>
-  <Typography variant="h6" gutterBottom>
-    Educational Qualifications
-  </Typography>
-  {qualifications.map((qualification, index) => (
-  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-    <TextField
-      label={`Qualification ${index + 1}`}
-      variant="outlined"
-      fullWidth
-      value={qualification}
-      onChange={(e) => handleQualificationChange(index, e.target.value)}
-      InputProps={{
-        readOnly: !isEditable,
-      }}
-    />
-    <IconButton
-      onClick={() => handleRemoveQualification(index)}
-      color="error"
-      disabled={qualifications.length === 1}
-    >
-      <Remove />
-    </IconButton>
-  </Box>
-))}
-<Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
-  Add Qualification
-</Button>
 
-  <Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
-    Add Qualification
-  </Button>
-</Box>
+              <Box sx={{ gridColumn: 'span 2' }}>
+                <Typography variant="h6" gutterBottom>
+                  Educational Qualifications
+                </Typography>
+                {qualifications.map((qualification, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TextField
+                      label={`Qualification ${index + 1}`}
+                      variant="outlined"
+                      fullWidth
+                      value={qualification}
+                      onChange={(e) => handleQualificationChange(index, e.target.value)}
+                      InputProps={{
+                        readOnly: !isEditable,
+                      }}
+                    />
+                    <IconButton
+                      onClick={() => handleRemoveQualification(index)}
+                      color="error"
+                      disabled={qualifications.length === 1}
+                    >
+                      <Remove />
+                    </IconButton>
+                  </Box>
+                ))}
+                <Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
+                  Add Qualification
+                </Button>
+
+                <Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
+                  Add Qualification
+                </Button>
+              </Box>
 
               <Box sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
                 <Button
@@ -512,7 +511,7 @@ const UserProfile: React.FC = () => {
           {activeTab === 'Description & Intro' && (
             <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gap: 2 }}>
               <TextField
-              name='Description'
+                name='Description'
                 label="Description"
                 multiline
                 rows={4}
@@ -523,37 +522,37 @@ const UserProfile: React.FC = () => {
                 value={formData.tutor?.Description || ''} onChange={handleChange}
               />
               <div className="video-upload-section bg-white p-6 rounded-lg shadow-md mt-5">
-        <Typography variant="h6" gutterBottom>
-          Upload Video
-        </Typography>
-        <input
-          type="file"
-          accept="video/*"
-          onChange={handleVideoChange}
-          className="hidden"
-          id="video-upload"
-        />
-        <label htmlFor="video-upload">
-          <Button
-            variant="contained"
-            color="primary"
-            component="span"
-            startIcon={<Add />}
-          >
-            Upload Video
-          </Button>
-        </label>
-        {videoPreview && (
-          <Box mt={2}>
-            <video
-              src={videoPreview}
-              controls
-              width="100%"
-              style={{ borderRadius: '8px' }}
-            />
-          </Box>
-        )}
-      </div>
+                <Typography variant="h6" gutterBottom>
+                  Upload Video
+                </Typography>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoChange}
+                  className="hidden"
+                  id="video-upload"
+                />
+                <label htmlFor="video-upload">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    component="span"
+                    startIcon={<Add />}
+                  >
+                    Upload Video
+                  </Button>
+                </label>
+                {videoPreview && (
+                  <Box mt={2}>
+                    <video
+                      src={videoPreview}
+                      controls
+                      width="100%"
+                      style={{ borderRadius: '8px' }}
+                    />
+                  </Box>
+                )}
+              </div>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button
                   variant="contained"
@@ -573,7 +572,7 @@ const UserProfile: React.FC = () => {
                 control={
                   <Checkbox
                     defaultChecked
-                    // disabled={!isEditable}
+                  // disabled={!isEditable}
                   />
                 }
                 label="Receive Email Notifications"
@@ -582,7 +581,7 @@ const UserProfile: React.FC = () => {
                 control={
                   <Checkbox
                     defaultChecked
-                    // disabled={!isEditable}
+                  // disabled={!isEditable}
                   />
                 }
                 label="Two-Factor Authentication"
@@ -592,7 +591,7 @@ const UserProfile: React.FC = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleEditClick}
-                  // disabled={!isEditable}
+                // disabled={!isEditable}
                 >
                   {isEditable ? 'Save Changes' : 'Edit'}
                 </Button>
@@ -603,7 +602,7 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* Video Upload Section */}
-    
+
     </div>
   );
 };

@@ -12,7 +12,7 @@ import {
   Divider,
 } from "@mui/material";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Footer from "../Landing/Footer";
 import NavBar from "../Landing/NavBar";
 
@@ -58,7 +58,7 @@ interface Review {
 
 const GroupClassDetails: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [groupClass, setGroupClass] = useState<GroupClass | null>(null);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -103,10 +103,10 @@ const GroupClassDetails: React.FC = () => {
     fetchData();
   }, [classId]);
 
-  const handleBookNow = (scheduleId: number) => {
-    // Navigate to booking confirmation or payment page
-    navigate(`/booking-confirm?schedule=${scheduleId}&class=${classId}`);
-  };
+  // const handleBookNow = (scheduleId: number) => {
+  //   // Navigate to booking confirmation or payment page
+  //   navigate(`/booking-confirm?schedule=${scheduleId}&class=${classId}`);
+  // };
 
   const handleAddReview = async () => {
     if (!rating || !comment.trim()) {
@@ -237,7 +237,7 @@ const GroupClassDetails: React.FC = () => {
                 </Typography>
                 <Rating
                   value={rating}
-                  onChange={(event, newValue) => setRating(newValue)}
+                  onChange={(_, newValue) => setRating(newValue)}
                   sx={{ mb: 1 }}
                 />
                 <TextField

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Text } from "../atoms/Text";
@@ -214,7 +214,6 @@ const GroupClassesFiltered = () => {
           ) : (
             <div className="grid grid-cols-5 md:grid-cols-2 lg:grid-cols-3 gap-6 px-16 ml-48 py-16  ">
               {filteredGroupClasses.map((groupClass) => {
-                const averageRating = calculateAverageRating(groupClass.id);
                 return (
                   <div
                     key={groupClass.id}

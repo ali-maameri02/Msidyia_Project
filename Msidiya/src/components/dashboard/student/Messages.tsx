@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import { queryClient } from "../../../main";
 import { useLatestMessagesQuery, useMessagesBetweenUsQuery, useSearchMessagesUsersQuery, useSendMessageMutatoin } from "../../../services/chat/chat.queries";
 import { IExtendedMessage } from "../../../interfaces/IExtendedMessage";
 import { IChatUser } from "../../../interfaces/IChatUser";

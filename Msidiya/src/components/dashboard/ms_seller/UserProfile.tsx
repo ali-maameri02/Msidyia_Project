@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CameraAlt, Edit } from '@mui/icons-material';
+import { CameraAlt } from '@mui/icons-material';
 import { TextField, Button, Box, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 

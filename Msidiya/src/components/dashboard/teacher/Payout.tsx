@@ -20,6 +20,7 @@ const PayoutComponent: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log(event)
     setActiveTab(newValue);
   };
 
@@ -30,7 +31,7 @@ const PayoutComponent: React.FC = () => {
       {
         data: [20, 50, 30],
         backgroundColor: ['#27D4EE', '#49C7B4', '#635BFF'],
-        hoverBackgroundColor:['#27D4EE', '#49C7B4', '#635BFF'],
+        hoverBackgroundColor: ['#27D4EE', '#49C7B4', '#635BFF'],
       },
     ],
   };
@@ -45,86 +46,86 @@ const PayoutComponent: React.FC = () => {
 
   return (
     <div className='ml-16 mt-16'>
-    <Box sx={{ p: 3 }}>
-      <Tabs value={activeTab} onChange={handleTabChange}>
-        <Tab label="Earnings Status" />
-        <Tab label="Request Manager Account" />
-      </Tabs>
+      <Box sx={{ p: 3 }}>
+        <Tabs value={activeTab} onChange={handleTabChange}>
+          <Tab label="Earnings Status" />
+          <Tab label="Request Manager Account" />
+        </Tabs>
 
-      {activeTab === 0 && (
-        <Box>
-          {/* Statistics Section */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={8}>
-              <Pie data={pieData} />
+        {activeTab === 0 && (
+          <Box>
+            {/* Statistics Section */}
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={8}>
+                <Pie data={pieData} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6">Total Earnings</Typography>
+                  <Typography variant="body1">$268</Typography>
+                  <Typography variant="h6">Commission to the site</Typography>
+                  <Typography variant="body1">$26.8</Typography>
+                  <Typography variant="h6">Tutor Earnings</Typography>
+                  <Typography variant="body1">$241.2</Typography>
+                </Paper>
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2 }}>
-                <Typography variant="h6">Total Earnings</Typography>
-                <Typography variant="body1">$268</Typography>
-                <Typography variant="h6">Commission to the site</Typography>
-                <Typography variant="body1">$26.8</Typography>
-                <Typography variant="h6">Tutor Earnings</Typography>
-                <Typography variant="body1">$241.2</Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Box>
-      )}
+          </Box>
+        )}
 
-      {activeTab === 1 && (
-        <Box>
-          {/* Table Section */}
-          <TableContainer component={Paper} sx={{ mt: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Commission</TableCell>
-                  <TableCell>Tutor Balance</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tableData.map((row, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{row.date}</TableCell>
-                    <TableCell>{row.amount}</TableCell>
-                    <TableCell>{row.commission}</TableCell>
-                    <TableCell>{row.balance}</TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color:
-                            row.status === 'Pending'
-                              ? 'orange'
-                              : row.status === 'Rejected'
-                              ? 'red'
-                              : 'green',
-                        }}
-                      >
-                        {row.status}
-                      </Typography>
-                    </TableCell>
+        {activeTab === 1 && (
+          <Box>
+            {/* Table Section */}
+            <TableContainer component={Paper} sx={{ mt: 2 }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Amount</TableCell>
+                    <TableCell>Commission</TableCell>
+                    <TableCell>Tutor Balance</TableCell>
+                    <TableCell>Status</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      )}
+                </TableHead>
+                <TableBody>
+                  {tableData.map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{row.date}</TableCell>
+                      <TableCell>{row.amount}</TableCell>
+                      <TableCell>{row.commission}</TableCell>
+                      <TableCell>{row.balance}</TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color:
+                              row.status === 'Pending'
+                                ? 'orange'
+                                : row.status === 'Rejected'
+                                  ? 'red'
+                                  : 'green',
+                          }}
+                        >
+                          {row.status}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
 
-      {/* Bottom Controls */}
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-        <Button variant="contained">Stats By Date Range</Button>
-        <Button variant="outlined">Send Request</Button>
-        <Button variant="contained" color="error">
-          Add a Bank Account
-        </Button>
+        {/* Bottom Controls */}
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button variant="contained">Stats By Date Range</Button>
+          <Button variant="outlined">Send Request</Button>
+          <Button variant="contained" color="error">
+            Add a Bank Account
+          </Button>
+        </Box>
       </Box>
-    </Box>
     </div>
   );
 };

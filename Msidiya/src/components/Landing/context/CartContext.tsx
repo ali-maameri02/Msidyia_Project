@@ -22,7 +22,7 @@ const CartContext = createContext<CartContextType>({
   removeFromCart: () => { },
   clearCart: () => { },
   totalPrice: 0,
-  inCart: (id: number) => false,
+  inCart: (id: number) => id != undefined && false,
 });
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {

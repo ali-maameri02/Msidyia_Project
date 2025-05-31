@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaStar } from 'react-icons/fa';
 import NavBar from '../Landing/NavBar';
 import Footer from '../Landing/Footer';
-import Skeleton from '@mui/material/Skeleton';
 import logo from '../../assets/msidiya-m-logo.png';
 import { Slider } from '@mui/material'; // Import Slider from MUI
 import { useCart } from '../Landing/context/CartContext'; // Import the CartContext

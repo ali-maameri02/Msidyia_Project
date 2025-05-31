@@ -7,6 +7,7 @@ import { User, fetchUserData } from '../../../utils/userData';
 
 const Teacher: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  console.log(user)
 
   useEffect(() => {
     const getUserData = async () => {
@@ -17,11 +18,11 @@ const Teacher: React.FC = () => {
   }, []);
   return (
     <div className="pl-12 ml-5 w-100">
-    
+
 
       {/* Main Content */}
       <main className="flex flex-col justify-center  mt-20 bg-transparent   ">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
             <div className="p-3 bg-purple-100 rounded-full">
               <FaChalkboardTeacher className="text-purple-500 text-2xl" />

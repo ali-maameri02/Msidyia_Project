@@ -1,4 +1,4 @@
-import { IUser } from "../services/users.service";
+import { IUser } from "./IUser";
 
 export interface ITransaction {
   id: number;

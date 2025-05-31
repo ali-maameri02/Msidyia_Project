@@ -1,5 +1,4 @@
 import "./style.css";
-import * as React from 'react';
 import {
   TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper
 } from "@mui/material";
@@ -39,10 +38,10 @@ function MyTransaction() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((row) => (
+              {data && data.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="font-extrabold text-blue-500">{row.sender}</TableCell>
-                  <TableCell className="font-extrabold">{row.receiver}</TableCell>
+                  <TableCell className="font-extrabold text-blue-500">{row.sender?.username}</TableCell>
+                  <TableCell className="font-extrabold">{row.receiver?.username}</TableCell>
                   <TableCell className="font-extrabold">${row.amount}</TableCell>
                   <TableCell className="font-extrabold">
                     <div className="bg-green-500 text-white text-center text-xs rounded-xl p-2">{row.type}</div>

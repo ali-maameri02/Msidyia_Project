@@ -8,7 +8,7 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
-import { Add, Remove, CameraAlt } from '@mui/icons-material';
+import { Add, CameraAlt } from '@mui/icons-material';
 
 // Define the structure of the student profile data
 interface StudentProfile {
@@ -106,7 +106,7 @@ const UserProfile = () => {
 
   const handleUpdate = async () => {
     if (!user) return;
-  
+
     const updatedData: Partial<StudentProfile> = {
       username: formData.username ?? user.username,
       email: formData.email ?? user.email,
@@ -120,10 +120,10 @@ const UserProfile = () => {
         Grade: formData.student?.Grade ?? user.student?.Grade,
       },
     };
-  
+
     try {
       const form = new FormData();
-  
+
       // Append fields to FormData
       form.append('username', updatedData.username!);
       form.append('email', updatedData.email!);
@@ -133,18 +133,18 @@ const UserProfile = () => {
       form.append('Zip_code', updatedData.Zip_code || '');
       form.append('Gender', updatedData.Gender || '');
       form.append('Role', updatedData.Role!);
-  
+
       // Add individual fields from the 'student' object
       if (updatedData.student?.Grade) {
         form.append('student.Grade', updatedData.student.Grade);
       }
-  
+
       // Append profile picture if available
       if (profileFile) {
         form.append('Picture', profileFile);
       }
-  
-      const response = await axios.patch(
+
+      await axios.patch(
         `http://127.0.0.1:8000/api/users/${user.id}/update/`,
         form,
         {
@@ -153,7 +153,7 @@ const UserProfile = () => {
           },
         }
       );
-  
+
       await fetchUserProfile(user.id); // Refresh the user data
       setIsEditable(false); // Turn off edit mode
       alert('Profile updated successfully!');
@@ -162,11 +162,11 @@ const UserProfile = () => {
       setError('Failed to update profile');
     }
   };
-  
-  
-  
-  
-  
+
+
+
+
+
   // Toggle edit mode
   const handleEditClick = () => {
     setIsEditable(!isEditable); // Toggle edit mode
@@ -211,21 +211,19 @@ const UserProfile = () => {
           <div className="border-b border-gray-200 mb-4">
             <ul className="flex space-x-6">
               <li
-                className={`cursor-pointer ${
-                  activeTab === 'General Information'
-                    ? 'text-blue-500 border-b-2 border-blue-500'
-                    : 'text-gray-500'
-                } pb-2`}
+                className={`cursor-pointer ${activeTab === 'General Information'
+                  ? 'text-blue-500 border-b-2 border-blue-500'
+                  : 'text-gray-500'
+                  } pb-2`}
                 onClick={() => handleTabClick('General Information')}
               >
                 General Information
               </li>
               <li
-                className={`cursor-pointer ${
-                  activeTab === 'Security and Notification'
-                    ? 'text-blue-500 border-b-2 border-blue-500'
-                    : 'text-gray-500'
-                } pb-2`}
+                className={`cursor-pointer ${activeTab === 'Security and Notification'
+                  ? 'text-blue-500 border-b-2 border-blue-500'
+                  : 'text-gray-500'
+                  } pb-2`}
                 onClick={() => handleTabClick('Security and Notification')}
               >
                 Security and Notification

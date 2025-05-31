@@ -15,7 +15,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [Role, setRole] = useState("");
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleSignup = async (e: React.FormEvent) => {

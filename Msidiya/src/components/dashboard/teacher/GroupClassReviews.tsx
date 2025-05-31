@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Typography,
   Card,
@@ -16,19 +16,19 @@ import SendIcon from "@mui/icons-material/Send";
 
 // Define the Reply type
 interface Reply {
-    user: string;
-    comment: string;
-  }
-  
-  // Define the Review type
-  interface Review {
-    id: number;
-    user: string;
-    rating: number;
-    comment: string;
-    timestamp: string;
-    replies: Reply[]; // Explicitly define the type of replies
-  }
+  user: string;
+  comment: string;
+}
+
+// Define the Review type
+interface Review {
+  id: number;
+  user: string;
+  rating: number;
+  comment: string;
+  timestamp: string;
+  replies: Reply[]; // Explicitly define the type of replies
+}
 
 const GroupClassReviews = () => {
   // Initial State with Explicit Types
@@ -69,9 +69,9 @@ const GroupClassReviews = () => {
       prevReviews.map((review) =>
         review.id === reviewId
           ? {
-              ...review,
-              replies: [...review.replies, { user: "Tutor", comment: replyText }],
-            }
+            ...review,
+            replies: [...review.replies, { user: "Tutor", comment: replyText }],
+          }
           : review
       )
     );

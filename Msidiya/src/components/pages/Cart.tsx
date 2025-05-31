@@ -1,18 +1,16 @@
-import React from "react";
 import { useCart } from "../Landing/context/CartContext";
 import { Button } from "../atoms/Button";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
 import { useNavigate } from "react-router-dom";
-import { Remove } from "@mui/icons-material";
 import { Trash } from "@phosphor-icons/react";
 
-interface CartItem {
-  id: number;
-  title: string;
-  price: number;
-  main_image: string;
-}
+// interface CartItem {
+//   id: number;
+//   title: string;
+//   price: number;
+//   main_image: string;
+// }
 
 const CartPage = () => {
   const { cartItems, clearCart, removeFromCart } = useCart();
@@ -85,7 +83,7 @@ const CartPage = () => {
                         onClick={() => removeFromCart(item.id)}
                         className="text-red-500 hover:text-red-700 text-sm"
                       >
-                        <Trash size={32}/>
+                        <Trash size={32} />
                       </Button>
                     </div>
                   </div>
@@ -99,18 +97,18 @@ const CartPage = () => {
               <p className="text-lg font-semibold">DA {totalPrice.toFixed(2)}</p>
             </div>
             <div className="flex flex-row justify-evenly">
-            <Button
-              onClick={() => window.history.back()}
-              className="bg-cyan-500 text-white px-6 py-2 rounded-lg"
-            >
-              Continue Shopping
-            </Button>
-            <Button
-              onClick={handleCheckout}
-              className=" bg-cyan-500 text-white px-6 py-2 rounded-lg font-medium"
-            >
-              Proceed to Checkout
-            </Button>
+              <Button
+                onClick={() => window.history.back()}
+                className="bg-cyan-500 text-white px-6 py-2 rounded-lg"
+              >
+                Continue Shopping
+              </Button>
+              <Button
+                onClick={handleCheckout}
+                className=" bg-cyan-500 text-white px-6 py-2 rounded-lg font-medium"
+              >
+                Proceed to Checkout
+              </Button>
             </div>
           </div>
         )}

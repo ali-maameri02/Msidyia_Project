@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { getLatestMessages, getMessagesBetweenus, sendMessageToUser, searchUsers } from '../../../services/chat.service';
 import { useAuth } from "../../../hooks/useAuth";
 import { queryClient } from "../../../main";
@@ -157,6 +157,7 @@ export default function Messages() {
       return { previousMessages };
     },
     onError: (err, variables, context) => {
+      console.error(err)
       if (context?.previousMessages) {
         queryClient.setQueryData(['messages', variables.Receiver], context.previousMessages);
       }

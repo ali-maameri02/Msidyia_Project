@@ -21,8 +21,8 @@ const TrafficSource: React.FC = () => {
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie data={data} innerRadius={60} outerRadius={80} dataKey="value" label>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              {data.map((_, index) => (
+                <Cell key={`cell-${index}$`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
           </PieChart>
