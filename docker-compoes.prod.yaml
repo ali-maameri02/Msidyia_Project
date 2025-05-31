@@ -6,6 +6,7 @@ services:
     restart: no
     build:
       context : ./Msidiya
+      dockerfile: Dockerfile.prod
       args:
         - VITE_API_URL=${VITE_API_URL}  
     environment:
@@ -29,6 +30,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - backend
+      - client
     networks:
       - app-network
 
