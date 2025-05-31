@@ -1,6 +1,6 @@
 
 
-FROM msidyia_project-client AS client_build_assets
+FROM chihabs/msidyia_project-client AS client_build_assets
 
 FROM nginx:stable-alpine
 COPY --from=client_build_assets /app/dist /usr/share/nginx/html/
