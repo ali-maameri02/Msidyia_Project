@@ -40,7 +40,9 @@ SECRET_KEY = 'django-insecure-tir$wa786fanu%cfw#o+y8zd4-an1bo0qwqb&gvw%6f%ajl&m9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG",True) !="False"
 # ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-ALLOWED_HOSTS = ["*"]  # Allow all hosts for development
+#ALLOWED_HOSTS = ["*"]  # Allow all hosts for development
+
+ALLOWED_HOSTS = ['localhost','msidiya.com', 'www.msidiya.com']
 # CORS_ALLOWED_ORIGINS = [
 #     'http://localhost:5173',
 # ]
@@ -49,6 +51,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SECURE = False  # Set to True only in production
 # Application definition
+CSRF_TRUSTED_ORIGINS = [
+    'https://msidiya.com',
+    'https://www.msidiya.com',
+]
+
 
 INSTALLED_APPS = [
     # 'jazzmin',
