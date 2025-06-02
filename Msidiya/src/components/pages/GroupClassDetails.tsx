@@ -74,7 +74,7 @@ const GroupClassDetails: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      const res = await axios.get<Review[]>(`http://127.0.0.1:8000/api/group-class-reviews/`);
+      const res = await axios.get<Review[]>(`https://msidiya.com/api/group-class-reviews/`);
       setReviews(res.data.filter((r) => r.group_class === Number(classId)));
     } catch (err) {
       console.error("Failed to fetch reviews", err);
@@ -85,12 +85,12 @@ const GroupClassDetails: React.FC = () => {
     const fetchData = async () => {
       try {
         const classRes = await axios.get<GroupClass>(
-          `http://127.0.0.1:8000/api/group-classes/${classId}/`
+          `https://msidiya.com/api/group-classes/${classId}/`
         );
         setGroupClass(classRes.data);
 
         const scheduleRes = await axios.get<Schedule[]>(
-          `http://127.0.0.1:8000/api/available-schedules/?group_class=${classId}`
+          `https://msidiya.com/api/available-schedules/?group_class=${classId}`
         );
         setSchedules(scheduleRes.data);
 
@@ -118,7 +118,7 @@ const GroupClassDetails: React.FC = () => {
 
     try {
       await axios.post(
-        `http://127.0.0.1:8000/api/group-class-reviews/`,
+        `https://msidiya.com/api/group-class-reviews/`,
         {
           rating,
           comment,

@@ -33,7 +33,7 @@ const Tutors: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get<Tutor[]>("http://127.0.0.1:8000/api/tutors/")
+      .get<Tutor[]>("https://msidiya.com/api/tutors/")
       .then((response) => {
         setTutors(response.data);
         setLoading(false);

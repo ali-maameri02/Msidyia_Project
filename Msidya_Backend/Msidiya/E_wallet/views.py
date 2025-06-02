@@ -52,7 +52,7 @@ def initiate_payment(request):
         "amount": amount,
         "currency": "dzd",
         "description": str(user.id),  # So you get it back in webhook
-        "success_url": "http://localhost:5173/",
+        "success_url": "https://msidiya.com",
 
 
     }

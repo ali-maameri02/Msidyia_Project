@@ -72,7 +72,7 @@ export default function Setcategories() {
       const loggedInUser = JSON.parse(storedUser);
       const tutorId = loggedInUser?.id;
 
-      const response = await axios.get('http://127.0.0.1:8000/api/categories/');
+      const response = await axios.get('https://msidiya.com/api/categories/');
       const tutorCategories = response.data
         .filter((category: any) => category.tutor === tutorId)
         .map((category: any) => ({
@@ -97,7 +97,7 @@ export default function Setcategories() {
 
   const handleOpen = (row: CategoryRow) => {
     setSelectedCategoryId(row.id); // Store the category ID
-    axios.get(`http://127.0.0.1:8000/api/categories/${row.id}/subjects/`)
+    axios.get(`https://msidiya.com/api/categories/${row.id}/subjects/`)
       .then(response => {
         setSelectedSubjects(response.data);
         setOpen(true);
@@ -134,13 +134,13 @@ export default function Setcategories() {
 
     try {
       await axios.post(
-        `http://127.0.0.1:8000/api/categories/${selectedCategoryId}/create_subject/`,
+        `https://msidiya.com/api/categories/${selectedCategoryId}/create_subject/`,
         { name: newValue, category_id: selectedCategoryId },
         { headers: { "Content-Type": "application/json" } }
       );
 
       // Fetch the updated subjects list immediately
-      const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+      const response = await axios.get(`https://msidiya.com/api/categories/${selectedCategoryId}/subjects/`);
       setSelectedSubjects(response.data);
 
       setNewValue('');
@@ -153,12 +153,12 @@ export default function Setcategories() {
   const handleUpdateSubject = async (subjectId: number, updatedName: string) => {
     try {
       await axios.patch(
-        `http://127.0.0.1:8000/api/subjects/${subjectId}/`,
+        `https://msidiya.com/api/subjects/${subjectId}/`,
         { name: updatedName },
         { headers: { "Content-Type": "application/json" } }
       );
       // Re-fetch updated subjects list
-      const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+      const response = await axios.get(`https://msidiya.com/api/categories/${selectedCategoryId}/subjects/`);
       setSelectedSubjects(response.data);
     } catch (error) {
       console.error("Error updating subject:", error);
@@ -168,9 +168,9 @@ export default function Setcategories() {
   // Delete a subject
   const handleDeleteSubject = async (subjectId: number) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/subjects/${subjectId}/`);
+      await axios.delete(`https://msidiya.com/api/subjects/${subjectId}/`);
       // Re-fetch updated subjects list
-      const response = await axios.get(`http://127.0.0.1:8000/api/categories/${selectedCategoryId}/subjects/`);
+      const response = await axios.get(`https://msidiya.com/api/categories/${selectedCategoryId}/subjects/`);
       setSelectedSubjects(response.data);
     } catch (error) {
       console.error("Error deleting subject:", error);
@@ -199,7 +199,7 @@ export default function Setcategories() {
       formData.append('tutor', tutorId.toString());
 
       const response = await axios.post(
-        'http://127.0.0.1:8000/api/categories/',
+        'https://msidiya.com/api/categories/',
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -216,7 +216,7 @@ export default function Setcategories() {
   // Delete a category
   const handleDeleteCategory = async (categoryId: number) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/categories/${categoryId}/`);
+      await axios.delete(`https://msidiya.com/api/categories/${categoryId}/`);
       await fetchCategories();
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -232,14 +232,14 @@ export default function Setcategories() {
 
     try {
       await axios.post(
-        `http://127.0.0.1:8000/api/subjects/${selectedSubject.id}/add_topic/`,
+        `https://msidiya.com/api/subjects/${selectedSubject.id}/add_topic/`,
         { name: newValue },
         { headers: { "Content-Type": "application/json" } }
       );
 
       // Fetch updated topics immediately
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/subjects/${selectedSubject.id}/`
+        `https://msidiya.com/api/subjects/${selectedSubject.id}/`
       );
       setSelectedTopics(response.data.topics);
 
@@ -253,12 +253,12 @@ export default function Setcategories() {
   const handleUpdateTopic = async (topicId: number, updatedName: string) => {
     try {
       await axios.patch(
-        `http://127.0.0.1:8000/api/topics/${topicId}/`,
+        `https://msidiya.com/api/topics/${topicId}/`,
         { name: updatedName },
         { headers: { "Content-Type": "application/json" } }
       );
       // Re-fetch updated topics for the selected subject
-      const response = await axios.get(`http://127.0.0.1:8000/api/subjects/${selectedSubject?.id}/`);
+      const response = await axios.get(`https://msidiya.com/api/subjects/${selectedSubject?.id}/`);
       setSelectedTopics(response.data.topics);
     } catch (error) {
       console.error("Error updating topic:", error);
@@ -273,7 +273,7 @@ export default function Setcategories() {
       }
 
       await axios.patch(
-        `http://127.0.0.1:8000/api/categories/${categoryId}/`,
+        `https://msidiya.com/api/categories/${categoryId}/`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -286,9 +286,9 @@ export default function Setcategories() {
   // Delete a topic
   const handleDeleteTopic = async (topicId: number) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/topics/${topicId}/`);
+      await axios.delete(`https://msidiya.com/api/topics/${topicId}/`);
       // Re-fetch updated topics for the selected subject
-      const response = await axios.get(`http://127.0.0.1:8000/api/subjects/${selectedSubject?.id}/`);
+      const response = await axios.get(`https://msidiya.com/api/subjects/${selectedSubject?.id}/`);
       setSelectedTopics(response.data.topics);
     } catch (error) {
       console.error("Error deleting topic:", error);

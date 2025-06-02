@@ -84,11 +84,11 @@ const TutorDetails = () => {
     const fetchTutorDetails = async () => {
       try {
         // Fetch tutor details
-        const response = await axios.get(`http://127.0.0.1:8000/api/tutor/${tutorId}/`);
+        const response = await axios.get(`https://msidiya.com/api/tutor/${tutorId}/`);
         setTutor(response.data);
   
         // Fetch all group classes
-        const Groupclasseresponse = await axios.get(`http://127.0.0.1:8000/api/group-classes/`);
+        const Groupclasseresponse = await axios.get(`https://msidiya.com/api/group-classes/`);
   
         // Filter group classes by the tutor's user ID
         const TutorGroupclass = Groupclasseresponse.data.filter(
@@ -98,7 +98,7 @@ const TutorDetails = () => {
         console.log(TutorGroupclass);
   
         // Fetch categories
-        const CategoriesResponse = await axios.get(`http://127.0.0.1:8000/api/categories/`);
+        const CategoriesResponse = await axios.get(`https://msidiya.com/api/categories/`);
   
         // Filter categories by the tutor's user ID
         const FiltredCategories = CategoriesResponse.data.filter(

@@ -49,7 +49,7 @@ const Groupclasses: React.FC = () => {
         const loggedInUser = JSON.parse(storedUser);
         const tutorId = loggedInUser?.id;
 
-        const response = await axios.get('http://127.0.0.1:8000/api/group-classes/');
+        const response = await axios.get('https://msidiya.com/api/group-classes/');
         const filteredClasses = response.data.filter((cls: GroupClass) => cls.tutor === tutorId);
 
         setGroupClasses(filteredClasses);
@@ -64,7 +64,7 @@ const Groupclasses: React.FC = () => {
 const handleDelete = async (id: number) => {
   if (window.confirm('Are you sure you want to delete this class?')) {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/group-classes/${id}/`, {
+      await axios.delete(`https://msidiya.com/api/group-classes/${id}/`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setGroupClasses(groupClasses.filter(cls => cls.id !== id));

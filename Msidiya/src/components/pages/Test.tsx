@@ -6,7 +6,7 @@ function Test() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/e_wallet/wallet/", {
+    axios.get("https://msidiya.com/e_wallet/wallet/", {
       withCredentials: true  // Important for session-authenticated APIs
     })
       .then((res) => {

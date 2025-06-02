@@ -23,7 +23,7 @@ const Services = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/categories/");
+      const response = await axios.get("https://msidiya.com/api/categories/");
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);

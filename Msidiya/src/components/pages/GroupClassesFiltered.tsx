@@ -66,7 +66,7 @@ const GroupClassesFiltered = () => {
       try {
         // Fetch group classes
         const groupClassesResponse = await axios.get<GroupClass[]>(
-          "http://127.0.0.1:8000/api/group-classes/"
+          "https://msidiya.com/api/group-classes/"
         );
         const filteredClasses = groupClassesResponse.data.filter(
           (groupClass) => groupClass.category.toString() === categoryId
@@ -75,13 +75,13 @@ const GroupClassesFiltered = () => {
 
         // Fetch reviews
         const reviewsResponse = await axios.get<Review[]>(
-          "http://127.0.0.1:8000/api/group-class-reviews/"
+          "https://msidiya.com/api/group-class-reviews/"
         );
         setReviews(reviewsResponse.data);
 
         // Fetch tutors
         const tutorsResponse = await axios.get<Tutor[]>(
-          "http://127.0.0.1:8000/api/tutors/"
+          "https://msidiya.com/api/tutors/"
         );
         console.log("Fetched tutors:", tutorsResponse.data);
         setTutors(tutorsResponse.data);

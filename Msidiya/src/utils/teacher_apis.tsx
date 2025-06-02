@@ -10,7 +10,7 @@ export interface Category {
 export const fetchCategories = async (): Promise<Category | null> => {
  
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/categories/`);
+      const response = await axios.get(`https://msidiya.com/api/categories/`);
       
       console.log(response.data)
 
@@ -23,7 +23,7 @@ export const fetchCategories = async (): Promise<Category | null> => {
 };
 export const postCategories = async (name: string): Promise<Category | null> => {
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/api/categories/`, {
+      const response = await axios.post(`https://msidiya.com/api/categories/`, {
         name, // Pass the name in the request body
       });
   

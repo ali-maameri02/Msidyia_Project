@@ -56,7 +56,7 @@ const UserProfile: React.FC = () => {
   const fetchUserProfile = async (userId: number) => {
     try {
       const response = await axios.get<UserProfile>(
-        `http://127.0.0.1:8000/api/users/${userId}/update/`
+        `https://msidiya.com/api/users/${userId}/update/`
       );
       // Use the response data directly to update state
       const userData = response.data;
@@ -158,7 +158,7 @@ const UserProfile: React.FC = () => {
       }
 
       const response = await axios.patch(
-        `http://127.0.0.1:8000/api/users/${user.id}/update/`,
+        `https://msidiya.com/api/users/${user.id}/update/`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

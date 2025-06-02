@@ -34,7 +34,7 @@ const UpcomingAppointments: React.FC = () => {
         const loggedInUser = JSON.parse(storedUser);
         const tutorId = loggedInUser?.id; // Ensure `id` exists
 
-        const response = await axios.get("http://127.0.0.1:8000/api/schedules/");
+        const response = await axios.get("https://msidiya.com/api/schedules/");
         const schedules = response.data;
 
         const groupClasses = schedules

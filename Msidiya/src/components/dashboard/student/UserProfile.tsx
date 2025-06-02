@@ -51,7 +51,7 @@ const UserProfile = () => {
   const fetchUserProfile = async (userId: number) => {
     try {
       const response = await axios.get<StudentProfile>(
-        `http://127.0.0.1:8000/api/users/${userId}/update/`
+        `https://msidiya.com/api/users/${userId}/update/`
       );
       const userData = response.data;
       setUser(userData);
@@ -145,7 +145,7 @@ const UserProfile = () => {
       }
 
       await axios.patch(
-        `http://127.0.0.1:8000/api/users/${user.id}/update/`,
+        `https://msidiya.com/api/users/${user.id}/update/`,
         form,
         {
           headers: {

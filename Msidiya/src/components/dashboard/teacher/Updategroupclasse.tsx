@@ -40,7 +40,7 @@ const Updategroupclasse: React.FC = () => {
   useEffect(() => {
     const fetchGroupClass = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/group-classes/${id}/`);
+        const response = await axios.get(`https://msidiya.com/api/group-classes/${id}/`);
         
         if (!response.data) {
           throw new Error("No data received");
@@ -66,7 +66,7 @@ const Updategroupclasse: React.FC = () => {
     
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/categories/");
+        const response = await axios.get("https://msidiya.com/api/categories/");
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -120,7 +120,7 @@ const Updategroupclasse: React.FC = () => {
     try {
       // Fetch previous data only if no new image is selected
       if (!selectedImage) {
-        const response = await axios.get(`http://127.0.0.1:8000/api/group-classes/${id}/`, {
+        const response = await axios.get(`https://msidiya.com/api/group-classes/${id}/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -142,7 +142,7 @@ const Updategroupclasse: React.FC = () => {
   
       // Send the update request
       await axios.put(
-        `http://127.0.0.1:8000/api/group-classes/${id}/`,
+        `https://msidiya.com/api/group-classes/${id}/`,
         formDataToSend,
         {
           headers: {

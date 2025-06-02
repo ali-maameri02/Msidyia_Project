@@ -20,7 +20,7 @@ const AddGroupClass: React.FC = () => {
   console.log(open, user)
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/categories/")
+    axios.get("https://msidiya.com/api/categories/")
       .then(response => setCategories(response.data))
       .catch(error => console.error("Error fetching categories:", error));
   }, []);
@@ -79,7 +79,7 @@ const AddGroupClass: React.FC = () => {
 
       // Step 1: Create Group Class
       const groupClassResponse = await axios.post(
-        "http://127.0.0.1:8000/api/group-classes/",
+        "https://msidiya.com/api/group-classes/",
         formDataObj,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -124,7 +124,7 @@ const AddGroupClass: React.FC = () => {
       };
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/schedulescreate/",
+        "https://msidiya.com/api/schedulescreate/",
         newSchedule
       );
 
@@ -182,7 +182,7 @@ const AddGroupClass: React.FC = () => {
   //     };
 
   //     const response = await axios.post(
-  //       "http://127.0.0.1:8000/api/schedules/",
+  //       "https://msidiya.com/api/schedules/",
   //       newSchedule
   //     );
 
