@@ -1,8 +1,15 @@
-import React, { useState, useMemo } from "react";
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { getLatestMessages, getMessagesBetweenus, sendMessageToUser, searchUsers } from '../../../services/chat.service';
+import React, { useState, useMemo, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import {
+  getLatestMessages,
+  getMessagesBetweenus,
+  sendMessageToUser,
+  searchUsers,
+} from "../../../services/chat.service";
 import { useAuth } from "../../../hooks/useAuth";
 import { queryClient } from "../../../main";
+import { useGetUserByIdQuery } from "../../../services/chat/chat.queries";
 
 // Interfaces
 interface IMessage {
@@ -51,15 +58,31 @@ interface IChatUser {
 }
 
 export default function Messages() {
+  const [searchParams] = useSearchParams();
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { user: currentUser, isLoading: isUserLoading } = useAuth();
 
+  // Add effect to handle URL parameter
+  useEffect(() => {
+    const withUser =
+      searchParams.get("with_user") || searchParams.get("chat_with");
+    console.log("URL parameter value:", withUser); // Debug log
+    if (withUser) {
+      const userId = parseInt(withUser, 10);
+      console.log("Parsed user ID:", userId); // Debug log
+      if (!isNaN(userId)) {
+        setSelectedUserId(userId);
+        console.log("Selected user ID set to:", userId); // Debug log
+      }
+    }
+  }, [searchParams]);
+
   // Fetch latest messages (users with recent conversations) - now returns IUserWithChat[]
   const { data: latestChats = [], isLoading: latestChatsLoading } = useQuery({
-    queryKey: ['latestChats'],
+    queryKey: ["latestChats"],
     queryFn: getLatestMessages,
     refetchInterval: 3000,
     staleTime: 0,
@@ -68,7 +91,7 @@ export default function Messages() {
 
   // Search users when search query exists
   const { data: searchResults = [], isLoading: searchLoading } = useQuery({
-    queryKey: ['searchUsers', searchQuery],
+    queryKey: ["searchUsers", searchQuery],
     queryFn: () => searchUsers(searchQuery),
     enabled: !!searchQuery.trim() && searchQuery.length > 2,
     staleTime: 1000 * 30, // 30 seconds
@@ -76,35 +99,59 @@ export default function Messages() {
 
   // Fetch messages between current user and selected user
   const { data: rawMessages = [], isLoading: messagesLoading } = useQuery({
-    queryKey: ['messages', selectedUserId],
+    queryKey: ["messages", selectedUserId],
     queryFn: () => getMessagesBetweenus(selectedUserId!),
     enabled: !!selectedUserId && !!currentUser,
     refetchInterval: 3000,
     staleTime: 0,
   });
 
+  // Fetch selected user's information if not in displayUsers
+  const { data: selectedUserInfo } = useGetUserByIdQuery(selectedUserId);
+
   // Transform raw messages to include isOwn property
   const messages: IExtendedMessage[] = useMemo(() => {
     if (!currentUser) return [];
-    return rawMessages.map(msg => ({
+    return rawMessages.map((msg) => ({
       ...msg,
-      isOwn: msg.Sender === currentUser.id
+      isOwn: msg.Sender === currentUser.id,
     }));
   }, [rawMessages, currentUser]);
 
   // Transform latest chats to IChatUser format - updated for IUserWithChat[]
   const chatUsers: IChatUser[] = useMemo(() => {
-    return latestChats.map((chat: IUserWithChat) => ({
+    const users = latestChats.map((chat: IUserWithChat) => ({
       id: chat.user.id,
       username: chat.user.username,
       avatar: chat.user.Picture,
       lastMessage: chat.last_message,
       lastMessageTime: chat.last_message_time,
-      displayName: chat.user.first_name && chat.user.last_name
-        ? `${chat.user.first_name} ${chat.user.last_name}`
-        : chat.user.username
+      displayName:
+        chat.user.first_name && chat.user.last_name
+          ? `${chat.user.first_name} ${chat.user.last_name}`
+          : chat.user.username,
     }));
-  }, [latestChats]);
+
+    // If we have selectedUserInfo and the user is not in the list, add them
+    if (
+      selectedUserInfo &&
+      !users.some((u) => u.id === selectedUserInfo.user.id)
+    ) {
+      users.push({
+        id: selectedUserInfo.user.id,
+        username: selectedUserInfo.user.username,
+        avatar: selectedUserInfo.user.Picture,
+        lastMessage: selectedUserInfo.last_message,
+        lastMessageTime: selectedUserInfo.last_message_time,
+        displayName:
+          selectedUserInfo.user.first_name && selectedUserInfo.user.last_name
+            ? `${selectedUserInfo.user.first_name} ${selectedUserInfo.user.last_name}`
+            : selectedUserInfo.user.username,
+      });
+    }
+
+    return users;
+  }, [latestChats, selectedUserInfo]);
 
   // Transform search results to IChatUser format
   const searchChatUsers: IChatUser[] = useMemo(() => {
@@ -114,18 +161,44 @@ export default function Messages() {
       avatar: result.user.Picture,
       lastMessage: result.last_message,
       lastMessageTime: result.last_message_time,
-      displayName: result.user.first_name && result.user.last_name
-        ? `${result.user.first_name} ${result.user.last_name}`
-        : result.user.username
+      displayName:
+        result.user.first_name && result.user.last_name
+          ? `${result.user.first_name} ${result.user.last_name}`
+          : result.user.username,
     }));
   }, [searchResults]);
 
   // Determine which users to display
   const displayUsers = searchQuery.trim() ? searchChatUsers : chatUsers;
-  const isLoadingUsers = searchQuery.trim() ? searchLoading : latestChatsLoading;
+  const isLoadingUsers = searchQuery.trim()
+    ? searchLoading
+    : latestChatsLoading;
 
   // Get selected user info
-  const selectedUser = displayUsers.find(user => user.id === selectedUserId);
+  const selectedUser = useMemo(() => {
+    // First try to find the user in displayUsers
+    const userFromList = displayUsers.find(
+      (user) => user.id === selectedUserId
+    );
+    if (userFromList) return userFromList;
+
+    // If not found in displayUsers but we have selectedUserInfo, use that
+    if (selectedUserInfo) {
+      return {
+        id: selectedUserInfo.user.id,
+        username: selectedUserInfo.user.username,
+        avatar: selectedUserInfo.user.Picture,
+        lastMessage: selectedUserInfo.last_message,
+        lastMessageTime: selectedUserInfo.last_message_time,
+        displayName:
+          selectedUserInfo.user.first_name && selectedUserInfo.user.last_name
+            ? `${selectedUserInfo.user.first_name} ${selectedUserInfo.user.last_name}`
+            : selectedUserInfo.user.username,
+      };
+    }
+
+    return null;
+  }, [displayUsers, selectedUserId, selectedUserInfo]);
 
   // Send message mutation with optimistic updates
   const sendMessageMutation = useMutation({
@@ -133,8 +206,8 @@ export default function Messages() {
     onMutate: async ({ Receiver, Content }) => {
       if (!currentUser) return;
 
-      await queryClient.cancelQueries({ queryKey: ['messages', Receiver] });
-      const previousMessages = queryClient.getQueryData(['messages', Receiver]);
+      await queryClient.cancelQueries({ queryKey: ["messages", Receiver] });
+      const previousMessages = queryClient.getQueryData(["messages", Receiver]);
 
       const optimisticMessage: IExtendedMessage = {
         id: Math.random() * 1000,
@@ -146,25 +219,28 @@ export default function Messages() {
         Content,
         Time: new Date().toISOString(),
         isOwn: true,
-        isOptimistic: true
+        isOptimistic: true,
       };
 
-      queryClient.setQueryData(['messages', Receiver], (old: IMessage[] = []) => [
-        ...old,
-        optimisticMessage
-      ]);
+      queryClient.setQueryData(
+        ["messages", Receiver],
+        (old: IMessage[] = []) => [...old, optimisticMessage]
+      );
 
       return { previousMessages };
     },
     onError: (err, variables, context) => {
-      console.error(err)
+      console.error(err);
       if (context?.previousMessages) {
-        queryClient.setQueryData(['messages', variables.Receiver], context.previousMessages);
+        queryClient.setQueryData(
+          ["messages", variables.Receiver],
+          context.previousMessages
+        );
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', selectedUserId] });
-      queryClient.invalidateQueries({ queryKey: ['latestChats'] });
+      queryClient.invalidateQueries({ queryKey: ["messages", selectedUserId] });
+      queryClient.invalidateQueries({ queryKey: ["latestChats"] });
     },
   });
 
@@ -173,7 +249,7 @@ export default function Messages() {
     if (message.trim() && selectedUserId && currentUser) {
       sendMessageMutation.mutate({
         Receiver: selectedUserId,
-        Content: message.trim()
+        Content: message.trim(),
       });
       setMessage("");
     }
@@ -186,7 +262,7 @@ export default function Messages() {
 
   // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -196,10 +272,10 @@ export default function Messages() {
   const formatTime = (timeString: string) => {
     try {
       const date = new Date(timeString);
-      return date.toLocaleTimeString('en-US', {
+      return date.toLocaleTimeString("en-US", {
         hour12: true,
-        hour: 'numeric',
-        minute: '2-digit'
+        hour: "numeric",
+        minute: "2-digit",
       });
     } catch {
       return timeString;
@@ -243,8 +319,18 @@ export default function Messages() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
             />
-            <svg className="w-4 h-4 absolute left-2 top-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-4 h-4 absolute left-2 top-3 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
           {searchQuery && (
@@ -252,8 +338,18 @@ export default function Messages() {
               onClick={() => setSearchQuery("")}
               className="p-2 text-gray-400 hover:text-gray-600"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
@@ -263,7 +359,7 @@ export default function Messages() {
         {isLoadingUsers && (
           <div className="p-4 text-center text-gray-500">
             <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            {searchQuery ? 'Searching users...' : 'Loading chats...'}
+            {searchQuery ? "Searching users..." : "Loading chats..."}
           </div>
         )}
 
@@ -273,13 +369,21 @@ export default function Messages() {
             <div
               key={user.id}
               onClick={() => setSelectedUserId(user.id)}
-              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-blue-50 border-r-4 border-blue-500' : ''
-                }`}
+              className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                selectedUserId === user.id
+                  ? "bg-blue-50 border-r-4 border-blue-500"
+                  : ""
+              }`}
             >
               <div className="relative">
                 <img
                   alt="User Avatar"
-                  src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=3b82f6&color=fff`}
+                  src={
+                    user.avatar ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user.displayName
+                    )}&background=3b82f6&color=fff`
+                  }
                   className="w-12 h-12 rounded-full mr-4 object-cover"
                 />
               </div>
@@ -288,7 +392,8 @@ export default function Messages() {
                   {user.displayName}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {user.lastMessage || (searchQuery ? 'Start a conversation' : 'No messages yet')}
+                  {user.lastMessage ||
+                    (searchQuery ? "Start a conversation" : "No messages yet")}
                 </p>
               </div>
               <div className="flex flex-col items-end space-y-1">
@@ -309,8 +414,7 @@ export default function Messages() {
             <p className="text-sm">
               {searchQuery
                 ? `No users found for "${searchQuery}"`
-                : 'No conversations yet'
-              }
+                : "No conversations yet"}
             </p>
             {!searchQuery && (
               <p className="text-xs text-gray-400 mt-1">
@@ -322,19 +426,31 @@ export default function Messages() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-cover bg-center" style={{ backgroundImage: 'url("https://i.imgur.com/9ZvQzqf.png")' }}>
+      <div
+        className="flex-1 flex flex-col bg-cover bg-center"
+        style={{ backgroundImage: 'url("https://i.imgur.com/9ZvQzqf.png")' }}
+      >
         {selectedUser ? (
           <>
             {/* Header */}
             <div className="flex items-center p-4 border-b border-gray-200 bg-white shadow-sm">
               <img
                 alt="Chat User"
-                src={selectedUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.displayName)}&background=3b82f6&color=fff`}
+                src={
+                  selectedUser.avatar ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    selectedUser.displayName
+                  )}&background=3b82f6&color=fff`
+                }
                 className="w-12 h-12 rounded-full mr-4 object-cover"
               />
               <div>
-                <p className="font-semibold text-gray-900">{selectedUser.displayName}</p>
-                <p className="text-xs text-gray-500">@{selectedUser.username}</p>
+                <p className="font-semibold text-gray-900">
+                  {selectedUser.displayName}
+                </p>
+                <p className="text-xs text-gray-500">
+                  @{selectedUser.username}
+                </p>
               </div>
             </div>
 
@@ -357,31 +473,74 @@ export default function Messages() {
               ) : (
                 <div className="space-y-4">
                   {messages.map((msg, index) => (
-                    <div key={`${msg.id}-${index}`} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'} items-end`}>
+                    <div
+                      key={`${msg.id}-${index}`}
+                      className={`flex ${
+                        msg.isOwn ? "justify-end" : "justify-start"
+                      } items-end`}
+                    >
                       {!msg.isOwn && (
                         <img
                           alt="User Avatar"
-                          src={selectedUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.displayName)}&background=3b82f6&color=fff`}
+                          src={
+                            selectedUser.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              selectedUser.displayName
+                            )}&background=3b82f6&color=fff`
+                          }
                           className="w-8 h-8 rounded-full mr-2 object-cover"
                         />
                       )}
-                      <div className={`p-3 rounded-lg max-w-xs break-words ${msg.isOwn
-                        ? `bg-blue-500 text-white ${msg.isOptimistic ? 'opacity-70' : ''}`
-                        : 'bg-gray-100 text-gray-900'
-                        }`}>
+                      <div
+                        className={`p-3 rounded-lg max-w-xs break-words ${
+                          msg.isOwn
+                            ? `bg-blue-500 text-white ${
+                                msg.isOptimistic ? "opacity-70" : ""
+                              }`
+                            : "bg-gray-100 text-gray-900"
+                        }`}
+                      >
                         <p className="text-sm">{msg.Content}</p>
                         <div className="flex items-center space-x-2 mt-1">
-                          <span className={`text-xs ${msg.isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
+                          <span
+                            className={`text-xs ${
+                              msg.isOwn ? "text-blue-100" : "text-gray-500"
+                            }`}
+                          >
                             {formatTime(msg.Time)}
                           </span>
                           {msg.isOwn && (
                             <div className="flex space-x-1">
-                              <svg className={`h-3 w-3 ${msg.isOptimistic ? 'text-blue-200' : 'text-blue-100'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <svg
+                                className={`h-3 w-3 ${
+                                  msg.isOptimistic
+                                    ? "text-blue-200"
+                                    : "text-blue-100"
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
                               {!msg.isOptimistic && (
-                                <svg className="h-3 w-3 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                <svg
+                                  className="h-3 w-3 text-blue-100"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
                                 </svg>
                               )}
                             </div>
@@ -391,7 +550,12 @@ export default function Messages() {
                       {msg.isOwn && (
                         <img
                           alt="Your Avatar"
-                          src={currentUser.Picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=059669&color=fff`}
+                          src={
+                            currentUser.Picture ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              currentUser.username
+                            )}&background=059669&color=fff`
+                          }
                           className="w-8 h-8 rounded-full ml-2 object-cover"
                         />
                       )}
@@ -427,8 +591,18 @@ export default function Messages() {
                   {sendMessageMutation.isPending ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                      />
                     </svg>
                   )}
                 </button>
@@ -438,7 +612,24 @@ export default function Messages() {
               {showEmojiPicker && (
                 <div className="absolute bottom-16 left-4 bg-white border border-gray-200 rounded-lg p-4 shadow-lg z-10">
                   <div className="grid grid-cols-8 gap-2">
-                    {['😀', '😂', '😍', '🥰', '😊', '😎', '🤔', '😮', '😢', '😡', '👍', '👎', '❤️', '🔥', '💯', '🎉'].map((emoji) => (
+                    {[
+                      "😀",
+                      "😂",
+                      "😍",
+                      "🥰",
+                      "😊",
+                      "😎",
+                      "🤔",
+                      "😮",
+                      "😢",
+                      "😡",
+                      "👍",
+                      "👎",
+                      "❤️",
+                      "🔥",
+                      "💯",
+                      "🎉",
+                    ].map((emoji) => (
                       <button
                         key={emoji}
                         onClick={() => {
@@ -461,7 +652,9 @@ export default function Messages() {
               <div className="text-6xl mb-4">💬</div>
               <p className="text-xl mb-2">Select a user to start messaging</p>
               <p className="text-sm text-gray-400">
-                {searchQuery ? 'Choose from search results' : 'Pick from your recent conversations'}
+                {searchQuery
+                  ? "Choose from search results"
+                  : "Pick from your recent conversations"}
               </p>
             </div>
           </div>

@@ -169,7 +169,9 @@ const TutorDetails = () => {
               <Button
                 variant="contained"
                 className="flex items-center font-bold p-0 col-3"
-                onClick={() => navigate(`/Tutors/TutorDetails/TutorOneToOne`)}
+                onClick={() =>
+                  navigate(`/Tutors/TutorDetails/${tutor.user.id}/OneToOne`)
+                }
               >
                 <InterpreterModeIcon />
                 <h3>One To One</h3>

@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import * as api from "../chat.service";
+import * as api from "./chat.api";
 import { IUser } from "../../interfaces/IUser";
 import { queryClient } from "../../main";
 import { IExtendedMessage } from "../../interfaces/IExtendedMessage";
 import { ICreateMessageDTO } from "../../interfaces/dto/ICreateMessageDTO";
 import { IChatUser } from "../../interfaces/IChatUser";
-import { IMessage } from "./chat.api";
+import { IMessage } from "../../interfaces/IMessage";
 
 export const useLatestMessagesQuery = (currentUser?: IUser) =>
   useQuery({
@@ -26,7 +26,7 @@ export const useSearchMessagesUsersQuery = (searchQuery: string) =>
 
 export const useMessagesBetweenUsQuery = (
   selectedUserId: number | null,
-  currentUser?: IUser,
+  currentUser?: IUser
 ) =>
   useQuery({
     queryKey: ["messages", selectedUserId],
@@ -39,7 +39,7 @@ export const useMessagesBetweenUsQuery = (
 export const useSendMessageMutatoin = (
   currentUser?: IUser,
   selectedUser?: IChatUser,
-  selectedUserId?: number | null,
+  selectedUserId?: number | null
 ) =>
   useMutation({
     mutationFn: (data: ICreateMessageDTO) => api.sendMessageToUser(data),
@@ -64,17 +64,17 @@ export const useSendMessageMutatoin = (
 
       queryClient.setQueryData(
         ["messages", Receiver],
-        (old: IMessage[] = []) => [...old, optimisticMessage],
+        (old: IMessage[] = []) => [...old, optimisticMessage]
       );
 
       return { previousMessages };
     },
-    onError: (err,variables, context) => {
-      console.error(err)
+    onError: (err, variables, context) => {
+      console.error(err);
       if (context?.previousMessages) {
         queryClient.setQueryData(
           ["messages", variables.Receiver],
-          context.previousMessages,
+          context.previousMessages
         );
       }
     },
@@ -82,4 +82,11 @@ export const useSendMessageMutatoin = (
       queryClient.invalidateQueries({ queryKey: ["messages", selectedUserId] });
       queryClient.invalidateQueries({ queryKey: ["latestChats"] });
     },
+  });
+
+export const useGetUserByIdQuery = (userId: number | null) =>
+  useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => api.getUserById(userId!),
+    enabled: !!userId,
   });

@@ -1,5 +1,6 @@
 import { IUser } from "../../interfaces/IUser";
 import { axiosClient } from "../../assets/lib/axiosClient";
+import axios from "axios";
 
 export const getCurrentLoggedUserProfile = async () => {
   const response = await axiosClient.get("/api/users/me/");
@@ -12,10 +13,13 @@ export const createUser = async (
   password: string,
   Role: string
 ) => {
-  const response = await axiosClient.post("/api/signup/", {
-    username,
-    password,
-    Role,
-  });
+  const response = await axios.post(
+    `${import.meta.env.VITE_API_BASE_URL}/api/signup/`,
+    {
+      username,
+      password,
+      Role,
+    }
+  );
   return response.data;
 };

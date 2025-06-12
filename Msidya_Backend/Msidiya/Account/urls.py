@@ -21,6 +21,7 @@ urlpatterns = [
     path('notifications/<int:pk>/read/', NotificationUpdateView.as_view(), name='notification-update'),
     path('qualification/',QualificationListcreatview.as_view(),name='Qualification'),
     path('tutor/<int:pk>/',TutorDetails.as_view(),name='tutor'),
+    path('tutor/<int:tutor_id>/group-classes/', TutorGroupClassView.as_view(), name='tutor-group-classes'),
     path('tutors/',TutorList.as_view(),name='tutor')
     
 ]

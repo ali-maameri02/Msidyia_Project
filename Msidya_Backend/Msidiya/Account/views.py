@@ -1,6 +1,7 @@
 import json
 from Group_Class.models import GroupClass
 
+from Group_Class.serializers import GroupClassSerializer
 from django.db.models import F, Q, OuterRef, Subquery,Exists
 import requests
 from rest_framework.response import Response
@@ -281,6 +282,15 @@ class TutorList(generics.ListAPIView):
         return Tutor.objects.annotate(
             has_free_groupclass=Exists(free_groupclass_subquery)
         ).filter(has_free_groupclass=True)
+class TutorGroupClassView(APIView):
+    def get(self, request, tutor_id):
+        group_classes = GroupClass.objects.filter(tutor_id=tutor_id, max_book=1)
+        
+        if not group_classes.exists():
+            return Response({"message": "No group classes found for this tutor with max_book=1."}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = GroupClassSerializer(group_classes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TutorDetails(generics.RetrieveAPIView):
     serializer_class=TutorslistSerializer

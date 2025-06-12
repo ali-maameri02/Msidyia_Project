@@ -70,7 +70,7 @@ function App() {
               }
             />
             <Route
-              path="/Tutors/TutorDetails/TutorOneToOne"
+              path="/Tutors/TutorDetails/:tutorId/OneToOne"
               element={
                 <ProtectedRoute>
                   <TutorOneToOne />
