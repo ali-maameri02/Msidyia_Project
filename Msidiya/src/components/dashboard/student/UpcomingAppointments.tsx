@@ -78,7 +78,11 @@ const UpcomingAppointments: React.FC = () => {
       setError(null);
 
       try {
-        const response = await axios.get(`https://msidiya.com/api/student-payments/${studentId}/`);
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/student-payments/${studentId}/`
+        );
         setPayments(response.data as StudentPayment[]);
       } catch (error) {
         setError("Error fetching student payments. Please try again later.");

@@ -23,7 +23,9 @@ const Services = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("https://msidiya.com/api/categories/");
+      const response = await axios.get(
+        "${import.meta.env.VITE_API_BASE_URL}/api/categories/"
+      );
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -34,15 +36,27 @@ const Services = () => {
     fetchCategories();
   }, []);
 
-
   return (
-    <section className="w-full h-auto flex flex-col items-center justify-center relative lg:px-24 md:px-20 px-6 z-40" style={{ zIndex: "9" }}>
-      <Image image={GroupOfPlus} alt="Vector" className="absolute top-0 right-4 lg:h-36 h-24" />
+    <section
+      className="w-full h-auto flex flex-col items-center justify-center relative lg:px-24 md:px-20 px-6 z-40"
+      style={{ zIndex: "9" }}
+    >
+      <Image
+        image={GroupOfPlus}
+        alt="Vector"
+        className="absolute top-0 right-4 lg:h-36 h-24"
+      />
       <main className="w-full pt-32 flex flex-col gap-3 items-center justify-center z-40">
-        <Text as="p" className="font-light text-base text-color3/80 tracking-widest">
+        <Text
+          as="p"
+          className="font-light text-base text-color3/80 tracking-widest"
+        >
           <Fade>{ServiceTexts.firstText}</Fade>
         </Text>
-        <Text as="h2" className="md:text-4xl text-2xl font-medium capitalize text-color3">
+        <Text
+          as="h2"
+          className="md:text-4xl text-2xl font-medium capitalize text-color3"
+        >
           <Fade>{ServiceTexts.secondText}</Fade>
         </Text>
 
@@ -58,7 +72,10 @@ const Services = () => {
               textWrapperClass="w-full flex flex-col items-center gap-2"
               onClick={() => navigate(`/group-classes/category/${category.id}`)} // Navigate to filtered group classes
             >
-              <Text as="h4" className="text-base rounded font-medium text-color3">
+              <Text
+                as="h4"
+                className="text-base rounded font-medium text-color3"
+              >
                 {category.name}
               </Text>
             </Card>

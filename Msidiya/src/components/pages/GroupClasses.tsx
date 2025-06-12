@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { FaStar } from 'react-icons/fa';
-import NavBar from '../Landing/NavBar';
-import Footer from '../Landing/Footer';
-import logo from '../../assets/msidiya-m-logo.png';
-import { Slider } from '@mui/material'; // Import Slider from MUI
-import { useCart } from '../Landing/context/CartContext'; // Import the CartContext
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { FaStar } from "react-icons/fa";
+import NavBar from "../Landing/NavBar";
+import Footer from "../Landing/Footer";
+import logo from "../../assets/msidiya-m-logo.png";
+import { Slider } from "@mui/material"; // Import Slider from MUI
+import { useCart } from "../Landing/context/CartContext"; // Import the CartContext
+import { useNavigate } from "react-router-dom";
 
 // Define TypeScript interfaces for the data structure
 interface Review {
@@ -45,35 +45,35 @@ const GroupClasses = () => {
   const { addToCart, inCart } = useCart();
 
   // State for filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTutor, setSelectedTutor] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTutor, setSelectedTutor] = useState("");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]); // Price range state
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   // Fetch group classes, reviews, and tutors from the Django backend
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch group classes
         const groupClassesResponse = await axios.get<GroupClass[]>(
-          'https://msidiya.com/api/group-classes/'
+          "${import.meta.env.VITE_API_BASE_URL}/api/group-classes/"
         );
         setGroupClasses(groupClassesResponse.data);
 
         // Fetch reviews
         const reviewsResponse = await axios.get<Review[]>(
-          'https://msidiya.com/api/group-class-reviews/'
+          "${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/"
         );
         setReviews(reviewsResponse.data);
 
         // Fetch tutors
         const tutorsResponse = await axios.get<Tutor[]>(
-          'https://msidiya.com/api/tutors/'
+          "${import.meta.env.VITE_API_BASE_URL}/api/tutors/"
         );
-        console.log('Fetched tutors:', tutorsResponse.data);
+        console.log("Fetched tutors:", tutorsResponse.data);
         setTutors(tutorsResponse.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -92,10 +92,15 @@ const GroupClasses = () => {
 
   // Function to calculate average rating for a group class
   const calculateAverageRating = (classId: number): number => {
-    const classReviews = reviews.filter((review) => review.group_class === classId);
+    const classReviews = reviews.filter(
+      (review) => review.group_class === classId
+    );
     if (!classReviews || classReviews.length === 0) return 0;
 
-    const totalRating = classReviews.reduce((sum, review) => sum + review.rating, 0);
+    const totalRating = classReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
     return parseFloat((totalRating / classReviews.length).toFixed(1));
   };
 
@@ -104,30 +109,35 @@ const GroupClasses = () => {
     const tutor = tutors.find((tutor) => tutor.user.id === tutorId); // Match tutorId with user.id
     if (!tutor) {
       console.warn(`No tutor found for User ID: ${tutorId}`);
-      return 'Unknown Tutor';
+      return "Unknown Tutor";
     }
-    return tutor.user?.username || 'Unknown Tutor';
+    return tutor.user?.username || "Unknown Tutor";
   };
 
   // Filtered group classes based on search term, tutor, minimum rating, and price range
   const filteredGroupClasses = groupClasses.filter((groupClass) => {
     const matchesSearchTerm =
-      searchTerm.trim() === '' ||
+      searchTerm.trim() === "" ||
       groupClass.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTutor =
-      selectedTutor === '' || getTutorUsername(groupClass.tutor) === selectedTutor;
+      selectedTutor === "" ||
+      getTutorUsername(groupClass.tutor) === selectedTutor;
     const matchesRating =
       minRating === null || calculateAverageRating(groupClass.id) >= minRating;
     const matchesPriceRange =
       groupClass.price >= priceRange[0] && groupClass.price <= priceRange[1];
 
-    return matchesSearchTerm && matchesTutor && matchesRating && matchesPriceRange;
+    return (
+      matchesSearchTerm && matchesTutor && matchesRating && matchesPriceRange
+    );
   });
 
   // Get unique tutor usernames for the filter dropdown
   const uniqueTutors = Array.from(
-    new Set(groupClasses.map((groupClass) => getTutorUsername(groupClass.tutor)))
-  ).filter((username) => username !== 'Unknown Tutor');
+    new Set(
+      groupClasses.map((groupClass) => getTutorUsername(groupClass.tutor))
+    )
+  ).filter((username) => username !== "Unknown Tutor");
 
   // Handle price range slider changes
   const handleChange = (_event: Event, newValue: number | number[]) => {
@@ -154,7 +164,9 @@ const GroupClasses = () => {
 
           {/* Tutor Filter */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Filter by Tutor:</label>
+            <label className="block text-sm font-medium mb-2">
+              Filter by Tutor:
+            </label>
             <select
               value={selectedTutor}
               onChange={(e) => setSelectedTutor(e.target.value)}
@@ -171,11 +183,15 @@ const GroupClasses = () => {
 
           {/* Rating Filter */}
           <div>
-            <label className="block text-sm font-medium mb-2">Minimum Rating:</label>
+            <label className="block text-sm font-medium mb-2">
+              Minimum Rating:
+            </label>
             <select
-              value={minRating ?? ''}
+              value={minRating ?? ""}
               onChange={(e) =>
-                setMinRating(e.target.value === '' ? null : Number(e.target.value))
+                setMinRating(
+                  e.target.value === "" ? null : Number(e.target.value)
+                )
               }
               className="w-full p-2 border rounded"
             >
@@ -190,9 +206,11 @@ const GroupClasses = () => {
 
           {/* Two-Way Range Slider for Price Filtering */}
           <div className="mt-4">
-            <label className="block text-sm font-medium mb-2">Price Range:</label>
+            <label className="block text-sm font-medium mb-2">
+              Price Range:
+            </label>
             <Slider
-              getAriaLabel={() => 'Price range'}
+              getAriaLabel={() => "Price range"}
               value={priceRange}
               onChange={handleChange}
               valueLabelDisplay="auto"
@@ -218,7 +236,6 @@ const GroupClasses = () => {
                   key={groupClass.id}
                   className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 cursor-pointer"
                   onClick={() => navigate(`/group-class/${groupClass.id}`)}
-
                 >
                   {/* Main Image */}
                   <img
@@ -228,35 +245,47 @@ const GroupClasses = () => {
                   />
                   <div className="p-4">
                     {/* Title */}
-                    <h2 className="text-xl font-semibold mb-2">{groupClass.title}</h2>
+                    <h2 className="text-xl font-semibold mb-2">
+                      {groupClass.title}
+                    </h2>
 
                     {/* Rating */}
                     <div className="flex items-center mb-2">
                       <FaStar className="text-yellow-500 mr-1" />
-                      <span>{averageRating} ({reviews.filter((r) => r.group_class === groupClass.id).length} reviews)</span>
+                      <span>
+                        {averageRating} (
+                        {
+                          reviews.filter((r) => r.group_class === groupClass.id)
+                            .length
+                        }{" "}
+                        reviews)
+                      </span>
                     </div>
 
                     {/* Tutor Name */}
                     <p className="text-gray-600">
-                      <span className="font-medium">Tutor:</span> {getTutorUsername(groupClass.tutor)}
+                      <span className="font-medium">Tutor:</span>{" "}
+                      {getTutorUsername(groupClass.tutor)}
                     </p>
                     <p className="text-gray-600">
-                      <span className="font-medium">Price:</span> {groupClass.price}DA
+                      <span className="font-medium">Price:</span>{" "}
+                      {groupClass.price}DA
                     </p>
 
                     {/* Book Now Button */}
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
+                        e.stopPropagation();
                         addToCart({
                           id: groupClass.id,
                           title: groupClass.title,
                           price: parseFloat(groupClass.price.toString()), // Ensure price is a number
                           main_image: groupClass.main_image,
-                        })
-                      }
-                      }
-                      className={`mt-4 w-full ${inCart(groupClass.id) ? "bg-red-500" : "bg-blue-500"} text-white py-2 rounded hover:bg-blue-600 transition-colors`}
+                        });
+                      }}
+                      className={`mt-4 w-full ${
+                        inCart(groupClass.id) ? "bg-red-500" : "bg-blue-500"
+                      } text-white py-2 rounded hover:bg-blue-600 transition-colors`}
                     >
                       {inCart(groupClass.id) ? "Remove" : "Book Now"}
                     </button>
@@ -266,7 +295,7 @@ const GroupClasses = () => {
             })}
           </div>
         </div>
-      </div >
+      </div>
 
       <Footer />
     </>

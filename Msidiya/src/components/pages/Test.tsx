@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function Test() {
-  const [wallet, setWallet] = useState<{ balance: string, currency: string } | null>(null);
+  const [wallet, setWallet] = useState<{
+    balance: string;
+    currency: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get("https://msidiya.com/e_wallet/wallet/", {
-      withCredentials: true  // Important for session-authenticated APIs
-    })
+    axios
+      .get("${import.meta.env.VITE_API_BASE_URL}/e_wallet/wallet/", {
+        withCredentials: true, // Important for session-authenticated APIs
+      })
       .then((res) => {
         setWallet(res.data);
       })
@@ -24,8 +28,12 @@ function Test() {
       {error && <p style={{ color: "red" }}>{error}</p>}
       {wallet ? (
         <div>
-          <p><strong>Balance:</strong> {wallet.balance}</p>
-          <p><strong>Currency:</strong> {wallet.currency}</p>
+          <p>
+            <strong>Balance:</strong> {wallet.balance}
+          </p>
+          <p>
+            <strong>Currency:</strong> {wallet.currency}
+          </p>
           {/* Add other fields as needed */}
         </div>
       ) : !error ? (

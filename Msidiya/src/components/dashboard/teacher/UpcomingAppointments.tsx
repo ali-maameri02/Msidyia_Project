@@ -19,7 +19,7 @@ const UpcomingAppointments: React.FC = () => {
   const [oneOnOneRows, setOneOnOneRows] = useState<any[]>([]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event)
+    console.log(event);
     setActiveTab(newValue);
   };
 
@@ -34,7 +34,9 @@ const UpcomingAppointments: React.FC = () => {
         const loggedInUser = JSON.parse(storedUser);
         const tutorId = loggedInUser?.id; // Ensure `id` exists
 
-        const response = await axios.get("https://msidiya.com/api/schedules/");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_BASE_URL}/api/schedules/"
+        );
         const schedules = response.data;
 
         const groupClasses = schedules
@@ -48,17 +50,25 @@ const UpcomingAppointments: React.FC = () => {
             category: schedule.category_name,
             max_book: schedule.group_class.max_book,
             class_type: schedule.group_class.class_type,
-            date_created: new Date(schedule.group_class.date_created).toLocaleDateString(),
+            date_created: new Date(
+              schedule.group_class.date_created
+            ).toLocaleDateString(),
             status: schedule.group_class.status,
-            last_time: new Date(schedule.group_class.last_time).toLocaleString(),
+            last_time: new Date(
+              schedule.group_class.last_time
+            ).toLocaleString(),
             session_link: schedule.session_link,
             schedule_date: new Date(schedule.date).toLocaleString(),
             duration: schedule.duration,
           }));
 
         // Separate Group Classes and One-on-One Sessions
-        setGroupClassRows(groupClasses.filter((cls: { max_book: number; }) => cls.max_book !== 1));
-        setOneOnOneRows(groupClasses.filter((cls: { max_book: number; }) => cls.max_book === 1));
+        setGroupClassRows(
+          groupClasses.filter((cls: { max_book: number }) => cls.max_book !== 1)
+        );
+        setOneOnOneRows(
+          groupClasses.filter((cls: { max_book: number }) => cls.max_book === 1)
+        );
       } catch (error) {
         console.error("Error fetching schedules:", error);
       }
@@ -137,7 +147,7 @@ const UpcomingAppointments: React.FC = () => {
           <DataGrid
             rows={activeTab === 0 ? oneOnOneRows : groupClassRows} // Filtered Data
             columns={columns}
-            sx={{ width: '55rem' }}
+            sx={{ width: "55rem" }}
             autoHeight
           />
         </Box>

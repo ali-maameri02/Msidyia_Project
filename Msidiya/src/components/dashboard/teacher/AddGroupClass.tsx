@@ -202,7 +202,7 @@ const AddGroupClass: React.FC = () => {
   //     };
 
   //     const response = await axios.post(
-  //       "https://msidiya.com/api/schedules/",
+  //       "${import.meta.env.VITE_API_BASE_URL}/api/schedules/",
   //       newSchedule
   //     );
 

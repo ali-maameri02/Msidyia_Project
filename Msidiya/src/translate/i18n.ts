@@ -25,6 +25,10 @@ const resources = {
         "Find Your Group Class Or Tutor And Start Learning Now!",
       "Find out more": "Find out more",
       "Play Demo": "Play Demo",
+      "Browse Trending Courses": "Browse Trending Courses",
+      "View All": "View All",
+      "Trending courses are not available for now":
+        "Trending courses are not available for now",
     },
   },
   fr: {
@@ -44,11 +48,16 @@ const resources = {
       Courses: "Cours",
       "How Its Works?": "Comment ça marche?",
       // HeroTexts
-      "BEST E-learning Platform": "MEILLEURE PLATEFORME D'APPRENTISSAGE EN LIGNE",
+      "BEST E-learning Platform":
+        "MEILLEURE PLATEFORME D'APPRENTISSAGE EN LIGNE",
       "Find Your Group Class Or Tutor And Start Learning Now!":
         "Trouvez votre cours en groupe ou votre tuteur et commencez à apprendre dès maintenant !",
       "Find out more": "En savoir plus",
       "Play Demo": "Lire la démo",
+      "Browse Trending Courses": "Parcourir les cours tendance",
+      "View All": "Voir tout",
+      "Trending courses are not available for now":
+        "Les cours tendance ne sont pas disponibles pour le moment",
     },
   },
   ar: {
@@ -73,6 +82,10 @@ const resources = {
         "ابحث عن فصلك الجماعي أو معلمك وابدأ التعلم الآن!",
       "Find out more": "اكتشف المزيد",
       "Play Demo": "تشغيل العرض التجريبي",
+      "Browse Trending Courses": "تصفح الدورات الشائعة",
+      "View All": "عرض الكل",
+      "Trending courses are not available for now":
+        "الدورات الشائعة غير متوفرة حاليا",
     },
   },
 };

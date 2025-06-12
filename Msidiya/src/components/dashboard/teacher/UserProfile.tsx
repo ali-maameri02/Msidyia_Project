@@ -1,8 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { CameraAlt } from '@mui/icons-material';
-import { TextField, Button, Box, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { Add, Remove } from '@mui/icons-material';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { CameraAlt } from "@mui/icons-material";
+import {
+  TextField,
+  Button,
+  Box,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+  InputAdornment,
+  IconButton,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
+import { Add, Remove } from "@mui/icons-material";
+import axios from "axios";
 interface UserProfile {
   id: number;
   username: string;
@@ -19,7 +32,7 @@ interface UserProfile {
     Description?: string;
     Intro_video?: string;
     Verification_Id?: boolean;
-    qualifications?: string[];  // Add this
+    qualifications?: string[]; // Add this
     languages?: string[];
   };
 }
@@ -27,9 +40,13 @@ const UserProfile: React.FC = () => {
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [coverFile, setcoverFile] = useState<File | null>(null);
 
-  const [activeTab, setActiveTab] = useState('General Information');
-  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');
-  const [coverImage, setCoverImage] = useState('https://via.placeholder.com/600x200');
+  const [activeTab, setActiveTab] = useState("General Information");
+  const [profileImage, setProfileImage] = useState(
+    "https://via.placeholder.com/150"
+  );
+  const [coverImage, setCoverImage] = useState(
+    "https://via.placeholder.com/600x200"
+  );
   const [isEditable, setIsEditable] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<Partial<UserProfile>>({
@@ -44,9 +61,9 @@ const UserProfile: React.FC = () => {
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
   // State for educational qualifications
-  const [qualifications, setQualifications] = useState<string[]>(['']);
+  const [qualifications, setQualifications] = useState<string[]>([""]);
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       fetchUserProfile(parsedUser.id);
@@ -56,13 +73,15 @@ const UserProfile: React.FC = () => {
   const fetchUserProfile = async (userId: number) => {
     try {
       const response = await axios.get<UserProfile>(
-        `https://msidiya.com/api/users/${userId}/update/`
+        `${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}/update/`
       );
       // Use the response data directly to update state
       const userData = response.data;
       setUser(userData);
-      setProfileImage(userData?.Picture || 'https://via.placeholder.com/150');
-      setCoverImage(userData.tutor?.Cover || 'https://via.placeholder.com/600x200');
+      setProfileImage(userData?.Picture || "https://via.placeholder.com/150");
+      setCoverImage(
+        userData.tutor?.Cover || "https://via.placeholder.com/600x200"
+      );
       setVideoPreview(userData.tutor?.Intro_video || null);
       setFormData({
         ...userData,
@@ -75,25 +94,24 @@ const UserProfile: React.FC = () => {
       // For qualifications, we use a separate state to manage add/remove
       setQualifications(userData.tutor?.qualifications || []);
     } catch (err) {
-      setError('Failed to load user profile');
+      setError("Failed to load user profile");
     } finally {
       setLoading(false);
     }
   };
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       tutor: {
         ...formData.tutor,
         [e.target.name]: e.target.value,
-      }, [e.target.name]: e.target.value,
-
+      },
+      [e.target.name]: e.target.value,
     });
   };
-
-
 
   const handleUpdate = async () => {
     if (!user) return;
@@ -112,7 +130,8 @@ const UserProfile: React.FC = () => {
         tutor: {
           Description: formData.tutor?.Description ?? user.tutor?.Description,
           Intro_video: formData.tutor?.Intro_video ?? user.tutor?.Intro_video,
-          Verification_Id: formData.tutor?.Verification_Id ?? user.tutor?.Verification_Id,
+          Verification_Id:
+            formData.tutor?.Verification_Id ?? user.tutor?.Verification_Id,
           qualifications: qualifications, // our separate state for qualifications
           languages: formData.tutor?.languages ?? user.tutor?.languages,
         },
@@ -126,14 +145,20 @@ const UserProfile: React.FC = () => {
       form.append("Phone_number", updatedData.Phone_number || "");
       form.append("Paypal_Email", updatedData.Paypal_Email || "");
       form.append("Address", updatedData.Address || "");
-      form.append("Zip_code", updatedData.Zip_code ? String(updatedData.Zip_code) : "");
+      form.append(
+        "Zip_code",
+        updatedData.Zip_code ? String(updatedData.Zip_code) : ""
+      );
       form.append("Gender", updatedData.Gender || "");
 
       // Append nested tutor fields individually.
       if (updatedData.tutor) {
         form.append("tutor[Description]", updatedData.tutor.Description || "");
         form.append("tutor[Intro_video]", updatedData.tutor.Intro_video || "");
-        form.append("tutor[Verification_Id]", String(updatedData.tutor.Verification_Id || false));
+        form.append(
+          "tutor[Verification_Id]",
+          String(updatedData.tutor.Verification_Id || false)
+        );
 
         // Append each qualification
         if (updatedData.tutor.qualifications) {
@@ -158,7 +183,7 @@ const UserProfile: React.FC = () => {
       }
 
       const response = await axios.patch(
-        `https://msidiya.com/api/users/${user.id}/update/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/users/${user.id}/update/`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -172,16 +197,15 @@ const UserProfile: React.FC = () => {
     }
   };
 
-
-
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
 
-  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfileImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setProfileFile(file); // Store file separately for upload
@@ -189,16 +213,15 @@ const UserProfile: React.FC = () => {
     }
   };
 
-
-
-  const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setcoverFile(file); // Store file separately for upload
       setCoverImage(URL.createObjectURL(file));
-    }// Preview new image
+    } // Preview new image
   };
-
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -223,7 +246,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleAddQualification = () => {
-    setQualifications([...qualifications, '']);
+    setQualifications([...qualifications, ""]);
   };
 
   const handleRemoveQualification = (index: number) => {
@@ -253,7 +276,6 @@ const UserProfile: React.FC = () => {
         </label>
       </div>
 
-
       <div className="flex flex-col lg:flex-row bg-white p-6 rounded-lg shadow-md mt-5">
         <div className="lg:w-1/3 p-4">
           <div className="relative -mt-16">
@@ -276,28 +298,38 @@ const UserProfile: React.FC = () => {
               <CameraAlt className="h-6 w-6" />
             </label>
           </div>
-
         </div>
 
         <div className="lg:w-2/3 p-4 lg:pl-8">
           <div className="border-b border-gray-200 mb-4">
-
             <ul className="flex space-x-6">
               <li
-                className={`cursor-pointer ${activeTab === 'General Information' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`}
-                onClick={() => handleTabClick('General Information')}
+                className={`cursor-pointer ${
+                  activeTab === "General Information"
+                    ? "text-blue-500 border-b-2 border-blue-500"
+                    : "text-gray-500"
+                } pb-2`}
+                onClick={() => handleTabClick("General Information")}
               >
                 General Information
               </li>
               <li
-                className={`cursor-pointer ${activeTab === 'Description & Intro' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`}
-                onClick={() => handleTabClick('Description & Intro')}
+                className={`cursor-pointer ${
+                  activeTab === "Description & Intro"
+                    ? "text-blue-500 border-b-2 border-blue-500"
+                    : "text-gray-500"
+                } pb-2`}
+                onClick={() => handleTabClick("Description & Intro")}
               >
                 Description & Intro
               </li>
               <li
-                className={`cursor-pointer ${activeTab === 'Security and Notification' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`}
-                onClick={() => handleTabClick('Security and Notification')}
+                className={`cursor-pointer ${
+                  activeTab === "Security and Notification"
+                    ? "text-blue-500 border-b-2 border-blue-500"
+                    : "text-gray-500"
+                } pb-2`}
+                onClick={() => handleTabClick("Security and Notification")}
               >
                 Security and Notification
               </li>
@@ -305,23 +337,34 @@ const UserProfile: React.FC = () => {
           </div>
 
           {/* Render the form based on the active tab */}
-          {activeTab === 'General Information' && (
-            <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          {activeTab === "General Information" && (
+            <Box
+              component="form"
+              noValidate
+              autoComplete="off"
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gap: 2,
+              }}
+            >
               <TextField
                 label="Profile Name"
                 variant="outlined"
-                value={formData.username || ''} onChange={handleChange}
+                value={formData.username || ""}
+                onChange={handleChange}
                 fullWidth
-                name='username'
+                name="username"
                 InputProps={{ readOnly: !isEditable }}
-
               />
               <FormControl fullWidth variant="outlined">
                 <InputLabel>Gender</InputLabel>
                 <Select
-                  name='Gender'
-                  value={formData.Gender || ''}
-                  onChange={(e) => setFormData({ ...formData, Gender: e.target.value })}
+                  name="Gender"
+                  value={formData.Gender || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, Gender: e.target.value })
+                  }
                   label="Gender"
                   disabled={!isEditable}
                 >
@@ -332,23 +375,27 @@ const UserProfile: React.FC = () => {
 
               <TextField
                 label="Email"
-                name='email'
+                name="email"
                 variant="outlined"
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                 }}
-                value={formData.email || ''} onChange={handleChange}
+                value={formData.email || ""}
+                onChange={handleChange}
               />
               <TextField
                 label="Phone Number"
-                name='Phone_number'
+                name="Phone_number"
                 variant="outlined"
-                value={formData.Phone_number || ''} onChange={handleChange}
+                value={formData.Phone_number || ""}
+                onChange={handleChange}
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
-                  startAdornment: <InputAdornment position="start">+213</InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">+213</InputAdornment>
+                  ),
                 }}
               />
               {/* <TextField
@@ -361,34 +408,42 @@ const UserProfile: React.FC = () => {
                 defaultValue="Vienna"
               /> */}
               <TextField
-                name='Address'
+                name="Address"
                 label="Address"
                 variant="outlined"
                 fullWidth
-                value={formData.Address || ''} onChange={handleChange}
-
+                value={formData.Address || ""}
+                onChange={handleChange}
                 InputProps={{
                   readOnly: !isEditable,
                 }}
                 defaultValue="2707 Pleasantdale Ro..."
               />
-              <Box sx={{ gridColumn: 'span 2' }}>
+              <Box sx={{ gridColumn: "span 2" }}>
                 <Typography variant="h6" gutterBottom>
                   Languages
                 </Typography>
                 {formData.tutor?.languages?.map((language, index) => (
-                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box
+                    key={index}
+                    sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                  >
                     <TextField
                       label={`Language ${index + 1}`}
                       variant="outlined"
                       fullWidth
                       value={language}
                       onChange={(e) => {
-                        const updatedLanguages = [...(formData.tutor?.languages || [])];
+                        const updatedLanguages = [
+                          ...(formData.tutor?.languages || []),
+                        ];
                         updatedLanguages[index] = e.target.value;
                         setFormData({
                           ...formData,
-                          tutor: { ...formData.tutor, languages: updatedLanguages },
+                          tutor: {
+                            ...formData.tutor,
+                            languages: updatedLanguages,
+                          },
                         });
                       }}
                       InputProps={{
@@ -398,10 +453,15 @@ const UserProfile: React.FC = () => {
                     <IconButton
                       onClick={() => {
                         const updatedLanguages =
-                          formData.tutor?.languages?.filter((_, i) => i !== index) || [];
+                          formData.tutor?.languages?.filter(
+                            (_, i) => i !== index
+                          ) || [];
                         setFormData({
                           ...formData,
-                          tutor: { ...formData.tutor, languages: updatedLanguages },
+                          tutor: {
+                            ...formData.tutor,
+                            languages: updatedLanguages,
+                          },
                         });
                       }}
                       color="error"
@@ -415,7 +475,10 @@ const UserProfile: React.FC = () => {
                   variant="outlined"
                   startIcon={<Add />}
                   onClick={() => {
-                    const updatedLanguages = [...(formData.tutor?.languages || []), ''];
+                    const updatedLanguages = [
+                      ...(formData.tutor?.languages || []),
+                      "",
+                    ];
                     setFormData({
                       ...formData,
                       tutor: { ...formData.tutor, languages: updatedLanguages },
@@ -429,7 +492,10 @@ const UserProfile: React.FC = () => {
                   variant="outlined"
                   startIcon={<Add />}
                   onClick={() => {
-                    const updatedLanguages = [...(formData.tutor?.languages || []), ''];
+                    const updatedLanguages = [
+                      ...(formData.tutor?.languages || []),
+                      "",
+                    ];
                     setFormData({
                       ...formData,
                       tutor: { ...formData.tutor, languages: updatedLanguages },
@@ -442,37 +508,44 @@ const UserProfile: React.FC = () => {
 
               <TextField
                 label="Zip Code"
-                name='Zip_code'
+                name="Zip_code"
                 variant="outlined"
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                 }}
-                value={formData.Zip_code || ''} onChange={handleChange}
+                value={formData.Zip_code || ""}
+                onChange={handleChange}
               />
               <TextField
                 label="Paypal Email ID"
                 variant="outlined"
-                name='Paypal_Email'
+                name="Paypal_Email"
                 fullWidth
                 InputProps={{
                   readOnly: !isEditable,
                 }}
-                value={formData.Paypal_Email || ''} onChange={handleChange}
+                value={formData.Paypal_Email || ""}
+                onChange={handleChange}
               />
 
-              <Box sx={{ gridColumn: 'span 2' }}>
+              <Box sx={{ gridColumn: "span 2" }}>
                 <Typography variant="h6" gutterBottom>
                   Educational Qualifications
                 </Typography>
                 {qualifications.map((qualification, index) => (
-                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box
+                    key={index}
+                    sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                  >
                     <TextField
                       label={`Qualification ${index + 1}`}
                       variant="outlined"
                       fullWidth
                       value={qualification}
-                      onChange={(e) => handleQualificationChange(index, e.target.value)}
+                      onChange={(e) =>
+                        handleQualificationChange(index, e.target.value)
+                      }
                       InputProps={{
                         readOnly: !isEditable,
                       }}
@@ -486,40 +559,59 @@ const UserProfile: React.FC = () => {
                     </IconButton>
                   </Box>
                 ))}
-                <Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={handleAddQualification}
+                >
                   Add Qualification
                 </Button>
 
-                <Button variant="outlined" startIcon={<Add />} onClick={handleAddQualification}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={handleAddQualification}
+                >
                   Add Qualification
                 </Button>
               </Box>
 
-              <Box sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
+              <Box
+                sx={{
+                  gridColumn: "span 2",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={handleEditClick}
                   disabled={!isEditable}
                 >
-                  {isEditable ? 'Save Changes' : 'Edit'}
+                  {isEditable ? "Save Changes" : "Edit"}
                 </Button>
               </Box>
             </Box>
           )}
 
-          {activeTab === 'Description & Intro' && (
-            <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gap: 2 }}>
+          {activeTab === "Description & Intro" && (
+            <Box
+              component="form"
+              noValidate
+              autoComplete="off"
+              sx={{ display: "grid", gap: 2 }}
+            >
               <TextField
-                name='Description'
+                name="Description"
                 label="Description"
                 multiline
                 rows={4}
                 variant="outlined"
                 fullWidth
                 InputProps={{ readOnly: !isEditable }}
-
-                value={formData.tutor?.Description || ''} onChange={handleChange}
+                value={formData.tutor?.Description || ""}
+                onChange={handleChange}
               />
               <div className="video-upload-section bg-white p-6 rounded-lg shadow-md mt-5">
                 <Typography variant="h6" gutterBottom>
@@ -548,31 +640,36 @@ const UserProfile: React.FC = () => {
                       src={videoPreview}
                       controls
                       width="100%"
-                      style={{ borderRadius: '8px' }}
+                      style={{ borderRadius: "8px" }}
                     />
                   </Box>
                 )}
               </div>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={handleEditClick}
                   disabled={!isEditable}
                 >
-                  {isEditable ? 'Save Changes' : 'Edit'}
+                  {isEditable ? "Save Changes" : "Edit"}
                 </Button>
               </Box>
             </Box>
           )}
 
-          {activeTab === 'Security and Notification' && (
-            <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gap: 2 }}>
+          {activeTab === "Security and Notification" && (
+            <Box
+              component="form"
+              noValidate
+              autoComplete="off"
+              sx={{ display: "grid", gap: 2 }}
+            >
               <FormControlLabel
                 control={
                   <Checkbox
                     defaultChecked
-                  // disabled={!isEditable}
+                    // disabled={!isEditable}
                   />
                 }
                 label="Receive Email Notifications"
@@ -581,19 +678,19 @@ const UserProfile: React.FC = () => {
                 control={
                   <Checkbox
                     defaultChecked
-                  // disabled={!isEditable}
+                    // disabled={!isEditable}
                   />
                 }
                 label="Two-Factor Authentication"
               />
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={handleEditClick}
-                // disabled={!isEditable}
+                  // disabled={!isEditable}
                 >
-                  {isEditable ? 'Save Changes' : 'Edit'}
+                  {isEditable ? "Save Changes" : "Edit"}
                 </Button>
               </Box>
             </Box>
@@ -602,7 +699,6 @@ const UserProfile: React.FC = () => {
       </div>
 
       {/* Video Upload Section */}
-
     </div>
   );
 };

@@ -66,7 +66,7 @@ const GroupClassesFiltered = () => {
       try {
         // Fetch group classes
         const groupClassesResponse = await axios.get<GroupClass[]>(
-          "https://msidiya.com/api/group-classes/"
+          "${import.meta.env.VITE_API_BASE_URL}/api/group-classes/"
         );
         const filteredClasses = groupClassesResponse.data.filter(
           (groupClass) => groupClass.category.toString() === categoryId
@@ -75,13 +75,13 @@ const GroupClassesFiltered = () => {
 
         // Fetch reviews
         const reviewsResponse = await axios.get<Review[]>(
-          "https://msidiya.com/api/group-class-reviews/"
+          "${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/"
         );
         setReviews(reviewsResponse.data);
 
         // Fetch tutors
         const tutorsResponse = await axios.get<Tutor[]>(
-          "https://msidiya.com/api/tutors/"
+          "${import.meta.env.VITE_API_BASE_URL}/api/tutors/"
         );
         console.log("Fetched tutors:", tutorsResponse.data);
         setTutors(tutorsResponse.data);
@@ -96,15 +96,24 @@ const GroupClassesFiltered = () => {
   }, [categoryId]);
 
   if (isLoading) {
-    return <Text as="p" className={""}>Loading...</Text>;
+    return (
+      <Text as="p" className={""}>
+        Loading...
+      </Text>
+    );
   }
 
   // Function to calculate average rating for a group class
   const calculateAverageRating = (classId: number): number => {
-    const classReviews = reviews.filter((review) => review.group_class === classId);
+    const classReviews = reviews.filter(
+      (review) => review.group_class === classId
+    );
     if (!classReviews || classReviews.length === 0) return 0;
 
-    const totalRating = classReviews.reduce((sum, review) => sum + review.rating, 0);
+    const totalRating = classReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
     return parseFloat((totalRating / classReviews.length).toFixed(1));
   };
 
@@ -114,18 +123,23 @@ const GroupClassesFiltered = () => {
       searchTerm.trim() === "" ||
       groupClass.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTutor =
-      selectedTutor === "" || getTutorUsername(groupClass.tutor) === selectedTutor;
+      selectedTutor === "" ||
+      getTutorUsername(groupClass.tutor) === selectedTutor;
     const matchesRating =
       minRating === null || calculateAverageRating(groupClass.id) >= minRating;
     const matchesPriceRange =
       groupClass.price >= priceRange[0] && groupClass.price <= priceRange[1];
 
-    return matchesSearchTerm && matchesTutor && matchesRating && matchesPriceRange;
+    return (
+      matchesSearchTerm && matchesTutor && matchesRating && matchesPriceRange
+    );
   });
 
   // Get unique tutor usernames for the filter dropdown
   const uniqueTutors = Array.from(
-    new Set(groupClasses.map((groupClass) => getTutorUsername(groupClass.tutor)))
+    new Set(
+      groupClasses.map((groupClass) => getTutorUsername(groupClass.tutor))
+    )
   ).filter((username) => username !== "Unknown Tutor");
 
   // Handle price range slider changes
@@ -153,7 +167,9 @@ const GroupClassesFiltered = () => {
 
             {/* Tutor Filter */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Filter by Tutor:</label>
+              <label className="block text-sm font-medium mb-2">
+                Filter by Tutor:
+              </label>
               <select
                 value={selectedTutor}
                 onChange={(e) => setSelectedTutor(e.target.value)}
@@ -170,11 +186,15 @@ const GroupClassesFiltered = () => {
 
             {/* Rating Filter */}
             <div>
-              <label className="block text-sm font-medium mb-2">Minimum Rating:</label>
+              <label className="block text-sm font-medium mb-2">
+                Minimum Rating:
+              </label>
               <select
                 value={minRating ?? ""}
                 onChange={(e) =>
-                  setMinRating(e.target.value === "" ? null : Number(e.target.value))
+                  setMinRating(
+                    e.target.value === "" ? null : Number(e.target.value)
+                  )
                 }
                 className="w-full p-2 border rounded"
               >
@@ -189,7 +209,9 @@ const GroupClassesFiltered = () => {
 
             {/* Two-Way Range Slider for Price Filtering */}
             <div className="mt-4">
-              <label className="block text-sm font-medium mb-2">Price Range:</label>
+              <label className="block text-sm font-medium mb-2">
+                Price Range:
+              </label>
               <Slider
                 getAriaLabel={() => "Price range"}
                 value={priceRange}

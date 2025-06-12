@@ -1,8 +1,5 @@
-import * as React from 'react';
-import {
-  DataGrid,
-  GridColDef,
-} from '@mui/x-data-grid';
+import * as React from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   Paper,
   IconButton,
@@ -17,13 +14,13 @@ import {
   TableRow,
   TableCell,
   TableBody,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ListIcon from '@mui/icons-material/List';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import ListIcon from "@mui/icons-material/List";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import axios from "axios";
+import { useEffect, useState } from "react";
 interface Topic {
   id: number;
   name: string;
@@ -36,7 +33,6 @@ interface Subject {
 }
 
 interface CategoryRow {
-
   id: number;
   tutor: number;
   name: string;
@@ -45,23 +41,22 @@ interface CategoryRow {
   subjects?: Subject[];
 }
 
-
-
-
 export default function Setcategories() {
   const [open, setOpen] = React.useState(false);
   const [addModalOpen, setAddModalOpen] = React.useState(false);
   const [isAddingSubject, setIsAddingSubject] = React.useState(false);
-  const [newValue, setNewValue] = React.useState('');
+  const [newValue, setNewValue] = React.useState("");
   const [selectedSubjects, setSelectedSubjects] = React.useState<Subject[]>([]);
   const [selectedTopics, setSelectedTopics] = React.useState<Topic[]>([]);
   const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(
     null
   );
   const [openAddCategoryModal, setOpenAddCategoryModal] = React.useState(false);
-  const [newCategory, setNewCategory] = React.useState('');
+  const [newCategory, setNewCategory] = React.useState("");
   const [categories, setCategories] = React.useState<CategoryRow[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<
+    number | null
+  >(null);
   // const [editValue, setEditValue] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null); // State for storing the logo file
 
@@ -72,7 +67,9 @@ export default function Setcategories() {
       const loggedInUser = JSON.parse(storedUser);
       const tutorId = loggedInUser?.id;
 
-      const response = await axios.get('https://msidiya.com/api/categories/');
+      const response = await axios.get(
+        "${import.meta.env.VITE_API_BASE_URL}/api/categories/"
+      );
       const tutorCategories = response.data
         .filter((category: any) => category.tutor === tutorId)
         .map((category: any) => ({
@@ -92,20 +89,20 @@ export default function Setcategories() {
     fetchCategories();
   }, []);
 
-
-
-
   const handleOpen = (row: CategoryRow) => {
     setSelectedCategoryId(row.id); // Store the category ID
-    axios.get(`https://msidiya.com/api/categories/${row.id}/subjects/`)
-      .then(response => {
+    axios
+      .get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/categories/${
+          row.id
+        }/subjects/`
+      )
+      .then((response) => {
         setSelectedSubjects(response.data);
         setOpen(true);
       })
-      .catch(error => console.error("Error fetching subjects:", error));
+      .catch((error) => console.error("Error fetching subjects:", error));
   };
-
-
 
   const handleClose = () => {
     setOpen(false);
@@ -122,43 +119,56 @@ export default function Setcategories() {
   const handleAddModalOpen = (isSubject: boolean) => {
     setIsAddingSubject(isSubject);
     setAddModalOpen(true);
-    setNewValue('');
+    setNewValue("");
   };
 
   // Add a new subject to the selected category
   const handleAddSubject = async () => {
     if (!selectedCategoryId || !newValue.trim()) {
-      alert('Please select a category and enter a subject name.');
+      alert("Please select a category and enter a subject name.");
       return;
     }
 
     try {
       await axios.post(
-        `https://msidiya.com/api/categories/${selectedCategoryId}/create_subject/`,
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/categories/${selectedCategoryId}/create_subject/`,
         { name: newValue, category_id: selectedCategoryId },
         { headers: { "Content-Type": "application/json" } }
       );
 
       // Fetch the updated subjects list immediately
-      const response = await axios.get(`https://msidiya.com/api/categories/${selectedCategoryId}/subjects/`);
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/categories/${selectedCategoryId}/subjects/`
+      );
       setSelectedSubjects(response.data);
 
-      setNewValue('');
+      setNewValue("");
       setAddModalOpen(false);
     } catch (error) {
       console.error("Error adding subject:", error);
     }
   };
   // Update a subject (for example, update its name)
-  const handleUpdateSubject = async (subjectId: number, updatedName: string) => {
+  const handleUpdateSubject = async (
+    subjectId: number,
+    updatedName: string
+  ) => {
     try {
       await axios.patch(
-        `https://msidiya.com/api/subjects/${subjectId}/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/subjects/${subjectId}/`,
         { name: updatedName },
         { headers: { "Content-Type": "application/json" } }
       );
       // Re-fetch updated subjects list
-      const response = await axios.get(`https://msidiya.com/api/categories/${selectedCategoryId}/subjects/`);
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/categories/${selectedCategoryId}/subjects/`
+      );
       setSelectedSubjects(response.data);
     } catch (error) {
       console.error("Error updating subject:", error);
@@ -168,9 +178,15 @@ export default function Setcategories() {
   // Delete a subject
   const handleDeleteSubject = async (subjectId: number) => {
     try {
-      await axios.delete(`https://msidiya.com/api/subjects/${subjectId}/`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/subjects/${subjectId}/`
+      );
       // Re-fetch updated subjects list
-      const response = await axios.get(`https://msidiya.com/api/categories/${selectedCategoryId}/subjects/`);
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/categories/${selectedCategoryId}/subjects/`
+      );
       setSelectedSubjects(response.data);
     } catch (error) {
       console.error("Error deleting subject:", error);
@@ -180,14 +196,14 @@ export default function Setcategories() {
   // Update category (e.g. update its name)
   const handleAddCategory = async () => {
     if (!newCategory.trim()) {
-      alert('Please enter a category name.');
+      alert("Please enter a category name.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('name', newCategory.trim());
+    formData.append("name", newCategory.trim());
     if (logoFile) {
-      formData.append('logo', logoFile); // Append the logo file
+      formData.append("logo", logoFile); // Append the logo file
     }
 
     try {
@@ -196,16 +212,16 @@ export default function Setcategories() {
       const loggedInUser = JSON.parse(storedUser);
       const tutorId = loggedInUser?.id;
 
-      formData.append('tutor', tutorId.toString());
+      formData.append("tutor", tutorId.toString());
 
       const response = await axios.post(
-        'https://msidiya.com/api/categories/',
+        "${import.meta.env.VITE_API_BASE_URL}/api/categories/",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       setCategories([...categories, response.data]);
-      setNewCategory('');
+      setNewCategory("");
       setLogoFile(null); // Reset the logo file state
       setOpenAddCategoryModal(false);
     } catch (error) {
@@ -216,34 +232,39 @@ export default function Setcategories() {
   // Delete a category
   const handleDeleteCategory = async (categoryId: number) => {
     try {
-      await axios.delete(`https://msidiya.com/api/categories/${categoryId}/`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/categories/${categoryId}/`
+      );
       await fetchCategories();
     } catch (error) {
       console.error("Error deleting category:", error);
     }
   };
 
-
   const handleAddTopic = async () => {
     if (!selectedSubject?.id || !newValue.trim()) {
-      alert('Please select a subject and enter a topic name.');
+      alert("Please select a subject and enter a topic name.");
       return;
     }
 
     try {
       await axios.post(
-        `https://msidiya.com/api/subjects/${selectedSubject.id}/add_topic/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/subjects/${
+          selectedSubject.id
+        }/add_topic/`,
         { name: newValue },
         { headers: { "Content-Type": "application/json" } }
       );
 
       // Fetch updated topics immediately
       const response = await axios.get(
-        `https://msidiya.com/api/subjects/${selectedSubject.id}/`
+        `${import.meta.env.VITE_API_BASE_URL}/api/subjects/${
+          selectedSubject.id
+        }/`
       );
       setSelectedTopics(response.data.topics);
 
-      setNewValue('');
+      setNewValue("");
       setAddModalOpen(false);
     } catch (error) {
       console.error("Error adding topic:", error);
@@ -253,27 +274,34 @@ export default function Setcategories() {
   const handleUpdateTopic = async (topicId: number, updatedName: string) => {
     try {
       await axios.patch(
-        `https://msidiya.com/api/topics/${topicId}/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/topics/${topicId}/`,
         { name: updatedName },
         { headers: { "Content-Type": "application/json" } }
       );
       // Re-fetch updated topics for the selected subject
-      const response = await axios.get(`https://msidiya.com/api/subjects/${selectedSubject?.id}/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/subjects/${
+          selectedSubject?.id
+        }/`
+      );
       setSelectedTopics(response.data.topics);
     } catch (error) {
       console.error("Error updating topic:", error);
     }
   };
-  const handleUpdateCategory = async (categoryId: number, updatedName: string) => {
+  const handleUpdateCategory = async (
+    categoryId: number,
+    updatedName: string
+  ) => {
     try {
       const formData = new FormData();
-      formData.append('name', updatedName);
+      formData.append("name", updatedName);
       if (logoFile) {
-        formData.append('logo', logoFile); // Append the logo file if provided
+        formData.append("logo", logoFile); // Append the logo file if provided
       }
 
       await axios.patch(
-        `https://msidiya.com/api/categories/${categoryId}/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/categories/${categoryId}/`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -286,9 +314,15 @@ export default function Setcategories() {
   // Delete a topic
   const handleDeleteTopic = async (topicId: number) => {
     try {
-      await axios.delete(`https://msidiya.com/api/topics/${topicId}/`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/topics/${topicId}/`
+      );
       // Re-fetch updated topics for the selected subject
-      const response = await axios.get(`https://msidiya.com/api/subjects/${selectedSubject?.id}/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/subjects/${
+          selectedSubject?.id
+        }/`
+      );
       setSelectedTopics(response.data.topics);
     } catch (error) {
       console.error("Error deleting topic:", error);
@@ -296,30 +330,29 @@ export default function Setcategories() {
   };
 
   const columns: GridColDef[] = [
-
-    { field: 'name', headerName: 'Category Name', width: 200 },
+    { field: "name", headerName: "Category Name", width: 200 },
     {
-      field: 'status',
-      headerName: 'Status',
+      field: "status",
+      headerName: "Status",
       width: 150,
       renderCell: (params) => {
-        let color = 'black'; // Default color
+        let color = "black"; // Default color
         const statusText = params.value; // Status from API
 
-        if (statusText === 'in progress') {
-          color = 'blue';
-        } else if (statusText === 'accepted') {
-          color = 'green';
-        } else if (statusText === 'refused') {
-          color = 'red';
+        if (statusText === "in progress") {
+          color = "blue";
+        } else if (statusText === "accepted") {
+          color = "green";
+        } else if (statusText === "refused") {
+          color = "red";
         }
 
-        return <span style={{ color, fontWeight: 'bold' }}>{statusText}</span>;
+        return <span style={{ color, fontWeight: "bold" }}>{statusText}</span>;
       },
     },
     {
-      field: 'actions',
-      headerName: 'Actions',
+      field: "actions",
+      headerName: "Actions",
       width: 200,
       sortable: false,
       renderCell: (params) => (
@@ -335,7 +368,10 @@ export default function Setcategories() {
             color="secondary"
             title="Modify"
             onClick={() => {
-              const updatedName = prompt("Enter new category name", params.row.name);
+              const updatedName = prompt(
+                "Enter new category name",
+                params.row.name
+              );
               if (updatedName) {
                 handleUpdateCategory(params.row.id, updatedName);
               }
@@ -366,7 +402,7 @@ export default function Setcategories() {
           ADD CATEGORY
         </Button>
       </div>
-      <Paper sx={{ height: 400, width: '95%' }}>
+      <Paper sx={{ height: 400, width: "95%" }}>
         <DataGrid
           rows={categories.map((row) => ({
             id: row.id,
@@ -379,22 +415,20 @@ export default function Setcategories() {
           checkboxSelection
           sx={{ border: 0 }}
         />
-
-
       </Paper>
 
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            borderRadius: '10px',
+            borderRadius: "10px",
           }}
         >
           <div className="flex space-x-6">
@@ -409,7 +443,14 @@ export default function Setcategories() {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Button variant='contained' onClick={() => { setIsAddingSubject(true); setAddModalOpen(true); selectedCategoryId }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setIsAddingSubject(true);
+                          setAddModalOpen(true);
+                          selectedCategoryId;
+                        }}
+                      >
                         Add Subject
                       </Button>
                     </TableCell>
@@ -422,7 +463,7 @@ export default function Setcategories() {
                       hover
                       selected={subject.id === selectedSubject?.id}
                       onClick={() => handleSubjectClick(subject)}
-                      sx={{ cursor: 'pointer' }}
+                      sx={{ cursor: "pointer" }}
                     >
                       <TableCell>{subject.name}</TableCell>
                       <TableCell align="right">
@@ -430,7 +471,10 @@ export default function Setcategories() {
                           color="secondary"
                           title="Modify"
                           onClick={() => {
-                            const updatedName = prompt("Enter new subject name", subject.name);
+                            const updatedName = prompt(
+                              "Enter new subject name",
+                              subject.name
+                            );
                             if (updatedName) {
                               handleUpdateSubject(subject.id, updatedName);
                             }
@@ -449,7 +493,6 @@ export default function Setcategories() {
                     </TableRow>
                   ))}
                 </TableBody>
-
               </Table>
             </TableContainer>
 
@@ -484,7 +527,10 @@ export default function Setcategories() {
                           color="secondary"
                           title="Modify"
                           onClick={() => {
-                            const updatedName = prompt("Enter new topic name", topic.name);
+                            const updatedName = prompt(
+                              "Enter new topic name",
+                              topic.name
+                            );
                             if (updatedName) {
                               handleUpdateTopic(topic.id, updatedName);
                             }
@@ -505,7 +551,6 @@ export default function Setcategories() {
                 </TableBody>
               </Table>
             </TableContainer>
-
           </div>
           <div className="flex justify-end mt-4">
             <Button variant="contained" color="primary" onClick={handleClose}>
@@ -519,22 +564,22 @@ export default function Setcategories() {
       <Modal open={addModalOpen} onClose={() => setAddModalOpen(false)}>
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             width: 400,
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            borderRadius: '10px',
+            borderRadius: "10px",
           }}
         >
           <Typography variant="h6" gutterBottom>
-            Add {isAddingSubject ? 'Subject' : 'Topic'}
+            Add {isAddingSubject ? "Subject" : "Topic"}
           </Typography>
           <TextField
-            label={`New ${isAddingSubject ? 'Subject' : 'Topic'} Name`}
+            label={`New ${isAddingSubject ? "Subject" : "Topic"} Name`}
             value={newValue}
             onChange={(e) => setNewValue(e.target.value)}
             fullWidth
@@ -555,18 +600,21 @@ export default function Setcategories() {
       </Modal>
 
       {/* Add Category Modal */}
-      <Modal open={openAddCategoryModal} onClose={() => setOpenAddCategoryModal(false)}>
+      <Modal
+        open={openAddCategoryModal}
+        onClose={() => setOpenAddCategoryModal(false)}
+      >
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             width: 400,
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            borderRadius: '10px',
+            borderRadius: "10px",
           }}
         >
           <Typography variant="h6" gutterBottom>
@@ -582,8 +630,10 @@ export default function Setcategories() {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setLogoFile(e.target.files ? e.target.files[0] : null)}
-            style={{ marginBottom: '1rem' }}
+            onChange={(e) =>
+              setLogoFile(e.target.files ? e.target.files[0] : null)
+            }
+            style={{ marginBottom: "1rem" }}
           />
           <div className="flex justify-end mt-4 space-x-4">
             <Button
@@ -592,7 +642,11 @@ export default function Setcategories() {
             >
               Cancel
             </Button>
-            <Button variant="contained" color="primary" onClick={handleAddCategory}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAddCategory}
+            >
               Add
             </Button>
           </div>

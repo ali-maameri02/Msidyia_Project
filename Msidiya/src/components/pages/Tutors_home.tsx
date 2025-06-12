@@ -11,7 +11,7 @@ import Rating from "@mui/material/Rating";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
 import { useNavigate } from "react-router-dom";
-import logo from '../../assets/msidiya-m-logo.png';
+import logo from "../../assets/msidiya-m-logo.png";
 
 interface User {
   id: number;
@@ -33,7 +33,7 @@ const Tutors: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get<Tutor[]>("https://msidiya.com/api/tutors/")
+      .get<Tutor[]>("${import.meta.env.VITE_API_BASE_URL}/api/tutors/")
       .then((response) => {
         setTutors(response.data);
         setLoading(false);
@@ -44,9 +44,12 @@ const Tutors: React.FC = () => {
       });
   }, []);
 
-  if (loading) return  <div className="p-6 bg-white min-h-screen flex justify-center items-center">
-  <img src={logo} width={50} alt="" className="animate-spin" />
-</div>;
+  if (loading)
+    return (
+      <div className="p-6 bg-white min-h-screen flex justify-center items-center">
+        <img src={logo} width={50} alt="" className="animate-spin" />
+      </div>
+    );
   if (error) return <p className="text-center mt-20 text-red-500">{error}</p>;
 
   return (
@@ -70,7 +73,12 @@ const Tutors: React.FC = () => {
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   {tutor.Description || "No bio available."}
                 </Typography>
-                <Rating name="size-large" defaultValue={3} size="large" readOnly />
+                <Rating
+                  name="size-large"
+                  defaultValue={3}
+                  size="large"
+                  readOnly
+                />
               </CardContent>
             </CardActionArea>
             <CardActions>

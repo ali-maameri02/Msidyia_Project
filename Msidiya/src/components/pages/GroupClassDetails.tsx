@@ -52,7 +52,7 @@ interface Review {
     id: number;
     username: string;
     Picture: string;
-  }
+  };
   group_class: number;
 }
 
@@ -74,7 +74,9 @@ const GroupClassDetails: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      const res = await axios.get<Review[]>(`https://msidiya.com/api/group-class-reviews/`);
+      const res = await axios.get<Review[]>(
+        `${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/`
+      );
       setReviews(res.data.filter((r) => r.group_class === Number(classId)));
     } catch (err) {
       console.error("Failed to fetch reviews", err);
@@ -85,12 +87,14 @@ const GroupClassDetails: React.FC = () => {
     const fetchData = async () => {
       try {
         const classRes = await axios.get<GroupClass>(
-          `https://msidiya.com/api/group-classes/${classId}/`
+          `${import.meta.env.VITE_API_BASE_URL}/api/group-classes/${classId}/`
         );
         setGroupClass(classRes.data);
 
         const scheduleRes = await axios.get<Schedule[]>(
-          `https://msidiya.com/api/available-schedules/?group_class=${classId}`
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/available-schedules/?group_class=${classId}`
         );
         setSchedules(scheduleRes.data);
 
@@ -118,7 +122,7 @@ const GroupClassDetails: React.FC = () => {
 
     try {
       await axios.post(
-        `https://msidiya.com/api/group-class-reviews/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/`,
         {
           rating,
           comment,
@@ -150,7 +154,12 @@ const GroupClassDetails: React.FC = () => {
       <NavBar />
       <Box sx={{ p: 3, maxWidth: 900, margin: "auto" }}>
         <Card>
-          <CardMedia component="img" height="300" image={groupClass.main_image} alt={groupClass.title} />
+          <CardMedia
+            component="img"
+            height="300"
+            image={groupClass.main_image}
+            alt={groupClass.title}
+          />
           <CardContent>
             <Typography variant="h4" gutterBottom>
               {groupClass.title}
@@ -174,7 +183,6 @@ const GroupClassDetails: React.FC = () => {
               <Grid item xs={6}>
                 <Typography>Type: {groupClass.class_type}</Typography>
               </Grid>
-
             </Grid>
 
             <Divider sx={{ my: 2 }} />
@@ -188,12 +196,15 @@ const GroupClassDetails: React.FC = () => {
                 schedules.map((schedule) => (
                   <Grid item xs={12} sm={6} key={schedule.id}>
                     <Card variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="body2">Date: {new Date(schedule.date).toLocaleString()}</Typography>
-                      <Typography variant="body2">Duration: {schedule.duration}</Typography>
+                      <Typography variant="body2">
+                        Date: {new Date(schedule.date).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2">
+                        Duration: {schedule.duration}
+                      </Typography>
                       <Typography variant="body2">
                         Topic: {schedule.topic?.name || "No Topic"}
                       </Typography>
-
                     </Card>
                   </Grid>
                 ))
@@ -213,16 +224,31 @@ const GroupClassDetails: React.FC = () => {
                 <Box key={review.id} sx={{ mb: 2 }}>
                   <div className="content flex flex-row justify-between items-start">
                     <div className="left flex flex-row items-start">
-                      <img className="rounded-full w-12 h-12" src={review.user?.Picture} alt="" />
-                      <Typography variant="caption"> {review.user?.username}</Typography>
+                      <img
+                        className="rounded-full w-12 h-12"
+                        src={review.user?.Picture}
+                        alt=""
+                      />
+                      <Typography variant="caption">
+                        {" "}
+                        {review.user?.username}
+                      </Typography>
                     </div>
                     <div className="right flex flex-col items-end w-full">
-                      <Rating value={review.rating} readOnly precision={0.5} size="small" />
-                      <Typography variant="body2" className="bg-gray-100 w-full rounded-lg p-2">{review.comment}</Typography>
-
+                      <Rating
+                        value={review.rating}
+                        readOnly
+                        precision={0.5}
+                        size="small"
+                      />
+                      <Typography
+                        variant="body2"
+                        className="bg-gray-100 w-full rounded-lg p-2"
+                      >
+                        {review.comment}
+                      </Typography>
                     </div>
                   </div>
-
                 </Box>
               ))
             ) : (
