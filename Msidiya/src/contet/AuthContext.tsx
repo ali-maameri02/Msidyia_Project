@@ -1,69 +1,70 @@
-
 import { createContext, ReactNode } from "react";
 import { IUser } from "../interfaces/IUser";
 import { queryManager } from "../services/query.manager";
-import { useProfileQuery, usersQueryKeys } from "../services/users/users.queries";
+import {
+  useProfileQuery,
+  usersQueryKeys,
+} from "../services/users/users.queries";
+import { useLogoutMutation } from "../services/auth/auth.queries";
 
 interface AuthContextInterface {
-  user: IUser | undefined,
-  logout: () => void,
-  isLoading: boolean,
-  isError: boolean,
-  refresh: () => void,
-  isStudent: () => boolean,
-  isSeller: () => boolean,
-  isTeacher: () => boolean,
+  user: IUser | null | undefined;
+  logout: () => void;
+  isLoading: boolean;
+  isError: boolean;
+  refresh: () => void;
+  isStudent: () => boolean;
+  isSeller: () => boolean;
+  isTeacher: () => boolean;
 }
 
 const initialState: AuthContextInterface = {
   user: undefined,
   isLoading: true,
   isError: false,
-  logout: () => { },
-  refresh: () => { },
+  logout: () => {},
+  refresh: () => {},
   isStudent: () => false,
   isSeller: () => false,
   isTeacher: () => false,
-}
+};
 
-export const authContext = createContext<AuthContextInterface>(initialState)
+export const authContext = createContext<AuthContextInterface>(initialState);
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-  const { isLoading, data: user, isError } = useProfileQuery()
+  const { isLoading, data: user, isError } = useProfileQuery();
+  const logoutMutation = useLogoutMutation();
 
   const refresh = () => {
-    queryManager.invalidate(usersQueryKeys.profile)
-  }
+    queryManager.invalidate(usersQueryKeys.profile);
+  };
 
   const isStudent = () => {
-    return user != null && user.Role == "Student"
-  }
+    return user != null && user.Role == "Student";
+  };
 
   const isSeller = () => {
-    return user != null && user.Role == "Ms_seller"
-  }
+    return user != null && user.Role == "Ms_seller";
+  };
 
   const isTeacher = () => {
-    return user != null && user.Role == "Tutor"
-  }
+    return user != null && user.Role == "Tutor";
+  };
+
   const logout = () => {
-    localStorage.removeItem("token")
-  }
+    logoutMutation.mutate();
+  };
 
   const value: AuthContextInterface = {
-    isLoading, // Pass the raw isLoading value
-    isError,   // Add isError to the context
+    isLoading,
+    isError,
     user,
     refresh,
     logout,
     isStudent,
     isTeacher,
-    isSeller
-  }
+    isSeller,
+  };
 
-  return (
-    <authContext.Provider value={value}>
-      {children}
-    </authContext.Provider>
-  )
-}
+  return <authContext.Provider value={value}>{children}</authContext.Provider>;
+};

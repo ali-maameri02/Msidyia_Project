@@ -9,9 +9,13 @@ import ball from "../../assets/ball.svg";
 interface SignupProps {
   onClose: () => void;
   onSwitchToLogin: () => void;
+  onSignupSuccess: () => void;
 }
 
-const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
+const Signup: React.FC<SignupProps> = ({
+  onSwitchToLogin,
+  onSignupSuccess,
+}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [Role, setRole] = useState("");
@@ -25,7 +29,7 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
       { username, password, Role },
       {
         onSuccess: () => {
-          onSwitchToLogin();
+          onSignupSuccess();
         },
         onError: (err: any) => {
           setError(

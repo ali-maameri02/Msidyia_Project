@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({
         onSuccess: (data) => {
           localStorage.setItem("user", JSON.stringify(data));
           localStorage.setItem("token", JSON.stringify(data));
-          window.location.reload();
+          // window.location.reload();
           if (onLoginSuccess) {
             onLoginSuccess(data);
           }

@@ -218,7 +218,8 @@ const NavBar: React.FC = () => {
     refresh();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     logout(); // Use auth context logout
     setShowProfileDropdown(false);
     navigate("/");
@@ -495,7 +496,9 @@ const NavBar: React.FC = () => {
                     alt="User Avatar"
                     className="w-12 h-12 rounded-full object-cover"
                   />
-                  <span className="text-gray-800 font-medium">{user.Name}</span>
+                  <span className="text-gray-800 font-medium">
+                    {user.username}
+                  </span>
                 </div>
                 <div className="w-full flex flex-col gap-2">
                   <Button

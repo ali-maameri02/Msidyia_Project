@@ -17,6 +17,11 @@ export const useLoginMutation = () =>
     },
   });
 
-export const useLogout = () => {
-  return api.logout;
-};
+export const useLogoutMutation = () =>
+  useMutation({
+    mutationFn: api.logout,
+    onSuccess: () => {
+      queryManager.setQueryData(usersQueryKeys.profile, null);
+      queryManager.invalidate(usersQueryKeys.profile);
+    },
+  });

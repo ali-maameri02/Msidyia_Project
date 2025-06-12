@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import {
+  createGroupClass,
+  createGroupClassSession,
+} from "../../../services/group_classes/group_classes.api";
+import { axiosClient } from "../../../assets/lib/axiosClient";
 // import Scheduler from "react-mui-scheduler";
 // import { Box, Modal, TextField } from "@mui/material";
 // import { SchedulerEvent } from "react-mui-scheduler"; // Import event type if available
@@ -11,18 +15,21 @@ import { Button } from "@mui/material";
 // };
 
 const AddGroupClass: React.FC = () => {
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    []
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   // const [duration, setDuration] = useState<string>("");
   const [open, setOpen] = useState(false);
   const tutorId = localStorage.getItem("user");
   const user = tutorId ? JSON.parse(tutorId) : null;
-  console.log(open, user)
+  console.log(open, user);
 
   useEffect(() => {
-    axios.get("https://msidiya.com/api/categories/")
-      .then(response => setCategories(response.data))
-      .catch(error => console.error("Error fetching categories:", error));
+    axiosClient
+      .get("/api/categories/")
+      .then((response) => setCategories(response.data))
+      .catch((error) => console.error("Error fetching categories:", error));
   }, []);
 
   const [formData, setFormData] = useState({
@@ -38,14 +45,21 @@ const AddGroupClass: React.FC = () => {
     main_image: null,
   });
 
-  const [scheduleDetails, setScheduleDetails] = useState<{ date: string; duration: string }[]>([]);
+  const [scheduleDetails, setScheduleDetails] = useState<
+    { date: string; duration: string }[]
+  >([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.files ? e.target.files[0] : null });
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.files ? e.target.files[0] : null,
+    });
   };
 
   const [groupClassId, setGroupClassId] = useState<number | null>(null);
@@ -58,7 +72,13 @@ const AddGroupClass: React.FC = () => {
       return;
     }
 
-    if (!formData.title || !formData.grade || !formData.class_type || !formData.status || !formData.last_time) {
+    if (
+      !formData.title ||
+      !formData.grade ||
+      !formData.class_type ||
+      !formData.status ||
+      !formData.last_time
+    ) {
       alert("Please fill all required fields.");
       return;
     }
@@ -69,7 +89,7 @@ const AddGroupClass: React.FC = () => {
 
       Object.entries(formData).forEach(([key, value]) => {
         if (value !== null && value !== "") {
-          formDataObj.append(key, value);
+          formDataObj.append(key, value as string | Blob);
         }
       });
 
@@ -78,11 +98,7 @@ const AddGroupClass: React.FC = () => {
       }
 
       // Step 1: Create Group Class
-      const groupClassResponse = await axios.post(
-        "https://msidiya.com/api/group-classes/",
-        formDataObj,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const groupClassResponse = await createGroupClass(formDataObj);
 
       const createdGroupClassId = groupClassResponse.data.id;
       setGroupClassId(createdGroupClassId);
@@ -95,7 +111,10 @@ const AddGroupClass: React.FC = () => {
         sendScheduleDetails(createdGroupClassId);
       }
     } catch (error: any) {
-      console.error("Error creating group class:", error.response?.data || error.message);
+      console.error(
+        "Error creating group class:",
+        error.response?.data || error.message
+      );
       alert("An error occurred while creating the group class.");
     }
   };
@@ -123,27 +142,28 @@ const AddGroupClass: React.FC = () => {
         duration: "01:00:00",
       };
 
-      const response = await axios.post(
-        "https://msidiya.com/api/schedulescreate/",
-        newSchedule
-      );
+      const response = await createGroupClassSession(newSchedule);
 
       console.log("Schedule Created:", response.data);
 
-      setScheduleDetails([...scheduleDetails, {
-        date: selectedDate,
-        duration: "1 hour"
-      }]);
+      setScheduleDetails([
+        ...scheduleDetails,
+        {
+          date: selectedDate,
+          duration: "1 hour",
+        },
+      ]);
 
       setOpen(false); // Close modal
       alert("Schedule added successfully!");
     } catch (error: any) {
-      console.error("Error creating schedule:", error.response?.data || error.message);
+      console.error(
+        "Error creating schedule:",
+        error.response?.data || error.message
+      );
       alert("Failed to add schedule.");
     }
   };
-
-
 
   // Capture date when user clicks on scheduler
   // const handleDateClick = (date: any) => {
@@ -188,9 +208,9 @@ const AddGroupClass: React.FC = () => {
 
   //     console.log("Schedule created:", response.data);
 
-  //     setScheduleDetails([...scheduleDetails, { 
-  //       date: selectedDate, 
-  //       duration: "1 hour" 
+  //     setScheduleDetails([...scheduleDetails, {
+  //       date: selectedDate,
+  //       duration: "1 hour"
   //     }]);
 
   //     setOpen(false); // Close modal
@@ -200,7 +220,6 @@ const AddGroupClass: React.FC = () => {
   //     alert("Failed to add schedule.");
   //   }
   // };
-
 
   // const handleCellClick = (event: any) => {
   //   console.log("Event received:", event);
@@ -230,18 +249,24 @@ const AddGroupClass: React.FC = () => {
   //   console.error("No valid date found in event.");
   // };
 
-
-
-
-
-
   return (
     <div className="ml-20 mt-16">
       <h1 className="text-2xl font-semibold mb-6">Create new group class</h1>
-      <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" onSubmit={handleSubmit}>
+      <form
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col">
-          <label htmlFor="title" className="font-medium mb-2">Group Class Title *</label>
-          <input id="title" type="text" placeholder="Enter title" className="border p-2 rounded-lg" onChange={handleChange} />
+          <label htmlFor="title" className="font-medium mb-2">
+            Group Class Title *
+          </label>
+          <input
+            id="title"
+            type="text"
+            placeholder="Enter title"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          />
         </div>
 
         {/* <div className="flex flex-col">
@@ -250,81 +275,160 @@ const AddGroupClass: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col">
-          <label htmlFor="grade" className="font-medium mb-2">Grade *</label>
-          <input id="grade" type="text" placeholder="Enter grade" className="border p-2 rounded-lg" onChange={handleChange} />
+          <label htmlFor="grade" className="font-medium mb-2">
+            Grade *
+          </label>
+          <input
+            id="grade"
+            type="text"
+            placeholder="Enter grade"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          />
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="price" className="font-medium mb-2">Price ($)</label>
-          <input id="price" type="number" placeholder="0" className="border p-2 rounded-lg" onChange={handleChange} />
+          <label htmlFor="price" className="font-medium mb-2">
+            Price ($)
+          </label>
+          <input
+            id="price"
+            type="number"
+            placeholder="0"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          />
         </div>
         <div className="flex flex-col">
-          <label htmlFor="max_book" className="font-medium mb-2">max_book </label>
-          <input id="max_book" type="number" placeholder="0" className="border p-2 rounded-lg" onChange={handleChange} />
+          <label htmlFor="max_book" className="font-medium mb-2">
+            max_book{" "}
+          </label>
+          <input
+            id="max_book"
+            type="number"
+            placeholder="0"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          />
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="category" className="font-medium mb-2">Category</label>
-          <select id="category" className="border p-2 rounded-lg" onChange={handleChange}>
+          <label htmlFor="category" className="font-medium mb-2">
+            Category
+          </label>
+          <select
+            id="category"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          >
             <option value="">Select a category</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="class_type" className="font-medium mb-2">Class Type *</label>
-          <select id="class_type" className="border p-2 rounded-lg" onChange={handleChange} defaultValue="Online">
+          <label htmlFor="class_type" className="font-medium mb-2">
+            Class Type *
+          </label>
+          <select
+            id="class_type"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+            defaultValue="Online"
+          >
             <option value="Paid">Paid</option>
             <option value="Free">Free</option>
           </select>
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="status" className="font-medium mb-2">Status *</label>
-          <select id="status" className="border p-2 rounded-lg" onChange={handleChange} defaultValue="Active">
+          <label htmlFor="status" className="font-medium mb-2">
+            Status *
+          </label>
+          <select
+            id="status"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+            defaultValue="Active"
+          >
             <option value="Visible">Visible</option>
             <option value="Hidden">Hidden </option>
           </select>
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="last_time" className="font-medium mb-2">Last Time *</label>
-          <input id="last_time" type="datetime-local" className="border p-2 rounded-lg" onChange={handleChange} />
+          <label htmlFor="last_time" className="font-medium mb-2">
+            Last Time *
+          </label>
+          <input
+            id="last_time"
+            type="datetime-local"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          />
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="main_image" className="font-medium mb-2">Upload Image</label>
-          <input id="main_image" type="file" className="border p-2 rounded-lg" onChange={handleFileChange} />
+          <label htmlFor="main_image" className="font-medium mb-2">
+            Upload Image
+          </label>
+          <input
+            id="main_image"
+            type="file"
+            className="border p-2 rounded-lg"
+            onChange={handleFileChange}
+          />
         </div>
 
-        <button type="submit" className="col-span-3 bg-blue-500 text-white py-2 rounded-lg">Submit</button>
+        <button
+          type="submit"
+          className="col-span-3 bg-blue-500 text-white py-2 rounded-lg"
+        >
+          Submit
+        </button>
       </form>
 
       <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <h1 className="col-span-full text-lg font-semibold">Sessions Times</h1>
 
-
-
         {/* Date Selection */}
         <div className="flex flex-col">
-          <label htmlFor="date" className="font-medium mb-2">Session Date *</label>
-          <input type="datetime-local" onChange={(e) => setSelectedDate(e.target.value)} />  </div>
+          <label htmlFor="date" className="font-medium mb-2">
+            Session Date *
+          </label>
+          <input
+            type="datetime-local"
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />{" "}
+        </div>
 
         {/* Duration Selection */}
         <div className="flex flex-col">
-          <label htmlFor="duration" className="font-medium mb-2">Duration (HH:MM:SS) *</label>
-          <input id="duration" type="time" step="1" className="border p-2 rounded-lg" onChange={handleChange} />
+          <label htmlFor="duration" className="font-medium mb-2">
+            Duration (HH:MM:SS) *
+          </label>
+          <input
+            id="duration"
+            type="time"
+            step="1"
+            className="border p-2 rounded-lg"
+            onChange={handleChange}
+          />
         </div>
 
-
         {/* Submit Button */}
-        <Button variant="contained" className="p-0 h-16" onClick={() => groupClassId && sendScheduleDetails(groupClassId)}>
+        <Button
+          variant="contained"
+          className="p-0 h-16"
+          onClick={() => groupClassId && sendScheduleDetails(groupClassId)}
+        >
           Add Schedule
         </Button>
       </form>
-
     </div>
   );
 };

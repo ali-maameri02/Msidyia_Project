@@ -8,6 +8,9 @@ export const queryManager = {
   refetch: (key: readonly string[]) =>
     queryClient.refetchQueries({ queryKey: key }),
 
+  setQueryData: (key: readonly string[], data: any) =>
+    queryClient.setQueryData(key, data),
+
   remove: (key: readonly string[]) =>
     queryClient.removeQueries({ queryKey: key }),
 
