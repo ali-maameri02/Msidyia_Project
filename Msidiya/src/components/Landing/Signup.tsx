@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import { useCreateUserMutation } from "../../services/users/users.queries";
 import "../../index.css";
 import { Slide } from "react-awesome-reveal";
 
@@ -15,21 +15,26 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [Role, setRole] = useState("");
-  const [error] = useState("");
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const [error, setError] = useState("");
+  const createUserMutation = useCreateUserMutation();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
-      const response = await axios.post(`${API_BASE_URL}/signup/`, { username, password, Role });
-      console.log("Signup successful:", response.data);
-      onSwitchToLogin();
-      // Handle successful signup (e.g., redirect to login)
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials and try again.');
-    }
+    setError("");
+    createUserMutation.mutate(
+      { username, password, Role },
+      {
+        onSuccess: () => {
+          onSwitchToLogin();
+        },
+        onError: (err: any) => {
+          setError(
+            err.response?.data?.message ||
+              "Signup failed. Please check your credentials and try again."
+          );
+        },
+      }
+    );
   };
 
   return (
@@ -102,7 +107,14 @@ const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                     <option value="Student">Student</option>
                   </select>
                 </div>
-                {error && <p className="text-red-600 text-sm">{error}</p>}
+                {(error || createUserMutation.error) && (
+                  <p className="text-red-600 text-sm">
+                    {error ||
+                      (createUserMutation.error as any)?.response?.data
+                        ?.message ||
+                      "Signup failed. Please check your credentials and try again."}
+                  </p>
+                )}
 
                 <div className="!mt-8">
                   <button

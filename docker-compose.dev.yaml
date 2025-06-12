@@ -13,15 +13,13 @@ services:
       - "./Msidya_Backend:/app"
     command: >
       sh -c "
-      python  manage.py collectstatic --noinput &&
-      python manage.py makemigrations &&
       python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000
       "
     environment:
       CLIENT_URL: "https://localhost:3000"
       DB_HOST: db
-      DB_NAME: "new"
+      DB_NAME: "db"
       DB_USER: "db_user"
       DB_PORT: "5432"
       DB_PASSWORD: "db_password"
@@ -41,8 +39,8 @@ services:
       POSTGRES_USER: "db_user"
       POSTGRES_PASSWORD: "db_password"
       POSTGRES_DB: "db"
-    ports:
-      - "5432:5432"  # only expose if you want to connect from outside Docker
+    # ports:
+    #   - "5432:5432"  # only expose if you want to connect from outside Docker
 
 volumes:
   pgdata:

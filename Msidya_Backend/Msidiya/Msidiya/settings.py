@@ -54,6 +54,7 @@ CSRF_COOKIE_SECURE = False  # Set to True only in production
 CSRF_TRUSTED_ORIGINS = [
     'https://msidiya.com',
     'https://www.msidiya.com',
+    'http://localhost:5173'
 ]
 
 

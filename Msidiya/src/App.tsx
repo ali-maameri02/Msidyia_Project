@@ -17,6 +17,7 @@ import GroupClasses from "./components/pages/GroupClasses";
 import CheckoutPage from "./components/pages/Checkout";
 import GroupClassesFiltered from "./components/pages/GroupClassesFiltered";
 import GroupClassDetails from "./components/pages/GroupClassDetails";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
   const location = useLocation();
@@ -36,18 +37,72 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/test" element={<Test />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/cart/checkout" element={<CheckoutPage />} />
-            <Route path="/group-classes" element={<GroupClasses />} />
             <Route path="/Tutors" element={<Tutors />} />
-            <Route path="/group-classes/category/:categoryId/" element={<GroupClassesFiltered />} />
-            <Route path="/Tutors/TutorDetails/:tutorId" element={<TutorDetails />} />
-            <Route path="/Tutors/TutorDetails/TutorOneToOne" element={<TutorOneToOne />} />
-            <Route path="/group-class/:classId" element={<GroupClassDetails />} />
+            <Route
+              path="/Tutors/TutorDetails/:tutorId"
+              element={<TutorDetails />}
+            />
+            <Route path="/group-classes" element={<GroupClasses />} />
+            <Route
+              path="/group-classes/category/:categoryId/"
+              element={<GroupClassesFiltered />}
+            />
+            <Route
+              path="/group-class/:classId"
+              element={<GroupClassDetails />}
+            />
 
-            <Route path="dashboard/*" element={<DashboardRoutes />} />
-            <Route path="dashboardstudent/*" element={<DashboardStudentRoutes />} />
-            <Route path="dashboardseller/*" element={<DashboardSellerRoutes />} />
+            {/* Protected Routes - require authentication */}
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cart/checkout"
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/Tutors/TutorDetails/TutorOneToOne"
+              element={
+                <ProtectedRoute>
+                  <TutorOneToOne />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Role-specific Routes */}
+            <Route
+              path="dashboard/*"
+              element={
+                <ProtectedRoute allowedRoles={["Tutor"]}>
+                  <DashboardRoutes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="dashboardstudent/*"
+              element={
+                <ProtectedRoute allowedRoles={["Student"]}>
+                  <DashboardStudentRoutes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="dashboardseller/*"
+              element={
+                <ProtectedRoute allowedRoles={["Ms_seller"]}>
+                  <DashboardSellerRoutes />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </CartProvider>
       </I18nextProvider>

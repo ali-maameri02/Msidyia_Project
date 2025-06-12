@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "../../index.css";
 import { Slide } from "react-awesome-reveal";
+import { useLoginMutation } from "../../services/auth/auth.queries";
 
 import loginimage from "../../assets/4957136_Mobile login.svg";
 import ball from "../../assets/balleft.svg";
-import { User, fetchUserData } from "../../utils/userData";
+import { User } from "../../utils/userData";
 
 interface LoginProps {
   onClose?: () => void;
@@ -14,49 +14,59 @@ interface LoginProps {
   onLoginSuccess: (userData: User) => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onClose, onSwitchToSignup, onLoginSuccess }) => {
+const Login: React.FC<LoginProps> = ({
+  onClose,
+  onSwitchToSignup,
+  onLoginSuccess,
+}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
+  const loginMutation = useLoginMutation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
-      const response = await axios.post(`${API_BASE_URL}/login/`, { username, password });
-      // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(response.data));
-      localStorage.setItem("token", JSON.stringify(response.data));
-      console.log("User data:", response.data);
-      // Call the onLoginSuccess callback with the user data so the NavBar updates immediately
-      if (onLoginSuccess) {
-        fetchUserData()
-        onLoginSuccess(response.data);
+    setError("");
+    loginMutation.mutate(
+      { username, password },
+      {
+        onSuccess: (data) => {
+          localStorage.setItem("user", JSON.stringify(data));
+          localStorage.setItem("token", JSON.stringify(data));
+          window.location.reload();
+          if (onLoginSuccess) {
+            onLoginSuccess(data);
+          }
+          const { user_role } = data;
+          if (user_role) {
+            navigate("/");
+            if (onClose) onClose();
+          }
+        },
+        onError: (err: any) => {
+          setError(err.response?.data?.message || "Something went wrong!");
+        },
       }
-
-      // Optionally, navigate or close the popup
-      const { user_role } = response.data;
-      if (user_role) {
-        navigate("/");
-        if (onClose) onClose();
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong!");
-    }
+    );
   };
 
   return (
     <div className="font-[sans-serif] p-5">
       <div className="relative pb-0 p-8 flex items-center justify-center py-6 px-4">
-        <Slide direction="right" className="absolute" style={{ top: "-2.65rem", left: "-1.71rem" }}>
+        <Slide
+          direction="right"
+          className="absolute"
+          style={{ top: "-2.65rem", left: "-1.71rem" }}
+        >
           <img src={ball} alt="" className="rounded-br-lg" />
         </Slide>
         <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full pb-0">
           <form className="max-w-md md:ml-auto w-full" onSubmit={handleLogin}>
             <Slide direction="right">
-              <h3 className="text-gray-800 text-3xl font-extrabold mb-8">Sign in</h3>
+              <h3 className="text-gray-800 text-3xl font-extrabold mb-8">
+                Sign in
+              </h3>
               <div className="space-y-4">
                 <div>
                   <input
