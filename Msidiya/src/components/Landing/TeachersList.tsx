@@ -1,62 +1,21 @@
-import React, { useRef, useEffect, useState } from 'react';
-import TeacherCard from './TeacherCard';
-import { motion } from 'framer-motion';
+import React, { useRef, useEffect, useState } from "react";
+import TeacherCard from "./TeacherCard";
+import { motion } from "framer-motion";
+import { useGetTutors } from "../../api/tutor/teacher.queries";
 
 // Import images directly
-import profile1 from '../../assets/profile1.jpeg';
-import profile2 from '../../assets/profile2.jpeg';
-import profile3 from '../../assets/profile3.jpeg';
+import profile1 from "../../assets/profile1.jpeg";
+import profile2 from "../../assets/profile2.jpeg";
+import profile3 from "../../assets/profile3.jpeg";
 
-// Add more fake teachers
-const teachers = [
-  {
-    image: profile1,
-    name: 'Nicholas Jordan',
-    rating: 0,
-    reviews: 0,
-    subjects: ['Fine Arts'],
-  },
-  {
-    image: profile2,
-    name: 'Mary James',
-    rating: 0,
-    reviews: 0,
-    subjects: ['Music'],
-  },
-  {
-    image: profile3,
-    name: 'Ryan Gerrard',
-    rating: 0,
-    reviews: 0,
-    subjects: ['Engineering', 'Coding & Tech'],
-  },
-  {
-    image: profile1,
-    name: 'Susan White',
-    rating: 0,
-    reviews: 0,
-    subjects: ['Math', 'Physics'],
-  },
-  {
-    image: profile2,
-    name: 'David Brown',
-    rating: 0,
-    reviews: 0,
-    subjects: ['History'],
-  },
-  {
-    image: profile3,
-    name: 'Alice Green',
-    rating: 0,
-    reviews: 0,
-    subjects: ['Biology'],
-  },
-];
+const profileImages = [profile1, profile2, profile3];
 
 const TeachersList: React.FC = () => {
+  const { data: teachers, isLoading, isError } = useGetTutors();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
-  console.log(scrollPosition)
+  console.log(scrollPosition);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -67,15 +26,23 @@ const TeachersList: React.FC = () => {
     const scrollAmount = scrollWidth / 3; // Scroll amount per interval
 
     const intervalId = setInterval(() => {
-      setScrollPosition(prev => {
+      setScrollPosition((prev) => {
         const newScrollPosition = (prev + scrollAmount) % scrollWidth;
-        container.scrollTo({ left: newScrollPosition, behavior: 'smooth' });
+        container.scrollTo({ left: newScrollPosition, behavior: "smooth" });
         return newScrollPosition;
       });
     }, scrollInterval);
 
     return () => clearInterval(intervalId);
   }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error fetching teachers</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 flex flex-col justify-center align-middle">
@@ -91,32 +58,30 @@ const TeachersList: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center text-gray-700 mb-8"
       >
-        Top-notch teachers, limitless learning. Explore any interest over live video chat! Discover fun, social, and safe
-        learning experiences led by passionate teachers.
+        Top-notch teachers, limitless learning. Explore any interest over live
+        video chat! Discover fun, social, and safe learning experiences led by
+        passionate teachers.
       </motion.p>
       <div ref={containerRef} className="scroll-container">
         <div className="scroll-content">
-          {teachers.map((teacher, index) => (
+          {teachers?.map((teacher, index) => (
             <TeacherCard
-              key={index}
-              image={teacher.image}
-              name={teacher.name}
-              rating={teacher.rating}
-              reviews={teacher.reviews}
-              subjects={teacher.subjects}
-              onClick={() => alert(`Starting free trial with ${teacher.name}`)}
-            />
-          ))}
-          {/* Duplicate the content to make scrolling seamless */}
-          {teachers.map((teacher, index) => (
-            <TeacherCard
-              key={`duplicate-${index}`}
-              image={teacher.image}
-              name={teacher.name}
-              rating={teacher.rating}
-              reviews={teacher.reviews}
-              subjects={teacher.subjects}
-              onClick={() => alert(`Starting free trial with ${teacher.name}`)}
+              key={teacher.id}
+              image={
+                teacher.user.Picture ||
+                profileImages[index % profileImages.length]
+              }
+              name={
+                teacher.user.first_name && teacher.user.last_name
+                  ? `${teacher.user.first_name} ${teacher.user.last_name}`
+                  : teacher.user.username
+              }
+              rating={0} // Placeholder
+              reviews={0} // Placeholder
+              subjects={teacher.qualifications.map((q) => q.toString())} // Assuming qualifications can be represented as strings
+              onClick={() =>
+                alert(`Starting free trial with ${teacher.user.username}`)
+              }
             />
           ))}
         </div>

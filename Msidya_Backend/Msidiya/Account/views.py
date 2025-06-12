@@ -1,5 +1,7 @@
 import json
-from django.db.models import F, Q, OuterRef, Subquery
+from Group_Class.models import GroupClass
+
+from django.db.models import F, Q, OuterRef, Subquery,Exists
 import requests
 from rest_framework.response import Response
 from rest_framework import generics
@@ -265,8 +267,20 @@ class ChatBetweenUsersView(APIView):
             
 
 class TutorList(generics.ListAPIView):
-    serializer_class=TutorslistSerializer
-    queryset=Tutor.objects.all()
+    serializer_class = TutorslistSerializer
+
+    def get_queryset(self):
+        # Filter GroupClasses where class_type is Free and status is Visible
+        free_groupclass_subquery = GroupClass.objects.filter(
+            tutor=OuterRef('user'),  # GroupClass.tutor points to User
+            class_type='Free',
+            status='Visible'
+        )
+
+        # Annotate tutors with a boolean indicating if they have free group classes
+        return Tutor.objects.annotate(
+            has_free_groupclass=Exists(free_groupclass_subquery)
+        ).filter(has_free_groupclass=True)
 
 class TutorDetails(generics.RetrieveAPIView):
     serializer_class=TutorslistSerializer
