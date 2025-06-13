@@ -1,8 +1,10 @@
+from datetime import timedelta
+from django.utils import timezone
 import json
-from Group_Class.models import GroupClass
+from Group_Class.models import GroupClass, StudentAppointment
 
 from Group_Class.serializers import GroupClassSerializer
-from django.db.models import F, Q, OuterRef, Subquery,Exists
+from django.db.models import F, Q, OuterRef, Subquery,Exists,Sum
 import requests
 from rest_framework.response import Response
 from rest_framework import generics
@@ -21,6 +23,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from E_wallet.models  import Transaction
 
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = UserregisterSerializer
@@ -297,3 +300,105 @@ class TutorDetails(generics.RetrieveAPIView):
     queryset=Tutor.objects.all()
     lookup_field = 'pk'
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tutor_dashboard_stats(request):
+    # Ensure only tutors can access
+    tutor = get_object_or_404(User, pk=request.user.id, Role='Tutor')
+
+    now            = timezone.now()
+    current_start  = now - timedelta(days=30)
+    previous_start = now - timedelta(days=60)
+    previous_end   = current_start
+
+    # 1) totalCourses for this tutor
+    total_courses    = GroupClass.objects.filter(tutor=tutor).count()
+    courses_current  = GroupClass.objects.filter(
+        tutor=tutor,
+        date_created__gte=current_start
+    ).count()
+    courses_previous = GroupClass.objects.filter(
+        tutor=tutor,
+        date_created__gte=previous_start,
+        date_created__lt= previous_end
+    ).count()
+    growth_courses = (
+        (courses_current - courses_previous) / courses_previous * 100
+        if courses_previous else 0
+    )
+
+    # 2) totalStudents = # of StudentAppointment on tutor's classes
+    total_students    = StudentAppointment.objects.filter(
+        schedule__group_class__tutor=tutor
+    ).count()
+    students_current  = StudentAppointment.objects.filter(
+        schedule__group_class__tutor=tutor,
+        booking_date__gte=current_start
+    ).count()
+    students_previous = StudentAppointment.objects.filter(
+        schedule__group_class__tutor=tutor,
+        booking_date__gte=previous_start,
+        booking_date__lt= previous_end
+    ).count()
+    growth_students = (
+        (students_current - students_previous) / students_previous * 100
+        if students_previous else 0
+    )
+
+    # 3) groupClasses: % Paid + growth in Paid creation
+    tutor_classes    = GroupClass.objects.filter(tutor=tutor)
+    paid_total       = tutor_classes.filter(class_type='Paid').count()
+    group_percentage = (paid_total / total_courses * 100) if total_courses else 0
+
+    paid_current  = tutor_classes.filter(
+        class_type='Paid',
+        date_created__gte=current_start
+    ).count()
+    paid_previous = tutor_classes.filter(
+        class_type='Paid',
+        date_created__gte=previous_start,
+        date_created__lt= previous_end
+    ).count()
+    growth_group = (
+        (paid_current - paid_previous) / paid_previous * 100
+        if paid_previous else 0
+    )
+
+    # 4) totalEarnings: sum of Transaction.amount where type='enroll' → tutor
+    earnings_current = Transaction.objects.filter(
+        receiver=tutor,
+        type='enroll',
+        created_at__gte=current_start
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    earnings_previous = Transaction.objects.filter(
+        receiver=tutor,
+        type='enroll',
+        created_at__gte=previous_start,
+        created_at__lt= previous_end
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    growth_earnings = (
+        (earnings_current - earnings_previous) / earnings_previous * 100
+        if earnings_previous else 0
+    )
+
+    return Response({
+        "totalCourses": {
+            "count":  total_courses,
+            "growth": round(growth_courses, 2),
+        },
+        "totalStudents": {
+            "count":  total_students,
+            "growth": round(growth_students, 2),
+        },
+        "groupClasses": {
+            "percentage": round(group_percentage, 2),
+            "growth":     round(growth_group, 2),
+        },
+        "totalEarnings": {
+            "amount": float(earnings_current),
+            "growth": round(growth_earnings, 2),
+        },
+    }, status=status.HTTP_200_OK)

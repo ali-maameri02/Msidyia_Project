@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 // import TrafficSource from './TrafficSource';
 import PieChart from "./PieChart";
 import SalesChart from "./SalesChart";
@@ -16,9 +16,11 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LocalMallIcon from "@mui/icons-material/LocalMall";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useAuth } from "../../../hooks/useAuth";
+import { useDashboardStats } from "../../../services/dashboard/dashboard.queries";
 
 const Teacher: React.FC = () => {
   const { user } = useAuth();
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
 
   const { data: notifications = [], isLoading: notificationsLoading } =
     useNotifications();
@@ -41,63 +43,113 @@ const Teacher: React.FC = () => {
 
   useEffect(() => {
     const getUserData = async () => {
-      const userData = await fetchUserData();
-      setUser(userData);
+      await fetchUserData();
     };
     getUserData();
   }, []);
+
   return (
     <div className="pl-12 ml-5 w-100">
       {/* Main Content */}
       <main className="flex flex-col justify-center  mt-20 bg-transparent   ">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {/* Total Courses Card */}
           <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
             <div className="p-3 bg-purple-100 rounded-full">
               <FaChalkboardTeacher className="text-purple-500 text-2xl" />
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Total Courses</p>
-              <p className="text-2xl font-bold">12</p>
-              <p className="text-sm text-green-500">↑ 8% Since last month</p>
+              <p className="text-2xl font-bold">
+                {statsLoading ? "..." : stats?.totalCourses.count}
+              </p>
+              <p
+                className={`text-sm ${
+                  stats?.totalCourses.growth >= 0
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {stats?.totalCourses.growth >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.totalCourses.growth || 0)}% Since last month
+              </p>
             </div>
           </div>
 
+          {/* Total Students Card */}
           <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
             <div className="p-3 bg-green-100 rounded-full">
               <FaBookOpen className="text-green-500 text-2xl" />
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Total Students</p>
-              <p className="text-2xl font-bold">150</p>
-              <p className="text-sm text-red-500">↓ 2% Since last month</p>
+              <p className="text-2xl font-bold">
+                {statsLoading ? "..." : stats?.totalStudents.count}
+              </p>
+              <p
+                className={`text-sm ${
+                  stats?.totalStudents.growth >= 0
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {stats?.totalStudents.growth >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.totalStudents.growth || 0)}% Since last month
+              </p>
             </div>
           </div>
 
+          {/* Group Classes Card */}
           <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
             <div className="p-3 bg-orange-100 rounded-full">
               <FaTasks className="text-orange-500 text-2xl" />
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Total Group Classes</p>
-              <p className="text-2xl font-bold">75.5%</p>
+              <p className="text-2xl font-bold">
+                {statsLoading ? "..." : `${stats?.groupClasses.percentage}%`}
+              </p>
               <div className="h-2 bg-gray-200 rounded-full mt-2">
                 <div
                   className="h-2 bg-purple-500 rounded-full"
-                  style={{ width: "75.5%" }}
+                  style={{ width: `${stats?.groupClasses.percentage || 0}%` }}
                 ></div>
               </div>
-              <p className="text-sm text-green-500">↑ 5% Since last month</p>
+              <p
+                className={`text-sm ${
+                  stats?.groupClasses.growth >= 0
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {stats?.groupClasses.growth >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.groupClasses.growth || 0)}% Since last month
+              </p>
             </div>
           </div>
 
+          {/* Total Earnings Card */}
           <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
             <div className="p-3 bg-blue-100 rounded-full">
               <FaMoneyCheckAlt className="text-blue-500 text-2xl" />
             </div>
             <div className="ml-4">
               <p className="text-gray-600">Total Earnings</p>
-              <p className="text-2xl font-bold">$15k</p>
-              <p className="text-sm text-green-500">↑ 12% Since last month</p>
+              <p className="text-2xl font-bold">
+                {statsLoading
+                  ? "..."
+                  : `$${stats?.totalEarnings.amount.toLocaleString()}`}
+              </p>
+              <p
+                className={`text-sm ${
+                  stats?.totalEarnings.growth >= 0
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {stats?.totalEarnings.growth >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.totalEarnings.growth || 0)}% Since last month
+              </p>
             </div>
           </div>
         </div>
