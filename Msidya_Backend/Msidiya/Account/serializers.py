@@ -167,10 +167,18 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = '__all__'
+
+
 class NotificationSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source="User.username")
+    message = serializers.CharField(source="Message")
+    status = serializers.CharField(source="Status")
+    
     class Meta:
         model = Notification
-        fields = '__all__'
+        fields = ['id', 'user', 'message', 'status']
+        read_only_fields = ['id']
+
 class ChatSerializer(serializers.ModelSerializer):
     sender_username = serializers.CharField(source='Sender.username', read_only=True)
     receiver_username = serializers.CharField(source='Receiver.username', read_only=True)

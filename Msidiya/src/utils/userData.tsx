@@ -1,4 +1,5 @@
 import axios from "axios";
+import { IUser } from "../interfaces/IUser";
 
 export interface User {
   id: number;
@@ -10,19 +11,12 @@ export interface User {
   Role: string;
 }
 
-export const fetchUserData = async (): Promise<User | null> => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    const parsedUser: User = JSON.parse(storedUser);
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/users/${parsedUser.id}/`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      return parsedUser; // Fallback to stored data
-    }
+export const fetchUserData = async (): Promise<IUser> => {
+  try {
+    const response = await axios.get("/api/users/me/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
   }
-  return null;
 };

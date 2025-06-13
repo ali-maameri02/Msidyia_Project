@@ -67,7 +67,7 @@ export const getUserSentMessages = async () => {
 export const getUserById = async (userId: number): Promise<IUserWithChat> => {
   try {
     const response = await axiosClient.get(`/api/users/${userId}/`);
-    return { user: response.data };
+    return { user: response.data, last_message: "", last_message_time: "" };
   } catch (error) {
     console.error("Error fetching user:", error);
     throw error;
