@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -58,29 +58,42 @@ interface IChatUser {
 }
 
 export default function Messages() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { user: currentUser, isLoading: isUserLoading } = useAuth();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Add effect to handle URL parameter
+  // Enhanced effect to handle URL parameter with better error handling
   useEffect(() => {
     const withUser =
       searchParams.get("with_user") || searchParams.get("chat_with");
-    console.log("URL parameter value:", withUser); // Debug log
+    console.log("URL parameter value:", withUser);
+
     if (withUser) {
       const userId = parseInt(withUser, 10);
-      console.log("Parsed user ID:", userId); // Debug log
-      if (!isNaN(userId)) {
+      console.log("Parsed user ID:", userId);
+
+      if (!isNaN(userId) && userId > 0) {
         setSelectedUserId(userId);
-        console.log("Selected user ID set to:", userId); // Debug log
+        console.log("Selected user ID set to:", userId);
+
+        // Clear search query when selecting from URL
+        setSearchQuery("");
+      } else {
+        console.warn("Invalid user ID in URL parameter:", withUser);
+        // Optionally remove invalid parameter
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete("with_user");
+        newSearchParams.delete("chat_with");
+        setSearchParams(newSearchParams, { replace: true });
       }
     }
-  }, [searchParams]);
+  }, [searchParams, setSearchParams]);
 
-  // Fetch latest messages (users with recent conversations) - now returns IUserWithChat[]
+  // Fetch latest messages (users with recent conversations)
   const { data: latestChats = [], isLoading: latestChatsLoading } = useQuery({
     queryKey: ["latestChats"],
     queryFn: getLatestMessages,
@@ -106,9 +119,6 @@ export default function Messages() {
     staleTime: 0,
   });
 
-  // Fetch selected user's information if not in displayUsers
-  const { data: selectedUserInfo } = useGetUserByIdQuery(selectedUserId);
-
   // Transform raw messages to include isOwn property
   const messages: IExtendedMessage[] = useMemo(() => {
     if (!currentUser) return [];
@@ -118,7 +128,21 @@ export default function Messages() {
     }));
   }, [rawMessages, currentUser]);
 
-  // Transform latest chats to IChatUser format - updated for IUserWithChat[]
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  // Fetch selected user's information if not in displayUsers
+  const {
+    data: selectedUserInfo,
+    isLoading: selectedUserLoading,
+    error: selectedUserError,
+  } = useGetUserByIdQuery(selectedUserId);
+
+  // Transform latest chats to IChatUser format
   const chatUsers: IChatUser[] = useMemo(() => {
     const users = latestChats.map((chat: IUserWithChat) => ({
       id: chat.user.id,
@@ -141,8 +165,8 @@ export default function Messages() {
         id: selectedUserInfo.user.id,
         username: selectedUserInfo.user.username,
         avatar: selectedUserInfo.user.Picture,
-        lastMessage: selectedUserInfo.last_message,
-        lastMessageTime: selectedUserInfo.last_message_time,
+        lastMessage: selectedUserInfo.last_message || null,
+        lastMessageTime: selectedUserInfo.last_message_time || null,
         displayName:
           selectedUserInfo.user.first_name && selectedUserInfo.user.last_name
             ? `${selectedUserInfo.user.first_name} ${selectedUserInfo.user.last_name}`
@@ -174,7 +198,7 @@ export default function Messages() {
     ? searchLoading
     : latestChatsLoading;
 
-  // Get selected user info
+  // Get selected user info with enhanced logic
   const selectedUser = useMemo(() => {
     // First try to find the user in displayUsers
     const userFromList = displayUsers.find(
@@ -183,13 +207,13 @@ export default function Messages() {
     if (userFromList) return userFromList;
 
     // If not found in displayUsers but we have selectedUserInfo, use that
-    if (selectedUserInfo) {
+    if (selectedUserInfo?.user) {
       return {
         id: selectedUserInfo.user.id,
         username: selectedUserInfo.user.username,
         avatar: selectedUserInfo.user.Picture,
-        lastMessage: selectedUserInfo.last_message,
-        lastMessageTime: selectedUserInfo.last_message_time,
+        lastMessage: selectedUserInfo.last_message || null,
+        lastMessageTime: selectedUserInfo.last_message_time || null,
         displayName:
           selectedUserInfo.user.first_name && selectedUserInfo.user.last_name
             ? `${selectedUserInfo.user.first_name} ${selectedUserInfo.user.last_name}`
@@ -200,7 +224,7 @@ export default function Messages() {
     return null;
   }, [displayUsers, selectedUserId, selectedUserInfo]);
 
-  // Send message mutation with optimistic updates
+  // Enhanced send message mutation with better error handling
   const sendMessageMutation = useMutation({
     mutationFn: (data: ICreateMessageDTO) => sendMessageToUser(data),
     onMutate: async ({ Receiver, Content }) => {
@@ -230,19 +254,31 @@ export default function Messages() {
       return { previousMessages };
     },
     onError: (err, variables, context) => {
-      console.error(err);
+      console.error("Failed to send message:", err);
       if (context?.previousMessages) {
         queryClient.setQueryData(
           ["messages", variables.Receiver],
           context.previousMessages
         );
       }
+      // You could show a toast notification here
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["messages", selectedUserId] });
       queryClient.invalidateQueries({ queryKey: ["latestChats"] });
     },
   });
+
+  // Enhanced user selection handler
+  const handleUserSelect = (userId: number) => {
+    setSelectedUserId(userId);
+    setSearchQuery(""); // Clear search when selecting a user
+
+    // Update URL to reflect the selected user
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("with_user", userId.toString());
+    setSearchParams(newSearchParams, { replace: true });
+  };
 
   // Handle sending message
   const handleSend = () => {
@@ -368,7 +404,7 @@ export default function Messages() {
           {displayUsers.map((user) => (
             <div
               key={user.id}
-              onClick={() => setSelectedUserId(user.id)}
+              onClick={() => handleUserSelect(user.id)}
               className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
                 selectedUserId === user.id
                   ? "bg-blue-50 border-r-4 border-blue-500"
@@ -432,26 +468,48 @@ export default function Messages() {
       >
         {selectedUser ? (
           <>
-            {/* Header */}
+            {/* Header with loading state for user info */}
             <div className="flex items-center p-4 border-b border-gray-200 bg-white shadow-sm">
-              <img
-                alt="Chat User"
-                src={
-                  selectedUser.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    selectedUser.displayName
-                  )}&background=3b82f6&color=fff`
-                }
-                className="w-12 h-12 rounded-full mr-4 object-cover"
-              />
-              <div>
-                <p className="font-semibold text-gray-900">
-                  {selectedUser.displayName}
-                </p>
-                <p className="text-xs text-gray-500">
-                  @{selectedUser.username}
-                </p>
-              </div>
+              {selectedUserLoading ? (
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full mr-4 animate-pulse"></div>
+                  <div>
+                    <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
+                    <div className="w-16 h-3 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              ) : selectedUserError ? (
+                <div className="flex items-center text-red-500">
+                  <div className="w-12 h-12 bg-red-100 rounded-full mr-4 flex items-center justify-center">
+                    <span className="text-red-500">!</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">User not found</p>
+                    <p className="text-xs">Failed to load user information</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <img
+                    alt="Chat User"
+                    src={
+                      selectedUser.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        selectedUser.displayName
+                      )}&background=3b82f6&color=fff`
+                    }
+                    className="w-12 h-12 rounded-full mr-4 object-cover"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-900">
+                      {selectedUser.displayName}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      @{selectedUser.username}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Chat Messages */}
@@ -561,6 +619,7 @@ export default function Messages() {
                       )}
                     </div>
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
               )}
             </div>
@@ -580,13 +639,19 @@ export default function Messages() {
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Type a message..."
-                  disabled={sendMessageMutation.isPending}
+                  disabled={
+                    sendMessageMutation.isPending || !!selectedUserError
+                  }
                   className="flex-1 p-3 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 disabled:opacity-50"
                 />
                 <button
                   className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition disabled:opacity-50"
                   onClick={handleSend}
-                  disabled={sendMessageMutation.isPending || !message.trim()}
+                  disabled={
+                    sendMessageMutation.isPending ||
+                    !message.trim() ||
+                    !!selectedUserError
+                  }
                 >
                   {sendMessageMutation.isPending ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -654,7 +719,7 @@ export default function Messages() {
               <p className="text-sm text-gray-400">
                 {searchQuery
                   ? "Choose from search results"
-                  : "Pick from your recent conversations"}
+                  : "Pick from your recent conversations or search for users"}
               </p>
             </div>
           </div>
