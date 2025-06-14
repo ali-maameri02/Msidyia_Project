@@ -22,8 +22,20 @@ urlpatterns = [
 
 
     path('group-classes/<int:pk>/', views.GroupClassDetailView.as_view(), name='group-class-detail'),
-    path('group-class-reviews/', views.GroupClassReviewListCreateView.as_view(), name='group-class-review-list-create'),
-    path('group-class-reviews/<int:pk>/', views.GroupClassReviewDetailView.as_view(), name='group-class-review-detail'),
+
+    path(
+        'group-classes/<int:group_class_id>/reviews/',
+        views.GroupClassReviewListCreateAPIView.as_view(),
+        name='groupclass-reviews-list-create'
+    ),
+
+    # List all reviews received by a tutor
+    path(
+        'tutors/<int:tutor_id>/reviews/',
+        views.TutorReviewListAPIView.as_view(),
+        name='tutor-reviews-list'
+    ),
+
     path('reports/', views.ReportListCreateView.as_view(), name='report-list-create'),
     path('reports/<int:pk>/', views.ReportDetailView.as_view(), name='report-detail'),
     

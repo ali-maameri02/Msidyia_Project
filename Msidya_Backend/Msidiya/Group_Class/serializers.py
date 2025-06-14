@@ -30,27 +30,18 @@ class GroupClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupClass
         fields = '__all__'
-class GroupClassReviewSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)  # Or whatever your UserSerializer is called
 
+class GroupClassReviewReadSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
     class Meta:
         model = GroupClassReview
         fields = ['id', 'user', 'group_class', 'rating', 'comment']
-class GroupClassReviewSerializercreate(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        required=False
-    )
+        read_only_fields = ['id', 'user', 'group_class']
 
+class GroupClassReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupClassReview
-        fields = ['id', 'user', 'group_class', 'rating', 'comment']
-
-    def create(self, validated_data):
-        # Automatically set user if not provided
-        user = self.context['request'].user
-        validated_data.setdefault('user', user)
-        return super().create(validated_data)
+        fields = ['rating', 'comment']
 
 # Report Serializer
 class ReportSerializer(serializers.ModelSerializer):

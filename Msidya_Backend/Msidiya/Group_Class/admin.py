@@ -7,3 +7,4 @@ admin.site.register(Schedule)
 
 admin.site.register(Category)
 admin.site.register(GroupClass)
+admin.site.register(GroupClassReview)

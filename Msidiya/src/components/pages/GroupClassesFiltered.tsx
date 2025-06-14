@@ -7,6 +7,7 @@ import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
 import { useCart } from "../Landing/context/CartContext";
 import Slider from "@mui/material/Slider";
+import { GroupClassReview } from "../../services/reviews/reviews.types";
 
 // Define TypeScript interfaces for the data structure
 interface Review {
@@ -19,6 +20,15 @@ interface Review {
 interface TutorUser {
   id: number;
   username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  Role: "Student" | "Tutor";
+  Gender: "Male" | "Female";
+  Phone_number: string;
+  Paypal_Email: string;
+  Address: string;
+  Picture: string;
 }
 
 interface Tutor {
@@ -39,7 +49,7 @@ interface GroupClass {
 const GroupClassesFiltered = () => {
   const { categoryId } = useParams<{ categoryId: string }>(); // Extract categoryId from URL params
   const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<GroupClassReview[]>([]);
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
@@ -74,7 +84,7 @@ const GroupClassesFiltered = () => {
         setGroupClasses(filteredClasses);
 
         // Fetch reviews
-        const reviewsResponse = await axios.get<Review[]>(
+        const reviewsResponse = await axios.get<GroupClassReview[]>(
           "${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/"
         );
         setReviews(reviewsResponse.data);

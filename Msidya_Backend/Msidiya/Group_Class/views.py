@@ -8,9 +8,12 @@ from django.utils import timezone
 from rest_framework import generics, permissions
 from .models import Category, StudentAppointment, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 from .serializers import (
-    CategorySerializer,  GroupClassReviewSerializer, GroupClassReviewSerializercreate, ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
+    CategorySerializer,   ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
     GroupClassSerializer, ReportSerializer,
-    ScheduleSerializer, DiscountSerializer
+    ScheduleSerializer, DiscountSerializer,
+    GroupClassReviewReadSerializer,
+    GroupClassReviewCreateSerializer
+
 )
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -80,31 +83,52 @@ class GroupClassDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = GroupClassSerializer
     permission_classes = [permissions.AllowAny]
 
-class GroupClassReviewListCreateView(generics.ListCreateAPIView):
-    permission_classes = [permissions.AllowAny]
+
+class GroupClassReviewListCreateAPIView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_group_class(self):
+        try:
+            return GroupClass.objects.get(pk=self.kwargs['group_class_id'])
+        except GroupClass.DoesNotExist:
+            raise NotFound("GroupClass not found")
 
     def get_queryset(self):
-        gc_id = self.kwargs.get('group_class_id')
-        # Validate the GroupClass exists
-        if not GroupClass.objects.filter(id=gc_id).exists():
-            raise NotFound(detail="GroupClass not found")
-        return GroupClassReview.objects.filter(group_class_id=gc_id)
+        gc = self.get_group_class()
+        return GroupClassReview.objects.filter(group_class=gc)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return GroupClassReviewCreateSerializer
-        return GroupClassReviewSerializer
+        return GroupClassReviewReadSerializer
 
     def perform_create(self, serializer):
-        gc = GroupClass.objects.get(id=self.kwargs['group_class_id'])
+        gc = self.get_group_class()
         serializer.save(
             user=self.request.user,
             group_class=gc
         )
-class GroupClassReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = GroupClassReview.objects.all()
-    serializer_class = GroupClassReviewSerializercreate
+
+
+class TutorReviewListAPIView(generics.ListAPIView):
+    """
+    List all reviews made on any GroupClass taught by this tutor.
+    """
+    serializer_class = GroupClassReviewReadSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_tutor_id(self):
+        return self.kwargs['tutor_id']
+
+    def get_queryset(self):
+        tutor_id = self.get_tutor_id()
+        # ensure tutor exists by checking at least one class:
+        qs = GroupClassReview.objects.filter(
+            group_class__tutor_id=tutor_id
+        )
+        if not qs.exists():
+            # could also check User.objects.filter(pk=tutor_id).exists()
+            raise N
 
 class ReportListCreateView(generics.ListCreateAPIView):
     queryset = Report.objects.all()
