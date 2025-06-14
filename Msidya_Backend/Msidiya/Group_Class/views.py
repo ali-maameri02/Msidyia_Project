@@ -2,14 +2,13 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Sum
 from E_wallet.models import Transaction
 from calendar import month_abbr
-
-
+from rest_framework.exceptions import NotFound
 
 from django.utils import timezone
 from rest_framework import generics, permissions
 from .models import Category, StudentAppointment, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
 from .serializers import (
-    CategorySerializer, GroupClassReviewSerializer, GroupClassReviewSerializercreate, ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
+    CategorySerializer,  GroupClassReviewSerializer, GroupClassReviewSerializercreate, ScheduleCreateSerializer, StudentAppointmentSerializer, SubjectSerializer, TopicSerializer,
     GroupClassSerializer, ReportSerializer,
     ScheduleSerializer, DiscountSerializer
 )
@@ -18,15 +17,6 @@ from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-
-
-
-
-
-
-
-
-
 
 
 
@@ -89,22 +79,33 @@ class GroupClassDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = GroupClass.objects.all()
     serializer_class = GroupClassSerializer
     permission_classes = [permissions.AllowAny]
+
 class GroupClassReviewListCreateView(generics.ListCreateAPIView):
-    queryset = GroupClassReview.objects.all()
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        gc_id = self.kwargs.get('group_class_id')
+        # Validate the GroupClass exists
+        if not GroupClass.objects.filter(id=gc_id).exists():
+            raise NotFound(detail="GroupClass not found")
+        return GroupClassReview.objects.filter(group_class_id=gc_id)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return GroupClassReviewSerializercreate
+            return GroupClassReviewCreateSerializer
         return GroupClassReviewSerializer
 
-    def get_serializer_context(self):
-        return {'request': self.request}
-
+    def perform_create(self, serializer):
+        gc = GroupClass.objects.get(id=self.kwargs['group_class_id'])
+        serializer.save(
+            user=self.request.user,
+            group_class=gc
+        )
 class GroupClassReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = GroupClassReview.objects.all()
     serializer_class = GroupClassReviewSerializercreate
     permission_classes = [permissions.AllowAny]
+
 class ReportListCreateView(generics.ListCreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer

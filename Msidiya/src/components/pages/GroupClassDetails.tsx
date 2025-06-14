@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Typography,
   Card,
@@ -10,140 +10,39 @@ import {
   Rating,
   TextField,
   Divider,
+  Avatar,
 } from "@mui/material";
-import axios from "axios";
 import { useParams } from "react-router-dom";
 import Footer from "../Landing/Footer";
 import NavBar from "../Landing/NavBar";
-
-interface Topic {
-  id: number;
-  name: string;
-}
-
-interface Schedule {
-  id: number;
-  date: string;
-  duration: string;
-  topic: Topic;
-}
-
-interface GroupClass {
-  id: number;
-  title: string;
-  grade: string;
-  price: number;
-  category: {
-    name: string;
-  };
-  max_book: number;
-  class_type: string;
-  main_image: string;
-  user: {
-    username: string;
-  };
-}
-
-interface Review {
-  id: number;
-  rating: number;
-  comment: string;
-  user?: {
-    id: number;
-    username: string;
-    Picture: string;
-  };
-  group_class: number;
-}
+import {
+  useGroupClassReviewsQuery,
+  useCreateGroupClassReviewMutation,
+} from "../../services/reviews/reviews.queries";
+import { GroupClassReview } from "../../services/reviews/reviews.types";
+import { useGroupClass } from "../../services/group_classes/group_classes.queries";
 
 const GroupClassDetails: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
-  // const navigate = useNavigate();
+  const [newReview, setNewReview] = useState({ rating: 0, comment: "" });
 
-  const [groupClass, setGroupClass] = useState<GroupClass | null>(null);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  // Use the new queries
+  const { data: groupClass } = useGroupClass(Number(classId));
+  const { data: reviews = [] } = useGroupClassReviewsQuery(Number(classId));
+  const createReview = useCreateGroupClassReviewMutation(Number(classId));
 
-  const [rating, setRating] = useState<number | null>(4);
-  const [comment, setComment] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // Assume user is stored in localStorage
-  const userData = localStorage.getItem("user");
-  const user = userData ? JSON.parse(userData) : null;
-
-  const fetchReviews = async () => {
-    try {
-      const res = await axios.get<Review[]>(
-        `${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/`
-      );
-      setReviews(res.data.filter((r) => r.group_class === Number(classId)));
-    } catch (err) {
-      console.error("Failed to fetch reviews", err);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const classRes = await axios.get<GroupClass>(
-          `${import.meta.env.VITE_API_BASE_URL}/api/group-classes/${classId}/`
-        );
-        setGroupClass(classRes.data);
-
-        const scheduleRes = await axios.get<Schedule[]>(
-          `${
-            import.meta.env.VITE_API_BASE_URL
-          }/api/available-schedules/?group_class=${classId}`
-        );
-        setSchedules(scheduleRes.data);
-
-        await fetchReviews();
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [classId]);
-
-  // const handleBookNow = (scheduleId: number) => {
-  //   // Navigate to booking confirmation or payment page
-  //   navigate(`/booking-confirm?schedule=${scheduleId}&class=${classId}`);
-  // };
-
-  const handleAddReview = async () => {
-    if (!rating || !comment.trim()) {
-      alert("Please fill in both rating and review.");
+  const handleSubmitReview = async () => {
+    if (!newReview.rating || !newReview.comment.trim()) {
+      alert("Please provide both rating and comment");
       return;
     }
 
-    setLoading(true);
-
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/`,
-        {
-          rating,
-          comment,
-          user: user.id,
-          group_class: classId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      setRating(null);
-      setComment("");
-      await fetchReviews();
-    } catch (err) {
-      console.error("Failed to submit review", err);
-      alert("Could not submit review.");
-    } finally {
-      setLoading(false);
+      await createReview.mutateAsync(newReview);
+      setNewReview({ rating: 0, comment: "" });
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+      alert("Failed to submit review");
     }
   };
 
@@ -187,104 +86,97 @@ const GroupClassDetails: React.FC = () => {
 
             <Divider sx={{ my: 2 }} />
 
-            {/* Schedules */}
-            <Typography variant="h6" gutterBottom>
-              Available Schedules
-            </Typography>
-            <Grid container spacing={2}>
-              {schedules.length > 0 ? (
-                schedules.map((schedule) => (
-                  <Grid item xs={12} sm={6} key={schedule.id}>
-                    <Card variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="body2">
-                        Date: {new Date(schedule.date).toLocaleString()}
-                      </Typography>
-                      <Typography variant="body2">
-                        Duration: {schedule.duration}
-                      </Typography>
-                      <Typography variant="body2">
-                        Topic: {schedule.topic?.name || "No Topic"}
-                      </Typography>
-                    </Card>
-                  </Grid>
-                ))
-              ) : (
-                <Typography>No schedules available</Typography>
-              )}
-            </Grid>
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* Reviews */}
+            {/* Reviews Section */}
             <Typography variant="h6" gutterBottom>
               Reviews
             </Typography>
-            {reviews.length > 0 ? (
-              reviews.map((review) => (
-                <Box key={review.id} sx={{ mb: 2 }}>
-                  <div className="content flex flex-row justify-between items-start">
-                    <div className="left flex flex-row items-start">
-                      <img
-                        className="rounded-full w-12 h-12"
-                        src={review.user?.Picture}
-                        alt=""
-                      />
-                      <Typography variant="caption">
-                        {" "}
-                        {review.user?.username}
-                      </Typography>
-                    </div>
-                    <div className="right flex flex-col items-end w-full">
-                      <Rating
-                        value={review.rating}
-                        readOnly
-                        precision={0.5}
-                        size="small"
-                      />
-                      <Typography
-                        variant="body2"
-                        className="bg-gray-100 w-full rounded-lg p-2"
-                      >
+
+            {/* Review Form */}
+            <Card className="mb-6 p-4">
+              <Typography variant="h6" gutterBottom>
+                Write a Review
+              </Typography>
+              <Box className="mb-4">
+                <Rating
+                  value={newReview.rating}
+                  onChange={(_, value) =>
+                    setNewReview((prev) => ({ ...prev, rating: value || 0 }))
+                  }
+                  size="large"
+                />
+              </Box>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Write your review..."
+                value={newReview.comment}
+                onChange={(e) =>
+                  setNewReview((prev) => ({ ...prev, comment: e.target.value }))
+                }
+                className="mb-4"
+              />
+              <Button
+                variant="contained"
+                onClick={handleSubmitReview}
+                disabled={!newReview.rating || !newReview.comment.trim()}
+              >
+                Submit Review
+              </Button>
+            </Card>
+
+            {/* Reviews List */}
+            <div className="space-y-4">
+              {reviews.map((review: GroupClassReview) => (
+                <Card key={review.id} className="p-4">
+                  <div className="flex items-start gap-4">
+                    <Avatar
+                      src={review.user.picture}
+                      alt={review.user.username}
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <Typography variant="subtitle1" className="font-bold">
+                          {review.user.username}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(review.timestamp).toLocaleDateString()}
+                        </Typography>
+                      </div>
+                      <Rating value={review.rating} readOnly size="small" />
+                      <Typography variant="body1" className="mt-2">
                         {review.comment}
                       </Typography>
+
+                      {/* Replies */}
+                      {review.replies.length > 0 && (
+                        <div className="mt-4 ml-4 space-y-2">
+                          {review.replies.map((reply) => (
+                            <div
+                              key={reply.id}
+                              className="flex items-start gap-2"
+                            >
+                              <Avatar
+                                src={reply.user.picture}
+                                alt={reply.user.username}
+                              />
+                              <div>
+                                <Typography variant="subtitle2">
+                                  {reply.user.username}
+                                </Typography>
+                                <Typography variant="body2">
+                                  {reply.comment}
+                                </Typography>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </Box>
-              ))
-            ) : (
-              <Typography>No reviews yet.</Typography>
-            )}
-
-            {/* Add Review */}
-            {user && (
-              <>
-                <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                  Add Your Review
-                </Typography>
-                <Rating
-                  value={rating}
-                  onChange={(_, newValue) => setRating(newValue)}
-                  sx={{ mb: 1 }}
-                />
-                <TextField
-                  label="Write your review"
-                  multiline
-                  rows={3}
-                  fullWidth
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  sx={{ mb: 1 }}
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAddReview}
-                  disabled={loading}
-                >
-                  Submit Review
-                </Button>
-              </>
-            )}
+                </Card>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </Box>

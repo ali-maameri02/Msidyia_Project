@@ -17,7 +17,7 @@ urlpatterns = [
     path('group-classes/', views.GroupClassListCreateView.as_view(), name='group-class-list-create'),
     path('group-classes/tutor/stats/', views.group_class_completion_chart, name='group-class-tutor-stats'),
 
-    path('group-classes/earnings/stats/', views.get_monthly_sales, name='group-class-tutor-earnings-stats'),
+    path('group-classes/earnings/stats/', views.get_monthly_sales, name='group-class-tutor-earning-stats'),
 
 
 

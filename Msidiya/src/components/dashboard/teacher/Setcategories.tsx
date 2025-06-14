@@ -14,13 +14,20 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Avatar,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ListIcon from "@mui/icons-material/List";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import {
+  useCreateCategory,
+  useGetCategories,
+} from "../../../services/categories/categories.queries";
+import { useQueryClient } from "@tanstack/react-query";
+
 interface Topic {
   id: number;
   name: string;
@@ -53,41 +60,20 @@ export default function Setcategories() {
   );
   const [openAddCategoryModal, setOpenAddCategoryModal] = React.useState(false);
   const [newCategory, setNewCategory] = React.useState("");
-  const [categories, setCategories] = React.useState<CategoryRow[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<
     number | null
   >(null);
   // const [editValue, setEditValue] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null); // State for storing the logo file
 
-  const fetchCategories = async () => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) return;
-      const loggedInUser = JSON.parse(storedUser);
-      const tutorId = loggedInUser?.id;
+  const createCategoryMutation = useCreateCategory();
+  const queryClient = useQueryClient();
 
-      const response = await axios.get(
-        "${import.meta.env.VITE_API_BASE_URL}/api/categories/"
-      );
-      const tutorCategories = response.data
-        .filter((category: any) => category.tutor === tutorId)
-        .map((category: any) => ({
-          id: category.id,
-          name: category.name,
-          status: category.status,
-          logo: category.logo,
-        }));
+  const storedUser = localStorage.getItem("user");
+  const loggedInUser = storedUser ? JSON.parse(storedUser) : null;
+  const tutorId = loggedInUser?.id;
 
-      setCategories(tutorCategories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const { data: categories = [], isLoading } = useGetCategories(tutorId);
 
   const handleOpen = (row: CategoryRow) => {
     setSelectedCategoryId(row.id); // Store the category ID
@@ -200,29 +186,20 @@ export default function Setcategories() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", newCategory.trim());
-    if (logoFile) {
-      formData.append("logo", logoFile); // Append the logo file
-    }
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+    const loggedInUser = JSON.parse(storedUser);
+    const tutorId = loggedInUser?.id;
 
     try {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) return;
-      const loggedInUser = JSON.parse(storedUser);
-      const tutorId = loggedInUser?.id;
+      await createCategoryMutation.mutateAsync({
+        name: newCategory.trim(),
+        logo: logoFile || undefined,
+        tutor: tutorId,
+      });
 
-      formData.append("tutor", tutorId.toString());
-
-      const response = await axios.post(
-        "${import.meta.env.VITE_API_BASE_URL}/api/categories/",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      setCategories([...categories, response.data]);
       setNewCategory("");
-      setLogoFile(null); // Reset the logo file state
+      setLogoFile(null);
       setOpenAddCategoryModal(false);
     } catch (error) {
       console.error("Error adding category:", error);
@@ -235,7 +212,7 @@ export default function Setcategories() {
       await axios.delete(
         `${import.meta.env.VITE_API_BASE_URL}/api/categories/${categoryId}/`
       );
-      await fetchCategories();
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
     } catch (error) {
       console.error("Error deleting category:", error);
     }
@@ -297,7 +274,7 @@ export default function Setcategories() {
       const formData = new FormData();
       formData.append("name", updatedName);
       if (logoFile) {
-        formData.append("logo", logoFile); // Append the logo file if provided
+        formData.append("logo", logoFile);
       }
 
       await axios.patch(
@@ -306,7 +283,7 @@ export default function Setcategories() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      await fetchCategories(); // Refresh categories after update
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
     } catch (error) {
       console.error("Error updating category:", error);
     }
@@ -330,6 +307,18 @@ export default function Setcategories() {
   };
 
   const columns: GridColDef[] = [
+    {
+      field: "logo",
+      headerName: "Logo",
+      width: 100,
+      renderCell: (params) => (
+        <Avatar
+          src={params.value}
+          alt={params.row.name}
+          sx={{ width: 40, height: 40 }}
+        />
+      ),
+    },
     { field: "name", headerName: "Category Name", width: 200 },
     {
       field: "status",
@@ -404,10 +393,11 @@ export default function Setcategories() {
       </div>
       <Paper sx={{ height: 400, width: "95%" }}>
         <DataGrid
-          rows={categories.map((row) => ({
+          rows={categories.map((row: Category) => ({
             id: row.id,
-            name: row.name.toString(), // Ensure name is a string
-            status: row.status.toString(), // Ensure status is a string
+            name: row.name,
+            status: row.status,
+            logo: row.logo,
             onListSubjects: () => handleOpen(row),
           }))}
           columns={columns}

@@ -1,149 +1,115 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Typography,
   Card,
   CardContent,
-  CardActions,
-  Button,
-  TextField,
   Rating,
+  TextField,
   Avatar,
-  IconButton,
-  Collapse,
+  Divider,
 } from "@mui/material";
-import ReplyIcon from "@mui/icons-material/Reply";
-import SendIcon from "@mui/icons-material/Send";
-
-// Define the Reply type
-interface Reply {
-  user: string;
-  comment: string;
-}
-
-// Define the Review type
-interface Review {
-  id: number;
-  user: string;
-  rating: number;
-  comment: string;
-  timestamp: string;
-  replies: Reply[]; // Explicitly define the type of replies
-}
+import { useGroupClassReviewsQuery } from "../../../services/reviews/reviews.queries";
+import { GroupClassReview } from "../../../services/reviews/reviews.types";
+import { useAuth } from "../../../hooks/useAuth";
 
 const GroupClassReviews = () => {
-  // Initial State with Explicit Types
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      user: "Alice",
-      rating: 5,
-      comment: "Great class! Very informative.",
-      timestamp: "2023-10-01",
-      replies: [],
-    },
-    {
-      id: 2,
-      user: "Bob",
-      rating: 4,
-      comment: "Good content but could be more interactive.",
-      timestamp: "2023-10-02",
-      replies: [],
-    },
-    {
-      id: 3,
-      user: "Charlie",
-      rating: 3,
-      comment: "The pace was a bit too fast.",
-      timestamp: "2023-10-03",
-      replies: [],
-    },
-  ]);
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // State for Tutor's Reply
-  const [replyText, setReplyText] = useState("");
-  const [expandedReviewId, setExpandedReviewId] = useState<number | null>(null);
+  // Get all reviews
+  const { data: reviews = [] } = useGroupClassReviewsQuery();
 
-  // Handle Tutor's Reply Submission
-  const handleReplySubmit = (reviewId: number) => {
-    setReviews((prevReviews) =>
-      prevReviews.map((review) =>
-        review.id === reviewId
-          ? {
-            ...review,
-            replies: [...review.replies, { user: "Tutor", comment: replyText }],
-          }
-          : review
-      )
+  // Filter reviews based on search term
+  const filteredReviews = reviews.filter((review: GroupClassReview) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      review.comment.toLowerCase().includes(searchLower) ||
+      review.user.username.toLowerCase().includes(searchLower)
     );
-    setReplyText(""); // Clear the input field
-    setExpandedReviewId(null); // Collapse the reply section
-  };
+  });
+
+  // Group reviews by class
+  const reviewsByClass = filteredReviews.reduce(
+    (acc: Record<number, GroupClassReview[]>, review: GroupClassReview) => {
+      const classId = review.group_class;
+      if (!acc[classId]) {
+        acc[classId] = [];
+      }
+      acc[classId].push(review);
+      return acc;
+    },
+    {}
+  );
 
   return (
-    <div className="p-8">
-      Reviews Section
-      <Typography variant="h5" className="mb-4">
-        Reviews
+    <div className="p-6">
+      <Typography variant="h4" gutterBottom>
+        Group Class Reviews
       </Typography>
-      {reviews.map((review) => (
-        <Card key={review.id} className="mb-4">
-          <CardContent>
-            <div className="flex items-center mb-2">
-              <Avatar className="mr-2">{review.user[0]}</Avatar>
-              <Typography variant="subtitle1">{review.user}</Typography>
-              <Rating value={review.rating} readOnly className="ml-auto" />
-            </div>
-            <Typography variant="body1" className="mb-2">
-              {review.comment}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {review.timestamp}
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <IconButton onClick={() => setExpandedReviewId(expandedReviewId === review.id ? null : review.id)}>
-              <ReplyIcon />
-            </IconButton>
-          </CardActions>
-          {/* Reply Section */}
-          <Collapse in={expandedReviewId === review.id} timeout="auto" unmountOnExit>
-            <CardContent>
-              {/* Display Existing Replies */}
-              {review.replies.length > 0 && (
-                <div className="pl-6">
-                  <Typography variant="h6" className="mb-2">
-                    Replies:
-                  </Typography>
-                  {review.replies.map((reply, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <Avatar className="mr-2">T</Avatar>
-                      <Typography variant="body1">{reply.comment}</Typography>
-                    </div>
+
+      {/* Search Bar */}
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Search reviews by student name or review content..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-6"
+      />
+
+      {/* Reviews by Class */}
+      <div className="space-y-6">
+        {Object.entries(reviewsByClass).map(([classId, classReviews]) => {
+          const reviews = classReviews as GroupClassReview[];
+          return (
+            <Card key={classId} className="mb-4">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Class ID: {classId}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Total Reviews: {reviews.length}
+                </Typography>
+                <Divider className="my-4" />
+
+                {/* Reviews List */}
+                <div className="space-y-4">
+                  {reviews.map((review: GroupClassReview) => (
+                    <Card key={review.id} variant="outlined" className="p-4">
+                      <div className="flex items-start gap-4">
+                        <Avatar
+                          src={review.user.Picture}
+                          alt={review.user.username}
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <Typography
+                              variant="subtitle1"
+                              className="font-bold"
+                            >
+                              {review.user.username}
+                            </Typography>
+                          </div>
+                          <Rating value={review.rating} readOnly size="small" />
+                          <Typography variant="body1" className="mt-2">
+                            {review.comment}
+                          </Typography>
+                        </div>
+                      </div>
+                    </Card>
                   ))}
                 </div>
-              )}
-              {/* Tutor's Reply Input */}
-              <div className="flex items-center">
-                <TextField
-                  fullWidth
-                  placeholder="Write a reply..."
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  className="mr-2"
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<SendIcon />}
-                  onClick={() => handleReplySubmit(review.id)}
-                  disabled={!replyText.trim()}
-                >
-                  Reply
-                </Button>
-              </div>
-            </CardContent>
-          </Collapse>
-        </Card>
-      ))}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {Object.keys(reviewsByClass).length === 0 && (
+        <Typography variant="body1" className="text-center text-gray-500">
+          No reviews found
+        </Typography>
+      )}
     </div>
   );
 };
