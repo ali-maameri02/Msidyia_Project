@@ -1,3 +1,10 @@
+from django.db.models.functions import TruncMonth
+from django.db.models import Sum
+from E_wallet.models import Transaction
+from calendar import month_abbr
+
+
+
 from django.utils import timezone
 from rest_framework import generics, permissions
 from .models import Category, StudentAppointment, Subject, Topic, GroupClass, GroupClassReview, Report, Schedule, Discount
@@ -257,3 +264,33 @@ def group_class_completion_chart(request):
     }
 
     return Response(data)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_monthly_sales(request):
+    # Only include 'enroll' transactions where the logged-in user is the receiver
+    queryset = Transaction.objects.filter(
+        type='enroll',
+        receiver=request.user
+    )
+
+    # Annotate by month and sum amounts
+    monthly_qs = (
+        queryset
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(total_sales=Sum('amount'))
+        .order_by('month')
+    )
+
+    # Initialize all 12 months to zero
+    month_sales = {month_abbr[i]: 0 for i in range(1, 13)}
+
+    # Fill in actual totals
+    for entry in monthly_qs:
+        mon = entry['month'].strftime('%b')  # 'Jan', 'Feb', ...
+        month_sales[mon] = float(entry['total_sales'] or 0)
+
+    return Response(month_sales)

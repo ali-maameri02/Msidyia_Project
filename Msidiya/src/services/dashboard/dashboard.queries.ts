@@ -3,6 +3,8 @@ import {
   getDashboardStats,
   DashboardStats,
   getGroupClassCompletionStats,
+  getMonthlyEarningStats,
+  MonthlyEarningStats,
 } from "./dashboard.api";
 
 export interface GroupClassCompletionStats {
@@ -21,5 +23,12 @@ export const useGroupClassCompletionStats = () => {
   return useQuery<GroupClassCompletionStats>({
     queryKey: ["groupClassCompletionStats"],
     queryFn: getGroupClassCompletionStats,
+  });
+};
+
+export const useMonthlyEarningStats = () => {
+  return useQuery<MonthlyEarningStats>({
+    queryKey: ["monthlyEarningStats"],
+    queryFn: getMonthlyEarningStats,
   });
 };

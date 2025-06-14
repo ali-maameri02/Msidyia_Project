@@ -24,6 +24,21 @@ export interface GroupClassCompletionStats {
   not_completed: number;
 }
 
+export interface MonthlyEarningStats {
+  Jan: number;
+  Feb: number;
+  Mar: number;
+  Apr: number;
+  May: number;
+  Jun: number;
+  Jul: number;
+  Aug: number;
+  Sep: number;
+  Oct: number;
+  Nov: number;
+  Dec: number;
+}
+
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   const response = await axiosClient.get("/api/tutor/stats/");
   if (response.status !== 200) {
@@ -37,6 +52,17 @@ export const getGroupClassCompletionStats =
     const response = await axiosClient.get("/api/group-classes/tutor/stats/");
     if (response.status !== 200) {
       throw new Error("Can't fetch group class completion stats");
+    }
+    return response.data;
+  };
+
+export const getMonthlyEarningStats =
+  async (): Promise<MonthlyEarningStats> => {
+    const response = await axiosClient.get(
+      "/api/group-classes/earnings/stats/"
+    );
+    if (response.status !== 200) {
+      throw new Error("Can't fetch monthly earnings stats");
     }
     return response.data;
   };

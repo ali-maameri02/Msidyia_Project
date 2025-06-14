@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   BarChart,
   Bar,
@@ -7,44 +7,83 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
-
-const data = [
-  { name: 'Jan', lastYear: 3000, thisYear: 4000 },
-  { name: 'Feb', lastYear: 2500, thisYear: 3000 },
-  { name: 'Mar', lastYear: 1500, thisYear: 2000 },
-  { name: 'Apr', lastYear: 2000, thisYear: 2780 },
-  { name: 'May', lastYear: 1800, thisYear: 1890 },
-  { name: 'Jun', lastYear: 2200, thisYear: 2390 },
-  { name: 'Jul', lastYear: 3200, thisYear: 3490 },
-  { name: 'Aug', lastYear: 2700, thisYear: 3000 },
-  { name: 'Sep', lastYear: 2300, thisYear: 2500 },
-  { name: 'Oct', lastYear: 2900, thisYear: 3300 },
-  { name: 'Nov', lastYear: 3100, thisYear: 3600 },
-  { name: 'Dec', lastYear: 3500, thisYear: 3800 },
-];
+} from "recharts";
+import { useMonthlyEarningStats } from "../../../services/dashboard/dashboard.queries";
 
 const SalesChart: React.FC = () => {
+  const { data: stats, isLoading } = useMonthlyEarningStats();
+
+  if (isLoading) {
+    return (
+      <div className="bg-white shadow-md rounded-lg p-6 font-ibm-plex-mono h-[400px] flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="bg-white shadow-md rounded-lg p-6 font-ibm-plex-mono h-[400px] flex flex-col items-center justify-center">
+        <h3 className="text-lg font-semibold mb-2">No Earnings Data</h3>
+        <p className="text-gray-500 text-center">
+          No earnings data available.
+          <br />
+          Start teaching classes to see your earnings here.
+        </p>
+      </div>
+    );
+  }
+
+  const chartData = Object.entries(stats).map(([month, earnings]) => ({
+    name: month,
+    earnings,
+  }));
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const totalEarnings = Object.values(stats).reduce(
+    (sum, value) => sum + value,
+    0
+  );
+
   return (
-    <div style={{zIndex:'-9999'}} className="bg-white shadow-md rounded-lg p-6 font-ibm-plex-mono">
-      <h3 className="text-lg font-semibold mb-4">Sales Chart</h3>
-      <ResponsiveContainer width="100%" height={300} >
-        <BarChart data={data} barGap={8}>
+    <div className="bg-white shadow-md rounded-lg p-6 font-ibm-plex-mono">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Monthly Earnings</h3>
+        <div className="text-sm text-gray-500">{new Date().getFullYear()}</div>
+      </div>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={chartData} barGap={8}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" tickLine={false} />
-          <YAxis tickLine={false} />
+          <YAxis tickLine={false} tickFormatter={formatCurrency} />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
             }}
-            labelStyle={{ color: '#000' }}
+            labelStyle={{ color: "#000" }}
+            formatter={(value: number) => [formatCurrency(value), "Earnings"]}
           />
-          <Bar dataKey="lastYear" fill="#4F46E5" barSize={30} opacity={0.5} />
-          <Bar dataKey="thisYear" fill="#4F46E5" barSize={30} />
+          <Bar
+            dataKey="earnings"
+            fill="#4F46E5"
+            barSize={30}
+            radius={[4, 4, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
+      <div className="mt-4 flex justify-end text-sm text-gray-500">
+        <div>Total Earnings: {formatCurrency(totalEarnings)}</div>
+      </div>
     </div>
   );
 };

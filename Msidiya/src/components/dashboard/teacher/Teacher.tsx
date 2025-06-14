@@ -8,7 +8,6 @@ import {
   FaTasks,
   FaMoneyCheckAlt,
 } from "react-icons/fa";
-import { fetchUserData } from "../../../utils/userData";
 import { useNotifications } from "../../../services/notifications/notification.queries";
 import { useLatestMessagesQuery } from "../../../services/chat/chat.queries";
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -40,13 +39,6 @@ const Teacher: React.FC = () => {
         return <PaymentIcon />;
     }
   };
-
-  useEffect(() => {
-    const getUserData = async () => {
-      await fetchUserData();
-    };
-    getUserData();
-  }, []);
 
   return (
     <div className="pl-12 ml-5 w-100">

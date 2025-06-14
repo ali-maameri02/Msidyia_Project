@@ -17,6 +17,10 @@ urlpatterns = [
     path('group-classes/', views.GroupClassListCreateView.as_view(), name='group-class-list-create'),
     path('group-classes/tutor/stats/', views.group_class_completion_chart, name='group-class-tutor-stats'),
 
+    path('group-classes/earnings/stats/', views.get_monthly_sales, name='group-class-tutor-earnings-stats'),
+
+
+
     path('group-classes/<int:pk>/', views.GroupClassDetailView.as_view(), name='group-class-detail'),
     path('group-class-reviews/', views.GroupClassReviewListCreateView.as_view(), name='group-class-review-list-create'),
     path('group-class-reviews/<int:pk>/', views.GroupClassReviewDetailView.as_view(), name='group-class-review-detail'),
