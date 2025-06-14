@@ -21,7 +21,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=[('accepted', 'Accepted'), ('refused', 'Refused'), ('in_progress', 'In Progress')] , default='In Progress')
     subjects = models.ManyToManyField(Subject,blank=True)
-    logo = models.ImageField( upload_to='Categories_logos/', height_field=None, width_field=None, max_length=None,blank=True,null=True)
+    logo = models.ImageField(upload_to='media/categories/logos/', height_field=None, width_field=None, max_length=None,blank=True,null=True)
     def __str__(self) :
         return self.name
 
@@ -35,12 +35,13 @@ class GroupClass(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     max_book = models.PositiveIntegerField()
     class_type = models.CharField(max_length=10, choices=[('Free', 'Free'), ('Paid', 'Paid')])
-    main_image = models.ImageField(upload_to='group_class_images/')
+    main_image = models.ImageField(upload_to='media/group_classes/images/')
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=[('Visible', 'Visible'), ('Hidden', 'Hidden')])
     last_time = models.DateTimeField()
     def __str__(self) :
         return self.title
+
 # Schedule Model
 class Schedule(models.Model):
     group_class = models.ForeignKey(GroupClass, related_name='schedules', on_delete=models.CASCADE)
@@ -63,7 +64,7 @@ class Schedule(models.Model):
 # File Model
 class File(models.Model):
     group_class = models.ForeignKey(GroupClass, related_name='course_materials', on_delete=models.CASCADE)
-    content = models.FileField(upload_to='course_materials/', blank=True, null=True)
+    content = models.FileField(upload_to='media/course_materials/', blank=True, null=True)
 
 # GroupClassReview Model
 class GroupClassReview(models.Model):

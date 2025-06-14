@@ -1,5 +1,4 @@
 version: "3.8"
-
 services:
   backend:
     build:
@@ -11,6 +10,9 @@ services:
     working_dir: /app/Msidiya
     volumes:
       - "./Msidya_Backend:/app"
+      # Create named volume for media files to persist and have proper permissions
+      - "media_files:/app/Msidiya/media" 
+      - "category_logos:/app/Msidiya/Categories_logos"
     command: >
       sh -c "
       python manage.py migrate &&
@@ -29,7 +31,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-
   db:
     image: postgres:15-alpine
     restart: unless-stopped
@@ -41,6 +42,7 @@ services:
       POSTGRES_DB: "db"
     # ports:
     #   - "5432:5432"  # only expose if you want to connect from outside Docker
-
 volumes:
   pgdata:
+  media_files:
+  category_logos:

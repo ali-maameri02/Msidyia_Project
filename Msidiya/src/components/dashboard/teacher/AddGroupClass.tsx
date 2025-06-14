@@ -1,38 +1,84 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   createGroupClass,
   createGroupClassSession,
 } from "../../../services/group_classes/group_classes.api";
 import { axiosClient } from "../../../assets/lib/axiosClient";
+import {
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormHelperText,
+  Alert,
+  CircularProgress,
+  SelectChangeEvent,
+} from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../../../hooks/useAuth";
+import { CreateGroupClassSessionData } from "../../../services/group_classes/group_classes.types";
 // import Scheduler from "react-mui-scheduler";
 // import { Box, Modal, TextField } from "@mui/material";
 // import { SchedulerEvent } from "react-mui-scheduler"; // Import event type if available
 
-import { Button } from "@mui/material";
 // type SchedulerEvent = {
 //   row?: { date?: string };
 //   value?: string;
 // };
 
+interface Category {
+  id: number;
+  name: string;
+}
+
+interface FormData {
+  title: string;
+  grade: string;
+  price: string;
+  category: string;
+  max_book: string;
+  class_type: string;
+  status: string;
+  last_time: string;
+  main_image: File | null;
+}
+
 const AddGroupClass: React.FC = () => {
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
-    []
-  );
+  const { user, isTeacher } = useAuth();
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<
+    Category[]
+  >({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await axiosClient.get("/api/categories/");
+      return response.data;
+    },
+  });
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   // const [duration, setDuration] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const tutorId = localStorage.getItem("user");
-  const user = tutorId ? JSON.parse(tutorId) : null;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   console.log(open, user);
 
-  useEffect(() => {
-    axiosClient
-      .get("/api/categories/")
-      .then((response) => setCategories(response.data))
-      .catch((error) => console.error("Error fetching categories:", error));
-  }, []);
+  // Form validation state
+  const [formErrors, setFormErrors] = useState<Record<keyof FormData, string>>({
+    title: "",
+    grade: "",
+    price: "",
+    category: "",
+    max_book: "",
+    class_type: "",
+    status: "",
+    last_time: "",
+    main_image: "",
+  });
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     // age_range: "",
     grade: "",
@@ -49,119 +95,185 @@ const AddGroupClass: React.FC = () => {
     { date: string; duration: string }[]
   >([]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  const handleTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (formErrors[name as keyof FormData]) {
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (formErrors[name as keyof FormData]) {
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.files ? e.target.files[0] : null,
-    });
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        setFormErrors((prev) => ({
+          ...prev,
+          main_image: "File size should be less than 5MB",
+        }));
+        return;
+      }
+      setFormData((prev) => ({ ...prev, main_image: file }));
+      setFormErrors((prev) => ({ ...prev, main_image: "" }));
+    }
   };
 
   const [groupClassId, setGroupClassId] = useState<number | null>(null);
 
+  const validateForm = () => {
+    const errors = {
+      title: "",
+      grade: "",
+      price: "",
+      category: "",
+      max_book: "",
+      class_type: "",
+      status: "",
+      last_time: "",
+      main_image: "",
+    };
+
+    if (!formData.title.trim()) {
+      errors.title = "Title is required";
+    }
+
+    if (!formData.grade.trim()) {
+      errors.grade = "Grade is required";
+    }
+
+    if (formData.price && isNaN(Number(formData.price))) {
+      errors.price = "Price must be a valid number";
+    }
+
+    if (formData.max_book && isNaN(Number(formData.max_book))) {
+      errors.max_book = "Maximum bookings must be a valid number";
+    }
+
+    if (!formData.class_type) {
+      errors.class_type = "Class type is required";
+    }
+
+    if (!formData.status) {
+      errors.status = "Status is required";
+    }
+
+    if (!formData.last_time) {
+      errors.last_time = "Last time is required";
+    }
+
+    setFormErrors(errors);
+    return !Object.values(errors).some((error) => error !== "");
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
-    if (!tutorId) {
-      alert("Tutor ID is missing.");
+    if (!user || !isTeacher()) {
+      setError("Please log in as a tutor to create a group class.");
       return;
     }
 
-    if (
-      !formData.title ||
-      !formData.grade ||
-      !formData.class_type ||
-      !formData.status ||
-      !formData.last_time
-    ) {
-      alert("Please fill all required fields.");
+    if (!validateForm()) {
+      setError("Please fix the errors in the form before submitting.");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const formDataObj = new FormData();
-      formDataObj.append("tutor", JSON.parse(tutorId).id.toString());
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== "") {
-          formDataObj.append(key, value as string | Blob);
-        }
-      });
+      // Add tutor ID first
+      formDataObj.append("tutor", user.id.toString());
 
-      if (formData.category) {
-        formDataObj.append("category", String(formData.category));
+      // Add all form fields
+      formDataObj.append("title", formData.title);
+      formDataObj.append("grade", formData.grade);
+      formDataObj.append("price", formData.price);
+      formDataObj.append("category", formData.category);
+      formDataObj.append("max_book", formData.max_book);
+      formDataObj.append("class_type", formData.class_type);
+      formDataObj.append("status", formData.status);
+      formDataObj.append("last_time", formData.last_time);
+
+      // Add image if it exists
+      if (formData.main_image) {
+        formDataObj.append("main_image", formData.main_image);
       }
 
-      // Step 1: Create Group Class
-      const groupClassResponse = await createGroupClass(formDataObj);
+      // Log the FormData contents for debugging
+      for (const pair of formDataObj.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
 
-      const createdGroupClassId = groupClassResponse.data.id;
-      setGroupClassId(createdGroupClassId);
+      const response = await createGroupClass(formDataObj);
+      const createdGroupClassId = response.id;
 
-      console.log("Group Class Created:", createdGroupClassId);
-      alert("Group class created successfully!");
+      setSuccess("Group class created successfully!");
 
-      // **Step 2: Automatically Create Schedule if Date Selected**
       if (selectedDate) {
-        sendScheduleDetails(createdGroupClassId);
+        await sendScheduleDetails(createdGroupClassId);
       }
+
+      // Reset form
+      setFormData({
+        title: "",
+        grade: "",
+        price: "",
+        category: "",
+        max_book: "",
+        class_type: "Free",
+        status: "Visible",
+        last_time: "",
+        main_image: null,
+      });
+      setSelectedDate(null);
+      setScheduleDetails([]);
     } catch (error: any) {
-      console.error(
-        "Error creating group class:",
-        error.response?.data || error.message
+      console.error("Error creating group class:", error);
+      setError(
+        error.response?.data?.message ||
+          "Failed to create group class. Please try again."
       );
-      alert("An error occurred while creating the group class.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const sendScheduleDetails = async (createdGroupClassId: number) => {
     if (!selectedDate) {
-      alert("Please select a date.");
-      return;
-    }
-
-    if (!tutorId) {
-      alert("Tutor ID is missing.");
-      return;
-    }
-
-    if (!createdGroupClassId) {
-      alert("Group class ID is missing. Please create the group class first.");
+      setError("Please select a date for the session.");
       return;
     }
 
     try {
-      const newSchedule = {
-        group_class: createdGroupClassId, // ✅ Send only the ID
+      const sessionData: CreateGroupClassSessionData = {
+        group_class: createdGroupClassId,
         date: selectedDate,
         duration: "01:00:00",
+        topic: "Initial Session",
       };
 
-      const response = await createGroupClassSession(newSchedule);
-
-      console.log("Schedule Created:", response.data);
-
-      setScheduleDetails([
-        ...scheduleDetails,
-        {
-          date: selectedDate,
-          duration: "1 hour",
-        },
-      ]);
-
-      setOpen(false); // Close modal
-      alert("Schedule added successfully!");
+      await createGroupClassSession(sessionData);
     } catch (error: any) {
-      console.error(
-        "Error creating schedule:",
-        error.response?.data || error.message
+      console.error("Error creating session:", error);
+      setError(
+        error.response?.data?.message ||
+          "Failed to create session. Please try again."
       );
-      alert("Failed to add schedule.");
     }
   };
 
@@ -252,183 +364,205 @@ const AddGroupClass: React.FC = () => {
   return (
     <div className="ml-20 mt-16">
       <h1 className="text-2xl font-semibold mb-6">Create new group class</h1>
+
+      {error && (
+        <Alert severity="error" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity="success" className="mb-4">
+          {success}
+        </Alert>
+      )}
+
       <form
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         onSubmit={handleSubmit}
       >
-        <div className="flex flex-col">
-          <label htmlFor="title" className="font-medium mb-2">
-            Group Class Title *
-          </label>
-          <input
-            id="title"
-            type="text"
-            placeholder="Enter title"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
+        <FormControl fullWidth error={!!formErrors.title}>
+          <TextField
+            name="title"
+            label="Group Class Title *"
+            value={formData.title}
+            onChange={handleTextChange}
+            error={!!formErrors.title}
+            helperText={formErrors.title}
+            required
           />
-        </div>
+        </FormControl>
 
         {/* <div className="flex flex-col">
           <label htmlFor="age_range" className="font-medium mb-2">Age Range *</label>
           <input id="age_range" type="text" placeholder="Enter age range" className="border p-2 rounded-lg" onChange={handleChange} />
         </div> */}
 
-        <div className="flex flex-col">
-          <label htmlFor="grade" className="font-medium mb-2">
-            Grade *
-          </label>
-          <input
-            id="grade"
-            type="text"
-            placeholder="Enter grade"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
+        <FormControl fullWidth error={!!formErrors.grade}>
+          <TextField
+            name="grade"
+            label="Grade *"
+            value={formData.grade}
+            onChange={handleTextChange}
+            error={!!formErrors.grade}
+            helperText={formErrors.grade}
+            required
           />
-        </div>
+        </FormControl>
 
-        <div className="flex flex-col">
-          <label htmlFor="price" className="font-medium mb-2">
-            Price ($)
-          </label>
-          <input
-            id="price"
+        <FormControl fullWidth error={!!formErrors.price}>
+          <TextField
+            name="price"
+            label="Price ($)"
             type="number"
-            placeholder="0"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
+            value={formData.price}
+            onChange={handleTextChange}
+            error={!!formErrors.price}
+            helperText={formErrors.price}
           />
-        </div>
-        <div className="flex flex-col">
-          <label htmlFor="max_book" className="font-medium mb-2">
-            max_book{" "}
-          </label>
-          <input
-            id="max_book"
-            type="number"
-            placeholder="0"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
-          />
-        </div>
+        </FormControl>
 
-        <div className="flex flex-col">
-          <label htmlFor="category" className="font-medium mb-2">
-            Category
-          </label>
-          <select
-            id="category"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
+        <FormControl fullWidth error={!!formErrors.max_book}>
+          <TextField
+            name="max_book"
+            label="Maximum Bookings"
+            type="number"
+            value={formData.max_book}
+            onChange={handleTextChange}
+            error={!!formErrors.max_book}
+            helperText={formErrors.max_book}
+          />
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Category</InputLabel>
+          <Select
+            name="category"
+            value={formData.category}
+            onChange={handleSelectChange}
+            label="Category"
+            disabled={isLoadingCategories}
           >
-            <option value="">Select a category</option>
+            <MenuItem value="">Select a category</MenuItem>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <MenuItem key={cat.id} value={cat.id}>
                 {cat.name}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
+          </Select>
+          {isLoadingCategories && (
+            <FormHelperText>Loading categories...</FormHelperText>
+          )}
+        </FormControl>
 
-        <div className="flex flex-col">
-          <label htmlFor="class_type" className="font-medium mb-2">
-            Class Type *
-          </label>
-          <select
-            id="class_type"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
-            defaultValue="Online"
+        <FormControl fullWidth error={!!formErrors.class_type}>
+          <InputLabel>Class Type *</InputLabel>
+          <Select
+            name="class_type"
+            value={formData.class_type}
+            onChange={handleSelectChange}
+            label="Class Type *"
+            required
           >
-            <option value="Paid">Paid</option>
-            <option value="Free">Free</option>
-          </select>
-        </div>
+            <MenuItem value="Paid">Paid</MenuItem>
+            <MenuItem value="Free">Free</MenuItem>
+          </Select>
+          {formErrors.class_type && (
+            <FormHelperText>{formErrors.class_type}</FormHelperText>
+          )}
+        </FormControl>
 
-        <div className="flex flex-col">
-          <label htmlFor="status" className="font-medium mb-2">
-            Status *
-          </label>
-          <select
-            id="status"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
-            defaultValue="Active"
+        <FormControl fullWidth error={!!formErrors.status}>
+          <InputLabel>Status *</InputLabel>
+          <Select
+            name="status"
+            value={formData.status}
+            onChange={handleSelectChange}
+            label="Status *"
+            required
           >
-            <option value="Visible">Visible</option>
-            <option value="Hidden">Hidden </option>
-          </select>
-        </div>
+            <MenuItem value="Visible">Visible</MenuItem>
+            <MenuItem value="Hidden">Hidden</MenuItem>
+          </Select>
+          {formErrors.status && (
+            <FormHelperText>{formErrors.status}</FormHelperText>
+          )}
+        </FormControl>
 
-        <div className="flex flex-col">
-          <label htmlFor="last_time" className="font-medium mb-2">
-            Last Time *
-          </label>
-          <input
-            id="last_time"
+        <FormControl fullWidth error={!!formErrors.last_time}>
+          <TextField
+            name="last_time"
+            label="Last Time *"
             type="datetime-local"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
+            value={formData.last_time}
+            onChange={handleTextChange}
+            error={!!formErrors.last_time}
+            helperText={formErrors.last_time}
+            required
+            InputLabelProps={{ shrink: true }}
           />
-        </div>
+        </FormControl>
 
-        <div className="flex flex-col">
-          <label htmlFor="main_image" className="font-medium mb-2">
-            Upload Image
-          </label>
-          <input
-            id="main_image"
+        <FormControl fullWidth error={!!formErrors.main_image}>
+          <TextField
+            name="main_image"
             type="file"
-            className="border p-2 rounded-lg"
             onChange={handleFileChange}
+            error={!!formErrors.main_image}
+            helperText={formErrors.main_image || "Maximum file size: 5MB"}
+            InputLabelProps={{ shrink: true }}
           />
-        </div>
+        </FormControl>
 
-        <button
-          type="submit"
-          className="col-span-3 bg-blue-500 text-white py-2 rounded-lg"
-        >
-          Submit
-        </button>
-      </form>
-
-      <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <h1 className="col-span-full text-lg font-semibold">Sessions Times</h1>
-
-        {/* Date Selection */}
-        <div className="flex flex-col">
-          <label htmlFor="date" className="font-medium mb-2">
-            Session Date *
-          </label>
-          <input
-            type="datetime-local"
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />{" "}
-        </div>
-
-        {/* Duration Selection */}
-        <div className="flex flex-col">
-          <label htmlFor="duration" className="font-medium mb-2">
-            Duration (HH:MM:SS) *
-          </label>
-          <input
-            id="duration"
-            type="time"
-            step="1"
-            className="border p-2 rounded-lg"
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Submit Button */}
         <Button
+          type="submit"
           variant="contained"
-          className="p-0 h-16"
-          onClick={() => groupClassId && sendScheduleDetails(groupClassId)}
+          color="primary"
+          className="col-span-3"
+          disabled={isSubmitting}
+          startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
         >
-          Add Schedule
+          {isSubmitting ? "Creating..." : "Create Group Class"}
         </Button>
       </form>
+
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Sessions Times</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <FormControl fullWidth>
+            <TextField
+              label="Session Date"
+              type="datetime-local"
+              value={selectedDate || ""}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </FormControl>
+
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => selectedDate && sendScheduleDetails(groupClassId!)}
+            disabled={!selectedDate || !groupClassId}
+          >
+            Add Schedule
+          </Button>
+        </div>
+
+        {scheduleDetails.length > 0 && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Added Sessions:</h3>
+            <ul className="list-disc pl-5">
+              {scheduleDetails.map((schedule, index) => (
+                <li key={index}>
+                  Date: {new Date(schedule.date).toLocaleString()}, Duration:{" "}
+                  {schedule.duration}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

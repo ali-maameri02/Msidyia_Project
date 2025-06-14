@@ -6,15 +6,20 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 RUN pip install --upgrade pip 
-
 COPY requirements.txt .
-
 RUN pip install -r requirements.txt
 
 COPY . .
 
-# RUN python Msidiya/manage.py collectstatic --noinput
+# Create media directories and set proper permissions
+RUN mkdir -p /app/Msidiya/Categories_logos && \
+    mkdir -p /app/Msidiya/media && \
+    chmod -R 755 /app/Msidiya/Categories_logos && \
+    chmod -R 755 /app/Msidiya/media
+
+# Create a non-root user and switch to it
+RUN groupadd -r django && useradd -r -g django django
+RUN chown -R django:django /app
+USER django
 
 EXPOSE 8000
-
-# CMD ["python","manage.py","runserver","0.0.0.0:8000"]

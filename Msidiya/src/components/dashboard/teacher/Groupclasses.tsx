@@ -1,193 +1,296 @@
-import React, { useState, useEffect } from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Paper, Box, Typography, Button, IconButton } from "@mui/material";
+import React from "react";
+import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import {
+  Paper,
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  CircularProgress,
+  Container,
+  useTheme,
+} from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useNavigate } from "react-router-dom";
-interface GroupClass {
-  id: number;
-  title: string;
-  // age_range: string;
-  grade: string;
-  price: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  max_book: number;
-  class_type: string;
-  main_image: string;
-  date_created: string;
-  status: string;
-  last_time: string;
-  tutor: number;
-}
+import {
+  useGroupClasses,
+  useDeleteGroupClass,
+} from "../../../services/group_classes/group_classes.queries";
+import { GroupClass } from "../../../services/group_classes/group_classes.types";
 
 const Groupclasses: React.FC = () => {
-  const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
   const navigate = useNavigate();
+  const theme = useTheme();
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const { data: groupClasses, isLoading } = useGroupClasses();
+  const deleteGroupClass = useDeleteGroupClass();
 
-  if (user?.is_tutor) {
-    console.log("Tutor details:", user.tutor_details);
-  } else {
-    console.log("User is not a tutor.");
-  }
-  useEffect(() => {
-    const fetchGroupClasses = async () => {
-      try {
-        const storedUser = localStorage.getItem("user");
-        if (!storedUser) return;
+  // Filter classes for the current tutor
+  const tutorClasses =
+    groupClasses?.filter((cls: GroupClass) => cls.tutor === user?.id) || [];
 
-        const loggedInUser = JSON.parse(storedUser);
-        const tutorId = loggedInUser?.id;
-
-        const response = await axios.get(
-          "${import.meta.env.VITE_API_BASE_URL}/api/group-classes/"
-        );
-        const filteredClasses = response.data.filter(
-          (cls: GroupClass) => cls.tutor === tutorId
-        );
-
-        setGroupClasses(filteredClasses);
-      } catch (error) {
-        console.error("Error fetching group classes:", error);
-      }
-    };
-
-    fetchGroupClasses();
-  }, []);
-  // Delete group class
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this class?")) {
       try {
-        await axios.delete(
-          `${import.meta.env.VITE_API_BASE_URL}/api/group-classes/${id}/`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        setGroupClasses(groupClasses.filter((cls) => cls.id !== id));
+        await deleteGroupClass.mutateAsync(id);
       } catch (error) {
         console.error("Error deleting group class:", error);
       }
     }
   };
+
   const columns: GridColDef[] = [
     {
       field: "main_image",
-      headerName: "Main Image",
+      headerName: "Image",
       width: 80,
       renderCell: (params) => (
         <img
           src={params.value}
           alt="Class"
           loading="lazy"
-          style={{ width: 50, height: 50, borderRadius: "50%" }}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "8px",
+            objectFit: "cover",
+          }}
         />
       ),
     },
-    { field: "title", headerName: "Title", width: 250 },
-    // { field: 'age_range', headerName: 'Age Range', width: 100 },
-    { field: "grade", headerName: "Grade", width: 120 },
-    { field: "price", headerName: "Price", width: 80 },
-    { field: "category", headerName: "Category", width: 130 },
-    { field: "max_book", headerName: "Max Book", width: 100 },
-    { field: "class_type", headerName: "Class Type", width: 120 },
-    { field: "last_time", headerName: "Last Time", width: 130 },
+    {
+      field: "title",
+      headerName: "Title",
+      width: 250,
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "grade",
+      headerName: "Grade",
+      width: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" color="text.secondary">
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "price",
+      headerName: "Price",
+      width: 100,
+      renderCell: (params) => (
+        <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>
+          ${params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      width: 130,
+      valueGetter: (params: GridValueGetterParams<GroupClass>) => {
+        const category = params.row?.category;
+        return category ? category.name : "";
+      },
+      renderCell: (params) => (
+        <Typography
+          variant="body2"
+          sx={{
+            backgroundColor: theme.palette.primary.light,
+            color: theme.palette.primary.contrastText,
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "0.75rem",
+          }}
+        >
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "max_book",
+      headerName: "Max Students",
+      width: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" color="text.secondary">
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "class_type",
+      headerName: "Type",
+      width: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" color="text.secondary">
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "last_time",
+      headerName: "Duration",
+      width: 130,
+      renderCell: (params) => (
+        <Typography variant="body2" color="text.secondary">
+          {params.value}
+        </Typography>
+      ),
+    },
     {
       field: "status",
       headerName: "Status",
       width: 100,
-      renderCell: (params) =>
-        params.value === "Visible" ? (
-          <CheckCircleIcon style={{ color: "green" }} />
-        ) : (
-          <CancelIcon style={{ color: "red" }} />
-        ),
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: params.value === "Visible" ? "success.main" : "error.main",
+          }}
+        >
+          {params.value === "Visible" ? (
+            <>
+              <CheckCircleIcon fontSize="small" />
+              <Typography variant="body2">Active</Typography>
+            </>
+          ) : (
+            <>
+              <CancelIcon fontSize="small" />
+              <Typography variant="body2">Hidden</Typography>
+            </>
+          )}
+        </Box>
+      ),
     },
-    { field: "date_created", headerName: "Created On", width: 130 },
+    {
+      field: "date_created",
+      headerName: "Created On",
+      width: 130,
+      renderCell: (params) => (
+        <Typography variant="body2" color="text.secondary">
+          {new Date(params.value).toLocaleDateString()}
+        </Typography>
+      ),
+    },
     {
       field: "actions",
       headerName: "Actions",
       width: 130,
       sortable: false,
       renderCell: (params) => (
-        <div>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton
-            color="secondary"
+            color="primary"
+            size="small"
             title="Edit"
             onClick={() =>
               navigate(`/dashboard/teacher/group-classes/update/${params.id}`)
             }
           >
-            <EditIcon />
+            <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
             color="error"
+            size="small"
             title="Delete"
             onClick={() => handleDelete(params.id as number)}
+            disabled={deleteGroupClass.isPending}
           >
-            <DeleteIcon />
+            <DeleteIcon fontSize="small" />
           </IconButton>
-        </div>
+        </Box>
       ),
     },
   ];
 
-  return (
-    <div className="mt-16 ml-12 h-full ">
+  if (isLoading) {
+    return (
       <Box
         sx={{
-          marginBottom: "20px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "400px",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <Box
+        sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingLeft: "2rem",
+          mb: 3,
         }}
       >
-        <Typography variant="h4" sx={{ marginBottom: "20px" }}>
+        <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Group Classes
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddCircleOutlineIcon />}
-          onClick={() => {
-            navigate(`/dashboard/teacher/group-classes/add`);
+          onClick={() => navigate(`/dashboard/teacher/group-classes/add`)}
+          sx={{
+            borderRadius: "8px",
+            textTransform: "none",
+            px: 3,
           }}
         >
-          Add
+          Add New Class
         </Button>
       </Box>
-      <Paper sx={{ width: "60rem", paddingLeft: "2rem" }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderRadius: "12px",
+          border: `1px solid ${theme.palette.divider}`,
+        }}
+      >
         <DataGrid
-          rows={groupClasses.map((cls) => ({
-            ...cls,
-            id: cls.id,
-          }))}
+          rows={tutorClasses}
           columns={columns}
           autoHeight
-          pageSizeOptions={[10, 20, 50]} // Larger page size for faster scrolling
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
           checkboxSelection
           disableColumnMenu
-          // disableSelectionOnClick
-          density="compact"
+          density="comfortable"
           getRowId={(row) => row.id}
           sx={{
-            "& .MuiDataGrid-virtualScroller": {
-              overflow: "auto",
+            border: "none",
+            "& .MuiDataGrid-cell": {
+              borderColor: theme.palette.divider,
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: theme.palette.background.default,
+              borderBottom: `2px solid ${theme.palette.divider}`,
+            },
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: theme.palette.action.hover,
             },
           }}
         />
       </Paper>
-    </div>
+    </Container>
   );
 };
 

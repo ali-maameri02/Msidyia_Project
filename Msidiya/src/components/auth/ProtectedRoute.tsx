@@ -1,7 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
-import { useContext } from "react";
-import { authContext } from "../../contet/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,14 +8,13 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, isLoading } = useContext(authContext);
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
   // If still loading, you might want to show a loading spinner
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
   // If no user is logged in, redirect to home page
   if (!user) {
     return <Navigate to="/" state={{ from: location }} replace />;
