@@ -10,6 +10,12 @@ import {
   TextField,
   Box,
   Avatar,
+  Alert,
+  Snackbar,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import EmailIcon from "@mui/icons-material/Email";
@@ -21,8 +27,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
-import { useGroupClassReviewsQuery } from "../../services/reviews/reviews.queries";
-import { GroupClassReview } from "../../services/reviews/reviews.types";
+import {
+  useGroupClassReviewsQuery,
+  useCreateGroupClassReviewMutation,
+} from "../../services/reviews/reviews.queries";
+import {
+  GroupClassReview,
+  CreateGroupClassReviewData,
+} from "../../services/reviews/reviews.types";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface User {
   id: number;
@@ -78,13 +91,29 @@ const TutorDetails = () => {
   const [tutor, setTutor] = useState<Tutor | null>(null);
   const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const [newReview, setNewReview] = useState({ rating: 0, comment: "" });
+  const [newReview, setNewReview] = useState<CreateGroupClassReviewData>({
+    rating: 0,
+    comment: "",
+  });
+  const [selectedGroupClassId, setSelectedGroupClassId] = useState<
+    number | null
+  >(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
 
   const { tutorId } = useParams();
   const navigate = useNavigate();
 
   // Get all reviews
-  const { data: reviews = [] } = useGroupClassReviewsQuery();
+  const { data: reviews = [] } = useGroupClassReviewsQuery(tutorId || "");
+
+  // Create review mutation
+  const createReviewMutation = useCreateGroupClassReviewMutation(
+    selectedGroupClassId || 0
+  );
 
   useEffect(() => {
     const fetchTutorDetails = async () => {
@@ -124,19 +153,44 @@ const TutorDetails = () => {
   }, [tutorId]);
 
   const handleSubmitReview = async () => {
+    if (!selectedGroupClassId) {
+      setSnackbar({
+        open: true,
+        message: "Please select a group class first",
+        severity: "error",
+      });
+      return;
+    }
+
     if (!newReview.rating || !newReview.comment.trim()) {
-      alert("Please provide both rating and comment");
+      setSnackbar({
+        open: true,
+        message: "Please provide both rating and comment",
+        severity: "error",
+      });
       return;
     }
 
     try {
-      // TODO: Implement review submission when the API is available
-      alert("Review submission is not yet implemented");
+      await createReviewMutation.mutateAsync(newReview);
       setNewReview({ rating: 0, comment: "" });
+      setSnackbar({
+        open: true,
+        message: "Review submitted successfully",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Failed to submit review:", error);
-      alert("Failed to submit review");
+      setSnackbar({
+        open: true,
+        message: "Failed to submit review",
+        severity: "error",
+      });
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   if (!tutor) return <div>Loading...</div>;
@@ -276,6 +330,25 @@ const TutorDetails = () => {
               <Typography variant="h6" gutterBottom>
                 Write a Review
               </Typography>
+
+              {/* Group Class Selection */}
+              <FormControl fullWidth className="mb-4">
+                <InputLabel>Select Group Class</InputLabel>
+                <Select
+                  value={selectedGroupClassId || ""}
+                  onChange={(e) =>
+                    setSelectedGroupClassId(Number(e.target.value))
+                  }
+                  label="Select Group Class"
+                >
+                  {groupClasses.map((groupClass) => (
+                    <MenuItem key={groupClass.id} value={groupClass.id}>
+                      {groupClass.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <Box className="mb-4">
                 <Rating
                   value={newReview.rating}
@@ -302,9 +375,16 @@ const TutorDetails = () => {
               <Button
                 variant="contained"
                 onClick={handleSubmitReview}
-                disabled={!newReview.rating || !newReview.comment.trim()}
+                disabled={
+                  !newReview.rating ||
+                  !newReview.comment.trim() ||
+                  !selectedGroupClassId ||
+                  createReviewMutation.isPending
+                }
               >
-                Submit Review
+                {createReviewMutation.isPending
+                  ? "Submitting..."
+                  : "Submit Review"}
               </Button>
             </Card>
 
@@ -341,6 +421,16 @@ const TutorDetails = () => {
         </div>
       </div>
       <Footer />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
