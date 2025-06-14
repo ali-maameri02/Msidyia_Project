@@ -33,7 +33,7 @@ const Tutors: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get<Tutor[]>("${import.meta.env.VITE_API_BASE_URL}/api/tutors/")
+      .get<Tutor[]>(`${import.meta.env.VITE_API_BASE_URL}/api/tutors/`)
       .then((response) => {
         setTutors(response.data);
         setLoading(false);

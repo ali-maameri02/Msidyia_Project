@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import TeacherCard from "./TeacherCard";
 import { motion } from "framer-motion";
 import { useGetTutors } from "../../api/tutor/teacher.queries";
+import { useNavigate } from "react-router-dom";
 
 // Import images directly
 import profile1 from "../../assets/profile1.jpeg";
@@ -12,6 +13,7 @@ const profileImages = [profile1, profile2, profile3];
 
 const TeachersList: React.FC = () => {
   const { data: teachers, isLoading, isError } = useGetTutors();
+  const navigate = useNavigate();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -79,9 +81,7 @@ const TeachersList: React.FC = () => {
               rating={0} // Placeholder
               reviews={0} // Placeholder
               subjects={teacher.qualifications.map((q) => q.toString())} // Assuming qualifications can be represented as strings
-              onClick={() =>
-                alert(`Starting free trial with ${teacher.user.username}`)
-              }
+              onClick={() => navigate(`/Tutors/TutorDetails/${teacher.id}`)}
             />
           ))}
         </div>
