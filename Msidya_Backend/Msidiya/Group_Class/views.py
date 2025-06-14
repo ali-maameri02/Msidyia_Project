@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 
 
 
@@ -231,3 +232,28 @@ class AvailableSchedulesView(generics.ListAPIView):
             group_class__status='Visible',
             
         ).order_by('date')
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_class_completion_chart(request):
+    tutor = request.user
+    if tutor.Role != 'Tutor':
+        return Response({"detail": "Only tutors can access this data."}, status=403)
+
+    now = timezone.now()
+
+    # Get all the tutor's group classes
+    group_classes = GroupClass.objects.filter(tutor=tutor)
+
+    # Count completed and not completed
+    completed_count = group_classes.filter(last_time__lt=now).count()
+    not_completed_count = group_classes.filter(last_time__gte=now).count()
+
+    data = {
+        "completed": completed_count,
+        "not_completed": not_completed_count
+    }
+
+    return Response(data)

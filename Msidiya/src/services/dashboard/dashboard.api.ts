@@ -19,6 +19,11 @@ export interface DashboardStats {
   };
 }
 
+export interface GroupClassCompletionStats {
+  completed: number;
+  not_completed: number;
+}
+
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   const response = await axiosClient.get("/api/tutor/stats/");
   if (response.status !== 200) {
@@ -26,3 +31,12 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   }
   return response.data;
 };
+
+export const getGroupClassCompletionStats =
+  async (): Promise<GroupClassCompletionStats> => {
+    const response = await axiosClient.get("/api/group-classes/tutor/stats/");
+    if (response.status !== 200) {
+      throw new Error("Can't fetch group class completion stats");
+    }
+    return response.data;
+  };

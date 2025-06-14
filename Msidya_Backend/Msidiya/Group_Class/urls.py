@@ -15,6 +15,8 @@ urlpatterns = [
      path('categories/<int:category_id>/subjects/', views.get_category_subjects, name='category-subjects'),
      path('subjects/<int:subject_id>/topics/', views.get_subject_topics, name='subject-topics'),
     path('group-classes/', views.GroupClassListCreateView.as_view(), name='group-class-list-create'),
+    path('group-classes/tutor/stats/', views.group_class_completion_chart, name='group-class-tutor-stats'),
+
     path('group-classes/<int:pk>/', views.GroupClassDetailView.as_view(), name='group-class-detail'),
     path('group-class-reviews/', views.GroupClassReviewListCreateView.as_view(), name='group-class-review-list-create'),
     path('group-class-reviews/<int:pk>/', views.GroupClassReviewDetailView.as_view(), name='group-class-review-detail'),
