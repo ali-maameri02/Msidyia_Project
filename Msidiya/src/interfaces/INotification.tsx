@@ -3,5 +3,6 @@ export interface INotification {
   user: string;
   message: string;
   status: boolean;
+  created_at: string;
   //   created_at: string;
 }

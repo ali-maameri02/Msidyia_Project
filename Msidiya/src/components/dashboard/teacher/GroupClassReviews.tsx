@@ -16,7 +16,6 @@ import { useGroupClassReviewsQuery } from "../../../services/reviews/reviews.que
 import { useGroupClassesQuery } from "../../../services/groupClasses/groupClasses.queries";
 import { GroupClassReview } from "../../../services/reviews/reviews.types";
 import { GroupClass } from "../../../services/groupClasses/groupClasses.types";
-import { useAuth } from "../../../hooks/useAuth";
 
 interface GroupClassReviewsProps {
   groupClassId?: string | number;
@@ -25,7 +24,6 @@ interface GroupClassReviewsProps {
 const GroupClassReviews: React.FC<GroupClassReviewsProps> = ({
   groupClassId: initialGroupClassId,
 }) => {
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGroupClassId, setSelectedGroupClassId] = useState<
     string | number | ""

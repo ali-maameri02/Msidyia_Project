@@ -73,7 +73,7 @@ export default function Setcategories() {
   const loggedInUser = storedUser ? JSON.parse(storedUser) : null;
   const tutorId = loggedInUser?.id;
 
-  const { data: categories = [], isLoading } = useGetCategories(tutorId);
+  const { data: categories = [] } = useGetCategories(tutorId);
 
   const handleOpen = (row: CategoryRow) => {
     setSelectedCategoryId(row.id); // Store the category ID
@@ -393,7 +393,7 @@ export default function Setcategories() {
       </div>
       <Paper sx={{ height: 400, width: "95%" }}>
         <DataGrid
-          rows={categories.map((row: Category) => ({
+          rows={categories.map((row: CategoryRow) => ({
             id: row.id,
             name: row.name,
             status: row.status,

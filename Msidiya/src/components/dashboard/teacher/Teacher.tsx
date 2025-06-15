@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 // import TrafficSource from './TrafficSource';
 import PieChart from "./PieChart";
 import SalesChart from "./SalesChart";
@@ -57,13 +57,13 @@ const Teacher: React.FC = () => {
               </p>
               <p
                 className={`text-sm ${
-                  stats?.totalCourses.growth >= 0
+                  (stats?.totalCourses.growth ?? 0) >= 0
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
-                {stats?.totalCourses.growth >= 0 ? "↑" : "↓"}{" "}
-                {Math.abs(stats?.totalCourses.growth || 0)}% Since last month
+                {(stats?.totalCourses.growth ?? 0) >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.totalCourses.growth ?? 0)}% Since last month
               </p>
             </div>
           </div>
@@ -80,13 +80,13 @@ const Teacher: React.FC = () => {
               </p>
               <p
                 className={`text-sm ${
-                  stats?.totalStudents.growth >= 0
+                  (stats?.totalStudents.growth ?? 0) >= 0
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
-                {stats?.totalStudents.growth >= 0 ? "↑" : "↓"}{" "}
-                {Math.abs(stats?.totalStudents.growth || 0)}% Since last month
+                {(stats?.totalStudents.growth ?? 0) >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.totalStudents.growth ?? 0)}% Since last month
               </p>
             </div>
           </div>
@@ -109,13 +109,13 @@ const Teacher: React.FC = () => {
               </div>
               <p
                 className={`text-sm ${
-                  stats?.groupClasses.growth >= 0
+                  (stats?.groupClasses.growth ?? 0) >= 0
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
-                {stats?.groupClasses.growth >= 0 ? "↑" : "↓"}{" "}
-                {Math.abs(stats?.groupClasses.growth || 0)}% Since last month
+                {(stats?.groupClasses.growth ?? 0) >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.groupClasses.growth ?? 0)}% Since last month
               </p>
             </div>
           </div>
@@ -134,13 +134,13 @@ const Teacher: React.FC = () => {
               </p>
               <p
                 className={`text-sm ${
-                  stats?.totalEarnings.growth >= 0
+                  (stats?.totalEarnings.growth ?? 0) >= 0
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
-                {stats?.totalEarnings.growth >= 0 ? "↑" : "↓"}{" "}
-                {Math.abs(stats?.totalEarnings.growth || 0)}% Since last month
+                {(stats?.totalEarnings.growth ?? 0) >= 0 ? "↑" : "↓"}{" "}
+                {Math.abs(stats?.totalEarnings.growth ?? 0)}% Since last month
               </p>
             </div>
           </div>

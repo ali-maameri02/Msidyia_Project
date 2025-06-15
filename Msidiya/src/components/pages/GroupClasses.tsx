@@ -59,19 +59,19 @@ const GroupClasses = () => {
       try {
         // Fetch group classes
         const groupClassesResponse = await axios.get<GroupClass[]>(
-          "${import.meta.env.VITE_API_BASE_URL}/api/group-classes/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/group-classes/`
         );
         setGroupClasses(groupClassesResponse.data);
 
         // Fetch reviews
         const reviewsResponse = await axios.get<GroupClassReview[]>(
-          "${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/`
         );
         setReviews(reviewsResponse.data);
 
         // Fetch tutors
         const tutorsResponse = await axios.get<Tutor[]>(
-          "${import.meta.env.VITE_API_BASE_URL}/api/tutors/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/tutors/`
         );
         console.log("Fetched tutors:", tutorsResponse.data);
         setTutors(tutorsResponse.data);

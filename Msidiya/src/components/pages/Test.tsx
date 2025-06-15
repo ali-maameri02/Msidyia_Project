@@ -10,7 +10,7 @@ function Test() {
 
   useEffect(() => {
     axios
-      .get("${import.meta.env.VITE_API_BASE_URL}/e_wallet/wallet/", {
+      .get(`${import.meta.env.VITE_API_BASE_URL}/e_wallet/wallet/`, {
         withCredentials: true, // Important for session-authenticated APIs
       })
       .then((res) => {

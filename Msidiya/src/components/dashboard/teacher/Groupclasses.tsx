@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DataGrid, GridColDef, GridValueGetter } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   Paper,
   Box,
@@ -143,9 +143,8 @@ const Groupclasses: React.FC = () => {
       field: "category",
       headerName: "Category",
       width: 130,
-      valueGetter: (params: GridValueGetter<GroupClass>) => {
-        const category = params.row?.category;
-        return category ? category.name : "";
+      valueGetter: (params: GroupClass) => {
+        return params.category || "";
       },
       renderCell: (params) => (
         <Chip

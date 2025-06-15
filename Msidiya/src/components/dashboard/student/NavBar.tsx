@@ -110,11 +110,11 @@ const Navbar: React.FC = () => {
                       >
                         <img
                           src={user.Picture || "/default-avatar.png"}
-                          alt={user.name || "User Avatar"}
+                          alt={user.username || "User Avatar"}
                           className="w-10 h-10 rounded-full cursor-pointer object-cover"
                         />
                         <span className="hidden md:block text-sm font-medium text-gray-700">
-                          {user.name || "User"}
+                          {user.username || "User"}
                         </span>
                       </button>
 

@@ -36,7 +36,7 @@ import { getUserWalletBalance } from "../../services/wallet.services";
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems } = useCart();
-  const { user, logout, isLoading, isError, refresh } = useAuth(); // Use auth context
+  const { user, logout, refresh } = useAuth(); // Use auth context
   const [userBalance, setUserBalance] = useState(0);
   const location = useLocation();
   const [open, setOpen] = useState(false);

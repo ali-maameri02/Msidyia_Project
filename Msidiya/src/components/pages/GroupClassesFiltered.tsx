@@ -10,12 +10,12 @@ import Slider from "@mui/material/Slider";
 import { GroupClassReview } from "../../services/reviews/reviews.types";
 
 // Define TypeScript interfaces for the data structure
-interface Review {
-  id: number;
-  rating: number;
-  comment: string;
-  group_class: number; // ID of the associated group class
-}
+// interface Review {
+//   id: number;
+//   rating: number;
+//   comment: string;
+//   group_class: number; // ID of the associated group class
+// }
 
 interface TutorUser {
   id: number;
@@ -76,7 +76,7 @@ const GroupClassesFiltered = () => {
       try {
         // Fetch group classes
         const groupClassesResponse = await axios.get<GroupClass[]>(
-          "${import.meta.env.VITE_API_BASE_URL}/api/group-classes/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/group-classes/`
         );
         const filteredClasses = groupClassesResponse.data.filter(
           (groupClass) => groupClass.category.toString() === categoryId
@@ -85,13 +85,13 @@ const GroupClassesFiltered = () => {
 
         // Fetch reviews
         const reviewsResponse = await axios.get<GroupClassReview[]>(
-          "${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/group-class-reviews/`
         );
         setReviews(reviewsResponse.data);
 
         // Fetch tutors
         const tutorsResponse = await axios.get<Tutor[]>(
-          "${import.meta.env.VITE_API_BASE_URL}/api/tutors/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/tutors/`
         );
         console.log("Fetched tutors:", tutorsResponse.data);
         setTutors(tutorsResponse.data);

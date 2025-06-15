@@ -24,6 +24,7 @@ import {
   useTutorProfileQuery,
   useTutorGroupClassesQuery,
 } from "../../services/tutor/tutor.queries";
+import { GroupClass } from "../../services/group_classes/group_classes.types";
 
 const TutorOneToOne = () => {
   const { tutorId } = useParams();
@@ -205,7 +206,7 @@ const TutorOneToOne = () => {
 
               {/* Group Classes Section */}
               {groupClasses && groupClasses.length > 0 ? (
-                groupClasses.map((groupClass) => (
+                groupClasses.map((groupClass: GroupClass) => (
                   <Card key={groupClass.id} className="bg-white">
                     <CardActionArea>
                       <CardContent className="flex flex-row justify-between items-center p-2">
@@ -230,18 +231,18 @@ const TutorOneToOne = () => {
                           <div className="date_time flex flex-row justify-between w-full gap-5">
                             <div className="date flex flex-row  items-center w-32 flex-nowrap">
                               <TodayIcon />
-                              <h3>
+                              {/* <h3>
                                 {new Date(
                                   groupClass.start_time
                                 ).toLocaleDateString()}
-                              </h3>
+                              </h3> */}
                             </div>
                             <div className="Time flex flex-row  items-center w-32">
                               <WatchLaterIcon />
                               <h3>
-                                {new Date(
+                                {/* {new Date(
                                   groupClass.end_time
-                                ).toLocaleDateString()}
+                                ).toLocaleDateString()} */}
                               </h3>
                             </div>
                           </div>

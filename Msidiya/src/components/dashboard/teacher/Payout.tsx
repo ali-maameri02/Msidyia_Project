@@ -21,21 +21,20 @@ import {
   usePayoutHistory,
   useRequestPayout,
   useAddBankAccount,
-  usePayoutStatsByDateRange,
 } from "../../../services/payout/payoutQueries";
 
 const PayoutComponent: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+  console.log(dateRange);
 
   const { data: payoutStats, isLoading: statsLoading } = usePayoutStats();
   const { data: payoutHistory, isLoading: historyLoading } = usePayoutHistory();
   const requestPayout = useRequestPayout();
   const addBankAccount = useAddBankAccount();
-  const { data: rangeStats, isLoading: rangeStatsLoading } =
-    usePayoutStatsByDateRange(dateRange.startDate, dateRange.endDate);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    event.preventDefault();
     setActiveTab(newValue);
   };
 

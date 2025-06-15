@@ -35,7 +35,6 @@ import {
   GroupClassReview,
   CreateGroupClassReviewData,
 } from "../../services/reviews/reviews.types";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface User {
   id: number;

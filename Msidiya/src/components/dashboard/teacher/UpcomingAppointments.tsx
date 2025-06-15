@@ -35,7 +35,7 @@ const UpcomingAppointments: React.FC = () => {
         const tutorId = loggedInUser?.id; // Ensure `id` exists
 
         const response = await axios.get(
-          "${import.meta.env.VITE_API_BASE_URL}/api/schedules/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/schedules/`
         );
         const schedules = response.data;
 

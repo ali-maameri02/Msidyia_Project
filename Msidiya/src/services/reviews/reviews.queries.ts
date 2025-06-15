@@ -63,7 +63,7 @@ export const useUpdateGroupClassReviewMutation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation<GroupClassReview, Error, UpdateGroupClassReviewData>({
     mutationFn: (reviewData) => updateGroupClassReview(id, reviewData),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groupClassReviews"] });
       queryClient.invalidateQueries({ queryKey: ["groupClassReview", id] });
       queryClient.invalidateQueries({ queryKey: ["tutorReviews"] });
@@ -75,7 +75,7 @@ export const usePatchGroupClassReviewMutation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation<GroupClassReview, Error, UpdateGroupClassReviewData>({
     mutationFn: (reviewData) => patchGroupClassReview(id, reviewData),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groupClassReviews"] });
       queryClient.invalidateQueries({ queryKey: ["groupClassReview", id] });
       queryClient.invalidateQueries({ queryKey: ["tutorReviews"] });

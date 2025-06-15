@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   createGroupClass,
-  createGroupClassSession,
+  // createGroupClassSession,
 } from "../../../services/group_classes/group_classes.api";
 import { axiosClient } from "../../../assets/lib/axiosClient";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../../hooks/useAuth";
-import { CreateGroupClassSessionData } from "../../../services/group_classes/group_classes.types";
+// import { CreateGroupClassSessionData } from "../../../services/group_classes/group_classes.types";
 // import Scheduler from "react-mui-scheduler";
 // import { Box, Modal, TextField } from "@mui/material";
 // import { SchedulerEvent } from "react-mui-scheduler"; // Import event type if available
@@ -59,7 +59,7 @@ const AddGroupClass: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   // const [duration, setDuration] = useState<string>("");
-  const [open, setOpen] = useState(false);
+  const [open] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -95,6 +95,8 @@ const AddGroupClass: React.FC = () => {
     { date: string; duration: string }[]
   >([]);
 
+  const [groupClassId] = useState<number | null>(null);
+
   const handleTextChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -128,8 +130,6 @@ const AddGroupClass: React.FC = () => {
       setFormErrors((prev) => ({ ...prev, main_image: "" }));
     }
   };
-
-  const [groupClassId, setGroupClassId] = useState<number | null>(null);
 
   const validateForm = () => {
     const errors = {
@@ -254,20 +254,20 @@ const AddGroupClass: React.FC = () => {
   };
 
   const sendScheduleDetails = async (createdGroupClassId: number) => {
+    console.log(createdGroupClassId);
     if (!selectedDate) {
       setError("Please select a date for the session.");
       return;
     }
 
     try {
-      const sessionData: CreateGroupClassSessionData = {
-        group_class: createdGroupClassId,
-        date: selectedDate,
-        duration: "01:00:00",
-        topic: "Initial Session",
-      };
-
-      await createGroupClassSession(sessionData);
+      // const sessionData: CreateGroupClassSessionData = {
+      //   group_class: createdGroupClassId,
+      //   date: selectedDate,
+      //   duration: "01:00:00",
+      //   topic: "Initial Session",
+      // };
+      // await createGroupClassSession(sessionData);
     } catch (error: any) {
       console.error("Error creating session:", error);
       setError(

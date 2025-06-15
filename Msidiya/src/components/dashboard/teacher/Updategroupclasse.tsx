@@ -87,7 +87,7 @@ const Updategroupclasse: React.FC = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          "${import.meta.env.VITE_API_BASE_URL}/api/categories/"
+          `${import.meta.env.VITE_API_BASE_URL}/api/categories/`
         );
         setCategories(response.data);
       } catch (error) {

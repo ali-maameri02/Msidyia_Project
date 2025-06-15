@@ -36,7 +36,20 @@ export const useCreateGroupClass = () => {
   const queryClient = useQueryClient();
 
   return useMutation<GroupClass, Error, CreateGroupClassData>({
-    mutationFn: api.createGroupClass,
+    mutationFn: (data) => {
+      const formData = new FormData();
+
+      Object.keys(data).forEach((key) => {
+        const value = data[key as keyof CreateGroupClassData];
+        if (value instanceof File) {
+          formData.append(key, value);
+        } else {
+          formData.append(key, String(value));
+        }
+      });
+
+      return api.createGroupClass(formData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: groupClassQueryKeys.lists() });
     },
@@ -46,9 +59,26 @@ export const useCreateGroupClass = () => {
 // Create group class session
 export const useCreateGroupClassSession = () => {
   const queryClient = useQueryClient();
-
   return useMutation<GroupClass, Error, CreateGroupClassSessionData>({
-    mutationFn: api.createGroupClassSession,
+    mutationFn: (data) => {
+      const formData = new FormData();
+
+      Object.keys(data).forEach((key) => {
+        const value = data[key as keyof CreateGroupClassSessionData];
+        if (
+          value &&
+          typeof value === "object" &&
+          "name" in value &&
+          "size" in value
+        ) {
+          formData.append(key, value as Blob);
+        } else {
+          formData.append(key, String(value));
+        }
+      });
+
+      return api.createGroupClass(formData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: groupClassQueryKeys.lists() });
     },

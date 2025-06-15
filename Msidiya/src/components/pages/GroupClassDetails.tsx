@@ -64,7 +64,7 @@ const GroupClassDetails: React.FC = () => {
               {groupClass.title}
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              Tutor: {groupClass.user?.username || "Unknown"}
+              Tutor: {groupClass.tutor || "Unknown"}
             </Typography>
 
             <Divider sx={{ my: 2 }} />
@@ -131,7 +131,7 @@ const GroupClassDetails: React.FC = () => {
                 <Card key={review.id} className="p-4">
                   <div className="flex items-start gap-4">
                     <Avatar
-                      src={review.user.picture}
+                      src={review.user.Picture ?? ""}
                       alt={review.user.username}
                     />
                     <div className="flex-1">
@@ -139,39 +139,11 @@ const GroupClassDetails: React.FC = () => {
                         <Typography variant="subtitle1" className="font-bold">
                           {review.user.username}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(review.timestamp).toLocaleDateString()}
-                        </Typography>
                       </div>
                       <Rating value={review.rating} readOnly size="small" />
                       <Typography variant="body1" className="mt-2">
                         {review.comment}
                       </Typography>
-
-                      {/* Replies */}
-                      {review.replies.length > 0 && (
-                        <div className="mt-4 ml-4 space-y-2">
-                          {review.replies.map((reply) => (
-                            <div
-                              key={reply.id}
-                              className="flex items-start gap-2"
-                            >
-                              <Avatar
-                                src={reply.user.picture}
-                                alt={reply.user.username}
-                              />
-                              <div>
-                                <Typography variant="subtitle2">
-                                  {reply.user.username}
-                                </Typography>
-                                <Typography variant="body2">
-                                  {reply.comment}
-                                </Typography>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </Card>
