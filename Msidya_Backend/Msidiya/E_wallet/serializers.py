@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from decimal import Decimal, ROUND_HALF_UP
 
 from Group_Class.models import GroupClass
 
@@ -78,12 +79,12 @@ class GroupClassTransactionSerializer(serializers.ModelSerializer):
                 pass
         return "Unknown Course"
     
+
     def get_earnings(self, obj):
         """Calculate earnings (assuming some commission or fee structure)"""
-        # You can modify this logic based on your business rules
-        # For now, I'm assuming earnings = 90% of the price (10% platform fee)
-        earnings_percentage = 0.9
-        return round(obj.amount * earnings_percentage, 2)
+        earnings_percentage = Decimal('0.9')
+        earnings = obj.amount * earnings_percentage
+        return earnings.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
 class EnrollClassItemSerializer(serializers.Serializer):
