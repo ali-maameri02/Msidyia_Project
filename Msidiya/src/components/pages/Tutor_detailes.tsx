@@ -23,10 +23,11 @@ import InterpreterModeIcon from "@mui/icons-material/InterpreterMode";
 import GroupsIcon from "@mui/icons-material/Groups";
 import TodayIcon from "@mui/icons-material/Today";
 import WatchLaterIcon from "@mui/icons-material/WatchLater";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import NavBar from "../Landing/NavBar";
 import Footer from "../Landing/Footer";
+import { useAuth } from "../../hooks/useAuth";
 import {
   useGroupClassReviewsQuery,
   useCreateGroupClassReviewMutation,
@@ -104,7 +105,7 @@ const TutorDetails = () => {
   });
 
   const { tutorId } = useParams();
-  const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
 
   // Get all reviews
   const { data: reviews = [] } = useGroupClassReviewsQuery(tutorId || "");
@@ -192,6 +193,23 @@ const TutorDetails = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  let messagesRoute = "/";
+  if (currentUser) {
+    switch (currentUser.Role) {
+      case "Student":
+        messagesRoute = "/dashboardstudent/student/messages";
+        break;
+      case "Tutor":
+        messagesRoute = "/dashboard/teacher/messages";
+        break;
+      case "Ms_seller":
+        messagesRoute = "/dashboardseller/seller/messages";
+        break;
+      default:
+        messagesRoute = "/";
+    }
+  }
+
   if (!tutor) return <div>Loading...</div>;
 
   return (
@@ -225,6 +243,8 @@ const TutorDetails = () => {
                 <Button
                   variant="contained"
                   className="flex items-center w-full justify-evenly"
+                  component={Link}
+                  to={`${messagesRoute}?with_user=${tutor.user.id}`}
                 >
                   <EmailIcon />
                   <h3>Send Message</h3>
@@ -247,9 +267,8 @@ const TutorDetails = () => {
               <Button
                 variant="contained"
                 className="flex items-center font-bold p-0 col-3"
-                onClick={() =>
-                  navigate(`/Tutors/TutorDetails/${tutor.user.id}/OneToOne`)
-                }
+                component={Link}
+                to={`/Tutors/TutorDetails/${tutor.user.id}/OneToOne`}
               >
                 <InterpreterModeIcon />
                 <h3>One To One</h3>

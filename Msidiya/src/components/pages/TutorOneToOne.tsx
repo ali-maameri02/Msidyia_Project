@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import {
   Typography,
@@ -28,7 +28,6 @@ import { GroupClass } from "../../services/group_classes/group_classes.types";
 
 const TutorOneToOne = () => {
   const { tutorId } = useParams();
-  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { data: tutor, isLoading: tutorLoading } = useTutorProfileQuery(
     tutorId!
@@ -42,34 +41,22 @@ const TutorOneToOne = () => {
     Array(7).fill({ time: "05:30-06:10", status: "Unavailable" })
   );
 
-  const handleSendMessage = () => {
-    if (!currentUser) {
-      // Handle case where user is not logged in
-      navigate("/login");
-      return;
-    }
-
-    // Determine the correct messages route based on user role
-    let messagesRoute = "/dashboard/";
+  let messagesRoute = "/";
+  if (currentUser) {
     switch (currentUser.Role) {
       case "Student":
-        messagesRoute += "messages";
+        messagesRoute = "/dashboardstudent/student/messages";
         break;
       case "Tutor":
-        messagesRoute += "teacher/messages";
+        messagesRoute = "/dashboard/teacher/messages";
         break;
       case "Ms_seller":
-        messagesRoute += "seller/messages";
+        messagesRoute = "/dashboardseller/seller/messages";
         break;
       default:
-        // Handle unknown role
-        console.error("Unknown user role");
-        return;
+        messagesRoute = "/";
     }
-
-    // Navigate to messages with tutor ID
-    navigate(`${messagesRoute}?with_user=${tutor?.user?.id}`);
-  };
+  }
 
   if (tutorLoading || groupClassesLoading) return <div>Loading...</div>;
   if (!tutor) return <div>No tutor found.</div>;
@@ -110,7 +97,8 @@ const TutorOneToOne = () => {
                 <Button
                   variant="contained"
                   className="flex flex-row items-center font-bold p-0 w-full justify-evenly"
-                  onClick={handleSendMessage}
+                  component={Link}
+                  to={`${messagesRoute}?with_user=${tutor?.user?.id}`}
                 >
                   <EmailIcon />
                   <h3 className="w-52">Send Message</h3>
