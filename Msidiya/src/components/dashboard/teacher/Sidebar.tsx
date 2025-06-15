@@ -3,15 +3,14 @@ import {
   Drawer,
   IconButton,
   List,
-  ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Collapse,
-  Toolbar,
-  Divider,
-  Box,
   Typography,
+  Box,
+  Divider,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -21,290 +20,305 @@ import GroupIcon from "@mui/icons-material/Group";
 import EventIcon from "@mui/icons-material/Event";
 import ClassIcon from "@mui/icons-material/Class";
 import EditIcon from "@mui/icons-material/Edit";
-import CategoryIcon from '@mui/icons-material/Category';
+import CategoryIcon from "@mui/icons-material/Category";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentIcon from "@mui/icons-material/Payment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { ReviewsOutlined } from "@mui/icons-material";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
+import msidiyalogo from "../../../assets/msidiya.png";
+import { useAuth } from "../../../hooks/useAuth";
 
-const drawerWidthOpen = 240;
-const drawerWidthClosed = 60;
+const drawerWidth = 240;
 
 interface SidebarAppProps {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
-const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
-  const [openGroupClasses, setOpenGroupClasses] = useState(false);
-  const [openAppointments, setOpenAppointments] = useState(false);
-  const [openPayments, setOpenPayments] = useState(false);
+const SidebarApp: React.FC<SidebarAppProps> = ({
+  isSidebarOpen,
+  toggleSidebar,
+}) => {
+  const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { logout } = useAuth();
+
+  const handleToggleGroup = (groupName: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
+  };
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+    logout();
   };
 
-  const menuItems = useMemo(() => [
-    { icon: <DashboardIcon />, link: "/dashboard/teacher", label: "Dashboard" },
-    { icon: <PersonIcon />, link: "/dashboard/teacher/profile", label: "Profile" },
-  ], []);
-
-  const groupClassesItems = useMemo(() => [
-    { icon: <ClassIcon />, link: "/dashboard/teacher/group-classes", label: "My Group Classes" },
-    { icon: <CategoryIcon />, link: "/dashboard/teacher/set-categories", label: "Set Categories" },
-    { icon: <ReviewsOutlined />, link: "/dashboard/teacher/group-classes/reviews", label: "Reviews" },
-  ], []);
-
-  const paymentsItems = useMemo(() => [
-    { icon: <ReceiptLongIcon />, link: "/dashboard/teacher/group-class-transactions", label: "Group Class Transactions" },
-    { icon: <PaymentIcon />, link: "/dashboard/teacher/payment", label: "Payment" },
-    { icon: <MonetizationOnIcon />, link: "/dashboard/teacher/payout", label: "Payout" }
-  ], []);
-
-  const appointmentsItems = useMemo(() => [
-    { icon: <EventIcon />, link: "/dashboard/teacher/upcoming-appointments", label: "Upcoming Appointments" },
-    { icon: <EditIcon />, link: "/dashboard/teacher/coupons-manager", label: "Coupons Manager" }
-  ], []);
-
-  // For responsive drawer open state on mobile
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+  const listItemStyle = {
+    px: 2,
+    py: 1.2,
+    borderRadius: "8px",
+    mx: 1,
+    my: 0.5,
+    color: "#374151",
+    "&:hover": {
+      backgroundColor: "#eef2f6",
+      color: "#1e293b",
+    },
+    "&.active": {
+      backgroundColor: "#5d87ff",
+      color: "white",
+      "&:hover": {
+        backgroundColor: "#537de8",
+      },
+      "& .MuiSvgIcon-root": {
+        color: "white",
+      },
+    },
   };
 
-  // Drawer content
+  const menuItems = useMemo(
+    () => [
+      {
+        icon: <DashboardIcon />,
+        link: "/dashboard/teacher",
+        label: "Dashboard",
+      },
+      {
+        icon: <PersonIcon />,
+        link: "/dashboard/teacher/profile",
+        label: "Profile",
+      },
+    ],
+    []
+  );
+
+  const groupClassesItems = useMemo(
+    () => ({
+      label: "Group Classes",
+      icon: <GroupIcon />,
+      nested: [
+        {
+          icon: <ClassIcon />,
+          link: "/dashboard/teacher/group-classes",
+          label: "My Group Classes",
+        },
+        {
+          icon: <CategoryIcon />,
+          link: "/dashboard/teacher/set-categories",
+          label: "Set Categories",
+        },
+        {
+          icon: <ReviewsOutlined />,
+          link: "/dashboard/teacher/group-classes/reviews",
+          label: "Reviews",
+        },
+      ],
+    }),
+    []
+  );
+
+  const paymentsItems = useMemo(
+    () => ({
+      label: "Payments",
+      icon: <AttachMoneyIcon />,
+      nested: [
+        {
+          icon: <ReceiptLongIcon />,
+          link: "/dashboard/teacher/group-class-transactions",
+          label: "Group Class Transactions",
+        },
+        {
+          icon: <PaymentIcon />,
+          link: "/dashboard/teacher/payment",
+          label: "Payment",
+        },
+        {
+          icon: <MonetizationOnIcon />,
+          link: "/dashboard/teacher/payout",
+          label: "Payout",
+        },
+      ],
+    }),
+    []
+  );
+
+  const appointmentsItems = useMemo(
+    () => ({
+      label: "Appointments",
+      icon: <EventIcon />,
+      nested: [
+        {
+          icon: <EventIcon />,
+          link: "/dashboard/teacher/upcoming-appointments",
+          label: "Upcoming Appointments",
+        },
+        {
+          icon: <EditIcon />,
+          link: "/dashboard/teacher/coupons-manager",
+          label: "Coupons Manager",
+        },
+      ],
+    }),
+    []
+  );
+
   const drawerContent = (
-    <Box sx={{ height: "100%", bgcolor: "background.paper", display: "flex", flexDirection: "column" }}>
-      <Toolbar sx={{ justifyContent: isSidebarOpen ? "center" : "center", p: 2 }}>
-        {/* You can add your logo here */}
-        {isSidebarOpen && <Typography variant="h6" noWrap>Msidiya</Typography>}
-      </Toolbar>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "#fff",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 2,
+          cursor: "pointer",
+          gap: 1,
+        }}
+        onClick={() => navigate("/")}
+      >
+        <img src={msidiyalogo} alt="Msidiya Logo" style={{ height: 40 }} />
+        <Typography variant="h6" noWrap>
+          Msidiya
+        </Typography>
+      </Box>
       <Divider />
 
       <List>
-        {/* Simple menu items */}
         {menuItems.map(({ icon, label, link }) => (
-          <ListItem key={label} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              component={Link}
-              to={link}
-              sx={{
-                minHeight: 48,
-                justifyContent: isSidebarOpen ? "initial" : "center",
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: isSidebarOpen ? 3 : "auto",
-                  justifyContent: "center",
-                }}
-              >
-                {icon}
-              </ListItemIcon>
-              {isSidebarOpen && <ListItemText primary={label} />}
-            </ListItemButton>
-          </ListItem>
+          <ListItemButton
+            key={label}
+            component={NavLink}
+            to={link}
+            sx={listItemStyle}
+          >
+            {icon}
+            <ListItemText primary={label} sx={{ marginLeft: 2 }} />
+          </ListItemButton>
         ))}
 
-        {/* Group Classes with collapse */}
-        <ListItem disablePadding sx={{ display: "block" }}>
-          <ListItemButton
-            onClick={() => setOpenGroupClasses(!openGroupClasses)}
-            sx={{
-              minHeight: 48,
-              justifyContent: isSidebarOpen ? "initial" : "center",
-              px: 2.5,
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                minWidth: 0,
-                mr: isSidebarOpen ? 3 : "auto",
-                justifyContent: "center",
-              }}
-            >
-              <GroupIcon />
-            </ListItemIcon>
-            {isSidebarOpen && <ListItemText primary="Group Classes" />}
-            {isSidebarOpen && (openGroupClasses ? <ExpandLess /> : <ExpandMore />)}
-          </ListItemButton>
-          <Collapse in={openGroupClasses} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {groupClassesItems.map(({ icon, label, link }) => (
-                <ListItemButton
-                  key={label}
-                  sx={{ pl: isSidebarOpen ? 4 : 2 }}
-                  component={Link}
-                  to={link}
-                >
-                  <ListItemIcon>{icon}</ListItemIcon>
-                  {isSidebarOpen && <ListItemText primary={label} />}
-                </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-        </ListItem>
-
-        {/* Appointments with collapse */}
-        <ListItem disablePadding sx={{ display: "block" }}>
-          <ListItemButton
-            onClick={() => setOpenAppointments(!openAppointments)}
-            sx={{
-              minHeight: 48,
-              justifyContent: isSidebarOpen ? "initial" : "center",
-              px: 2.5,
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                minWidth: 0,
-                mr: isSidebarOpen ? 3 : "auto",
-                justifyContent: "center",
-              }}
-            >
-              <EventIcon />
-            </ListItemIcon>
-            {isSidebarOpen && <ListItemText primary="Appointments" />}
-            {isSidebarOpen && (openAppointments ? <ExpandLess /> : <ExpandMore />)}
-          </ListItemButton>
-          <Collapse in={openAppointments} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {appointmentsItems.map(({ icon, label, link }) => (
-                <ListItemButton
-                  key={label}
-                  sx={{ pl: isSidebarOpen ? 4 : 2 }}
-                  component={Link}
-                  to={link}
-                >
-                  <ListItemIcon>{icon}</ListItemIcon>
-                  {isSidebarOpen && <ListItemText primary={label} />}
-                </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-        </ListItem>
-
-        {/* Payments with collapse */}
-        <ListItem disablePadding sx={{ display: "block" }}>
-          <ListItemButton
-            onClick={() => setOpenPayments(!openPayments)}
-            sx={{
-              minHeight: 48,
-              justifyContent: isSidebarOpen ? "initial" : "center",
-              px: 2.5,
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                minWidth: 0,
-                mr: isSidebarOpen ? 3 : "auto",
-                justifyContent: "center",
-              }}
-            >
-              <AttachMoneyIcon />
-            </ListItemIcon>
-            {isSidebarOpen && <ListItemText primary="Payments" />}
-            {isSidebarOpen && (openPayments ? <ExpandLess /> : <ExpandMore />)}
-          </ListItemButton>
-          <Collapse in={openPayments} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {paymentsItems.map(({ icon, label, link }) => (
-                <ListItemButton
-                  key={label}
-                  sx={{ pl: isSidebarOpen ? 4 : 2 }}
-                  component={Link}
-                  to={link}
-                >
-                  <ListItemIcon>{icon}</ListItemIcon>
-                  {isSidebarOpen && <ListItemText primary={label} />}
-                </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-        </ListItem>
+        {/* Collapsible items */}
+        {[groupClassesItems, appointmentsItems, paymentsItems].map(
+          (item, index) => (
+            <React.Fragment key={index}>
+              <ListItemButton
+                onClick={() => handleToggleGroup(item.label)}
+                sx={listItemStyle}
+              >
+                {item.icon}
+                <ListItemText primary={item.label} sx={{ marginLeft: 2 }} />
+              </ListItemButton>
+              <Collapse
+                in={!!openGroups[item.label]}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {item.nested.map((nestedItem) => (
+                    <ListItemButton
+                      key={nestedItem.label}
+                      sx={{ ...listItemStyle, pl: 4 }}
+                      component={NavLink}
+                      to={nestedItem.link}
+                    >
+                      {nestedItem.icon}
+                      <ListItemText
+                        primary={nestedItem.label}
+                        sx={{ marginLeft: 2 }}
+                      />
+                    </ListItemButton>
+                  ))}
+                </List>
+              </Collapse>
+            </React.Fragment>
+          )
+        )}
       </List>
 
       <Box sx={{ flexGrow: 1 }} />
       <Divider />
       {/* Logout button */}
-      <List>
-        <ListItem disablePadding sx={{ display: "block" }}>
-          <ListItemButton
-            onClick={handleLogout}
+      <Box sx={{ p: 2 }}>
+        <ListItemButton
+          onClick={handleLogout}
+          sx={{
+            borderRadius: 1,
+            color: "#c62828",
+            "&:hover": {
+              backgroundColor: "#ffebee",
+            },
+            "& .MuiSvgIcon-root": {
+              color: "#c62828",
+            },
+          }}
+        >
+          <LogoutOutlinedIcon />
+          <ListItemText
+            primary="Logout"
             sx={{
-              minHeight: 48,
-              justifyContent: isSidebarOpen ? "initial" : "center",
-              px: 2.5,
+              marginLeft: 2,
+              "& .MuiTypography-root": { fontWeight: "bold" },
             }}
-          >
-            <ListItemIcon
-              sx={{
-                minWidth: 0,
-                mr: isSidebarOpen ? 3 : "auto",
-                justifyContent: "center",
-              }}
-            >
-              <LogoutOutlinedIcon />
-            </ListItemIcon>
-            {isSidebarOpen && <ListItemText primary="Logout" />}
-          </ListItemButton>
-        </ListItem>
-      </List>
+          />
+        </ListItemButton>
+      </Box>
     </Box>
   );
 
   return (
     <>
-      {/* Toggle button */}
       <IconButton
-        onClick={toggleSidebar}
-        sx={{ position: "fixed", top: 10, left: 10, zIndex: 1301 }}
-        size="large"
+        edge="start"
         color="inherit"
+        aria-label="menu"
+        onClick={toggleSidebar}
+        sx={{
+          display: { xs: "block", md: "none" },
+          position: "fixed",
+          top: 6,
+          left: 16,
+          zIndex: 1300,
+        }}
       >
         <MenuIcon />
       </IconButton>
 
-      {/* Permanent drawer for desktop */}
       <Drawer
-        variant="permanent"
+        variant={isMobile ? "temporary" : "persistent"}
         open={isSidebarOpen}
-        sx={{
-          width: isSidebarOpen ? drawerWidthOpen : drawerWidthClosed,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: isSidebarOpen ? drawerWidthOpen : drawerWidthClosed,
-            boxSizing: "border-box",
-            overflowX: "hidden",
-            transition: (theme) =>
-              theme.transitions.create("width", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-          },
-          display: { xs: "none", sm: "block" },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
-
-      {/* Temporary drawer for mobile */}
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
+        onClose={toggleSidebar}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
         }}
         sx={{
-          display: { xs: "block", sm: "none" },
-          "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidthOpen },
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            top: isMobile ? 0 : 50,
+            height: isMobile ? "100vh" : "90vh",
+            borderRight: "1px solid #e0e0e0",
+            backgroundColor: "#fff",
+            scrollbarWidth: "thin",
+            scrollbarColor: "#888 #f0f0f0",
+            "&::-webkit-scrollbar": { width: "6px" },
+            "&::-webkit-scrollbar-track": { background: "#f0f0f0" },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#888",
+              borderRadius: "6px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": { background: "#555" },
+          },
         }}
       >
         {drawerContent}
@@ -314,7 +328,3 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
 };
 
 export default SidebarApp;
-
-// Don't forget to import ExpandLess, ExpandMore from @mui/icons-material for the collapse toggles
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";

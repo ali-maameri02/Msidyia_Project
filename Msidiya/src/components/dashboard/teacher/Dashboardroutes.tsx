@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import SidebarApp from "./Sidebar";
 import Navbar from "./NavBar";
@@ -15,8 +15,16 @@ import GroupClassesTransaction from "./GroupClassesTransaction";
 import Messages from "./Messages";
 import Notification from "./Notification";
 import GroupClassReviews from "./GroupClassReviews";
+import { useMediaQuery, useTheme } from "@mui/material";
+
 const DashboardRoutes: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
+
+  useEffect(() => {
+    setIsSidebarOpen(isDesktop);
+  }, [isDesktop]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -24,11 +32,41 @@ const DashboardRoutes: React.FC = () => {
 
   // Move mock data here
   const mockTransactions = [
-    { userName: "Minh Student", courseName: "test course", price: "$30", earnings: "$27", createdOn: "Feb 28, 2024" },
-    { userName: "studentharry", courseName: "Reading 101", price: "$100", earnings: "$90", createdOn: "Jan 9, 2024" },
-    { userName: "Priya", courseName: "The Ultimate Guide To Understanding Algebra", price: "$40", earnings: "$36", createdOn: "Aug 30, 2023" },
-    { userName: "Priya", courseName: "Reading 101", price: "$100", earnings: "$90", createdOn: "Aug 25, 2023" },
-    { userName: "Priya", courseName: "New Course Test", price: "$21", earnings: "$18.9", createdOn: "Mar 1, 2023" },
+    {
+      userName: "Minh Student",
+      courseName: "test course",
+      price: "$30",
+      earnings: "$27",
+      createdOn: "Feb 28, 2024",
+    },
+    {
+      userName: "studentharry",
+      courseName: "Reading 101",
+      price: "$100",
+      earnings: "$90",
+      createdOn: "Jan 9, 2024",
+    },
+    {
+      userName: "Priya",
+      courseName: "The Ultimate Guide To Understanding Algebra",
+      price: "$40",
+      earnings: "$36",
+      createdOn: "Aug 30, 2023",
+    },
+    {
+      userName: "Priya",
+      courseName: "Reading 101",
+      price: "$100",
+      earnings: "$90",
+      createdOn: "Aug 25, 2023",
+    },
+    {
+      userName: "Priya",
+      courseName: "New Course Test",
+      price: "$21",
+      earnings: "$18.9",
+      createdOn: "Mar 1, 2023",
+    },
   ];
 
   return (
@@ -44,18 +82,38 @@ const DashboardRoutes: React.FC = () => {
           <Routes>
             <Route path="teacher" element={<Teacher />} />
             <Route path="teacher/group-classes" element={<Groupclasses />} />
-            <Route path="teacher/group-classes/reviews" element={<GroupClassReviews />} />
-            <Route path="teacher/group-classes/add" element={<AddGroupClass />} />
-            <Route path="teacher/group-classes/update/:id" element={<Updategroupclasse />} />
+            <Route
+              path="teacher/group-classes/reviews"
+              element={<GroupClassReviews />}
+            />
+            <Route
+              path="teacher/group-classes/add"
+              element={<AddGroupClass />}
+            />
+            <Route
+              path="teacher/group-classes/update/:id"
+              element={<Updategroupclasse />}
+            />
             <Route path="teacher/set-categories" element={<Setcategories />} />
             <Route path="teacher/profile" element={<UserProfile />} />
-            <Route path="teacher/payout" element={<PayoutComponent />} /> {/* teacher payoutA*/}
-            <Route path="teacher/messages" element={<Messages />} /> 
+            <Route path="teacher/payout" element={<PayoutComponent />} />{" "}
+            {/* teacher payoutA*/}
+            <Route path="teacher/messages" element={<Messages />} />
             <Route path="teacher/notifications" element={<Notification />} />
             {/* Pass transactions as a prop here */}
-            <Route path="teacher/course-transactions" element={<Transactions transactions={mockTransactions} />} />
-            <Route path="teacher/upcoming-appointments" element={<UpcomingAppointments />} />
-            <Route path="teacher/group-class-transactions" element={<GroupClassesTransaction />} /> {/*  group class trans*/}
+            <Route
+              path="teacher/course-transactions"
+              element={<Transactions transactions={mockTransactions} />}
+            />
+            <Route
+              path="teacher/upcoming-appointments"
+              element={<UpcomingAppointments />}
+            />
+            <Route
+              path="teacher/group-class-transactions"
+              element={<GroupClassesTransaction />}
+            />{" "}
+            {/*  group class trans*/}
           </Routes>
         </main>
       </div>

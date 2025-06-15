@@ -9,6 +9,8 @@ import {
   Typography,
   Box,
   Divider,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -22,8 +24,9 @@ import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { Payment } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import msidiyalogo from "../../../assets/msidiya.png";
+import { useAuth } from "../../../hooks/useAuth";
 
 interface SidebarItem {
   icon: JSX.Element;
@@ -39,20 +42,37 @@ interface SidebarAppProps {
 
 const drawerWidth = 240;
 
-const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
+const SidebarApp: React.FC<SidebarAppProps> = ({
+  isSidebarOpen,
+  toggleSidebar,
+}) => {
   const navigate = useNavigate();
   const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("xl"));
+  const { logout } = useAuth();
 
   // Shared style for list items
   const listItemStyle = {
     px: 2,
-    py: 1.5,
-    borderRadius: 1,
+    py: 1.2,
+    borderRadius: "8px",
+    mx: 1,
     my: 0.5,
     color: "#374151",
     "&:hover": {
-      backgroundColor: "#5d87ff20",
-      color: "#635BFF",
+      backgroundColor: "#eef2f6",
+      color: "#1e293b",
+    },
+    "&.active": {
+      backgroundColor: "#5d87ff",
+      color: "white",
+      "&:hover": {
+        backgroundColor: "#537de8",
+      },
+      "& .MuiSvgIcon-root": {
+        color: "white",
+      },
     },
   };
 
@@ -64,15 +84,22 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+    logout();
   };
 
   // Menu Items
   const menuItems = useMemo<SidebarItem[]>(
     () => [
-      { icon: <DashboardIcon />, label: "Dashboard", link: "/dashboardstudent/student" },
-      { icon: <PersonIcon />, label: "Profile", link: "/dashboardstudent/student/profile" },
+      {
+        icon: <DashboardIcon />,
+        label: "Dashboard",
+        link: "/dashboardstudent/student",
+      },
+      {
+        icon: <PersonIcon />,
+        label: "Profile",
+        link: "/dashboardstudent/student/profile",
+      },
     ],
     []
   );
@@ -83,9 +110,21 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
         icon: <EventIcon />,
         label: "Appointments",
         nested: [
-          { icon: <EventIcon />, label: "Upcoming Appointments", link: "/dashboardstudent/student/Upcoming-Appointments" },
-          { icon: <GroupIcon />, label: "Favorite Tutors", link: "/dashboardstudent/student/Favorite-tutor" },
-          { icon: <ClassIcon />, label: "Favorite Group Class", link: "/dashboardstudent/student/Favorite-Groupe-Class" },
+          {
+            icon: <EventIcon />,
+            label: "Upcoming Appointments",
+            link: "/dashboardstudent/student/Upcoming-Appointments",
+          },
+          {
+            icon: <GroupIcon />,
+            label: "Favorite Tutors",
+            link: "/dashboardstudent/student/Favorite-tutor",
+          },
+          {
+            icon: <ClassIcon />,
+            label: "Favorite Group Class",
+            link: "/dashboardstudent/student/Favorite-Groupe-Class",
+          },
         ],
       },
     ],
@@ -98,9 +137,21 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
         icon: <Payment />,
         label: "Payment",
         nested: [
-          { icon: <ReceiptLongIcon />, label: "My Courses", link: "/dashboardstudent/student/My-Courses" },
-          { icon: <EventIcon />, label: "My Transaction", link: "/dashboardstudent/student/My-Transaction" },
-          { icon: <ShoppingCartIcon />, label: "Shopping Cart", link: "/dashboardstudent/student/Shopping-Cart" },
+          {
+            icon: <ReceiptLongIcon />,
+            label: "My Courses",
+            link: "/dashboardstudent/student/My-Courses",
+          },
+          {
+            icon: <EventIcon />,
+            label: "My Transaction",
+            link: "/dashboardstudent/student/My-Transaction",
+          },
+          {
+            icon: <ShoppingCartIcon />,
+            label: "Shopping Cart",
+            link: "/dashboardstudent/student/Shopping-Cart",
+          },
         ],
       },
     ],
@@ -109,8 +160,16 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
 
   const notificationsItems = useMemo<SidebarItem[]>(
     () => [
-      { icon: <NotificationsActiveIcon />, label: "Notification", link: "/dashboardstudent/student/Notification" },
-      { icon: <TelegramIcon />, label: "Messages", link: "/dashboardstudent/student/Messages" },
+      {
+        icon: <NotificationsActiveIcon />,
+        label: "Notification",
+        link: "/dashboardstudent/student/Notification",
+      },
+      {
+        icon: <TelegramIcon />,
+        label: "Messages",
+        link: "/dashboardstudent/student/Messages",
+      },
     ],
     []
   );
@@ -136,17 +195,22 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
 
       {/* Drawer */}
       <Drawer
-        variant="persistent"
+        variant={isMobile ? "temporary" : "persistent"}
         open={isSidebarOpen}
+        onClose={toggleSidebar}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
         sx={{
           width: drawerWidth,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
-            top: 50,
-            height: "90vh",
+            top: isMobile ? 0 : 50,
+            height: isMobile ? "100vh" : "90vh",
             backgroundColor: "#fff",
+            borderRight: "1px solid #e0e0e0",
             scrollbarWidth: "thin",
             scrollbarColor: "#888 #f0f0f0",
             "&::-webkit-scrollbar": { width: "6px" },
@@ -157,7 +221,6 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
             },
             "&::-webkit-scrollbar-thumb:hover": { background: "#555" },
           },
-          display: { xs: "none", md: "block" },
         }}
       >
         {/* Logo */}
@@ -184,7 +247,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
           {menuItems.map((item) => (
             <ListItemButton
               key={item.link}
-              component={Link}
+              component={NavLink}
               to={item.link!}
               sx={listItemStyle}
             >
@@ -215,12 +278,15 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
                     {item.nested.map((nestedItem, nestedIndex) => (
                       <ListItemButton
                         key={nestedIndex}
-                        component={Link}
+                        component={NavLink}
                         to={nestedItem.link}
                         sx={{ ...listItemStyle, pl: 4 }}
                       >
                         {nestedItem.icon}
-                        <ListItemText primary={nestedItem.label} sx={{ marginLeft: 2 }} />
+                        <ListItemText
+                          primary={nestedItem.label}
+                          sx={{ marginLeft: 2 }}
+                        />
                       </ListItemButton>
                     ))}
                   </List>
@@ -257,12 +323,15 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
                     {item.nested.map((nestedItem, nestedIndex) => (
                       <ListItemButton
                         key={nestedIndex}
-                        component={Link}
+                        component={NavLink}
                         to={nestedItem.link}
                         sx={{ ...listItemStyle, pl: 4 }}
                       >
                         {nestedItem.icon}
-                        <ListItemText primary={nestedItem.label} sx={{ marginLeft: 2 }} />
+                        <ListItemText
+                          primary={nestedItem.label}
+                          sx={{ marginLeft: 2 }}
+                        />
                       </ListItemButton>
                     ))}
                   </List>
@@ -277,7 +346,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
           {notificationsItems.map((item, index) => (
             <ListItemButton
               key={index}
-              component={Link}
+              component={NavLink}
               to={item.link!}
               sx={listItemStyle}
             >
@@ -291,26 +360,29 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
         <Box sx={{ flexGrow: 1 }} />
 
         {/* Logout */}
-        <Box
-          sx={{
-            px: 2,
-            py: 1.5,
-            m: 2,
-            borderRadius: 1,
-            bgcolor: "#eee",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            cursor: "pointer",
-            "&:hover": {
-              bgcolor: "red",
-              color: "white",
-            },
-          }}
-          onClick={handleLogout}
-        >
-          <Typography>Logout</Typography>
-          <LogoutOutlinedIcon />
+        <Box sx={{ p: 2 }}>
+          <ListItemButton
+            onClick={handleLogout}
+            sx={{
+              borderRadius: 1,
+              color: "#c62828",
+              "&:hover": {
+                backgroundColor: "#ffebee",
+              },
+              "& .MuiSvgIcon-root": {
+                color: "#c62828",
+              },
+            }}
+          >
+            <LogoutOutlinedIcon />
+            <ListItemText
+              primary="Logout"
+              sx={{
+                marginLeft: 2,
+                "& .MuiTypography-root": { fontWeight: "bold" },
+              }}
+            />
+          </ListItemButton>
         </Box>
       </Drawer>
     </>

@@ -3,11 +3,13 @@ import {
   IconButton,
   List,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Divider,
   Box,
   Typography,
+  Drawer,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -16,19 +18,50 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import msidiyalogo from "../../../assets/msidiya.png";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
+
+const drawerWidth = 240;
 
 interface SidebarAppProps {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
-const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar }) => {
+const SidebarApp: React.FC<SidebarAppProps> = ({
+  isSidebarOpen,
+  toggleSidebar,
+}) => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+    logout();
+  };
+
+  const listItemStyle = {
+    px: 2,
+    py: 1.2,
+    borderRadius: "8px",
+    mx: 1,
+    my: 0.5,
+    color: "#374151",
+    "&:hover": {
+      backgroundColor: "#eef2f6",
+      color: "#1e293b",
+    },
+    "&.active": {
+      backgroundColor: "#5d87ff",
+      color: "white",
+      "&:hover": {
+        backgroundColor: "#537de8",
+      },
+      "& .MuiSvgIcon-root": {
+        color: "white",
+      },
+    },
   };
 
   const menuItems = useMemo(
@@ -59,131 +92,110 @@ const SidebarApp: React.FC<SidebarAppProps> = ({ isSidebarOpen, toggleSidebar })
 
   return (
     <>
-      {/* Toggle button for smaller screens */}
       <IconButton
         edge="start"
         color="inherit"
         aria-label="menu"
         onClick={toggleSidebar}
         sx={{
-          display: { xs: "block", md: "block" },
+          display: { xs: "block", md: "none" },
           position: "fixed",
           top: 6,
           left: 16,
-          zIndex: 1301, // above the sidebar
+          zIndex: 1300,
         }}
       >
         <MenuIcon />
       </IconButton>
 
-      {/* Sidebar container */}
-      <Box
-        component="nav"
+      <Drawer
+        variant={isMobile ? "temporary" : "persistent"}
+        open={isSidebarOpen}
+        onClose={toggleSidebar}
+        ModalProps={{
+          keepMounted: true,
+        }}
         sx={{
-          position: "fixed",
-          top: 50,
-          left: 0,
-          height: "100vh",
-          width: isSidebarOpen ? 272 : 64, // 17rem = 272px, 4rem = 64px
-          bgcolor: "background.paper",
-          boxShadow: 1,
-          overflowY: "auto",
-          transition: "width 0.3s ease",
-          zIndex: 1200,
-          display: { xs: "none", md: "block" }, // Hide on small screens
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            top: isMobile ? 0 : 50,
+            height: isMobile ? "100vh" : "90vh",
+            borderRight: "1px solid #e0e0e0",
+            backgroundColor: "#fff",
+            scrollbarWidth: "thin",
+            scrollbarColor: "#888 #f0f0f0",
+            "&::-webkit-scrollbar": { width: "6px" },
+            "&::-webkit-scrollbar-track": { background: "#f0f0f0" },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#888",
+              borderRadius: "6px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": { background: "#555" },
+          },
         }}
       >
-        {/* Logo Section */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            height: 64,
-            px: 2,
-            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+            p: 2,
             cursor: "pointer",
+            gap: 1,
           }}
           onClick={() => navigate("/")}
         >
-          <Box
-            component="img"
-            src={msidiyalogo}
-            alt="Msidiya Logo"
-            sx={{
-              height: 40,
-              width: 40,
-              mr: isSidebarOpen ? 1.5 : 0,
-              transition: "margin 0.3s ease",
-            }}
-          />
-          {isSidebarOpen && (
-            <Typography variant="h6" noWrap>
-              Msidiya
-            </Typography>
-          )}
+          <img src={msidiyalogo} alt="Msidiya Logo" style={{ height: 40 }} />
+          <Typography variant="h6" noWrap>
+            Msidiya
+          </Typography>
         </Box>
 
-        {/* Menu Items */}
-        <List disablePadding>
+        <Divider />
+
+        <List>
           {menuItems.map(({ icon, link, label }) => (
             <ListItemButton
               key={link}
-              component={Link}
+              component={NavLink}
               to={link}
-              sx={{
-                px: 2,
-                justifyContent: isSidebarOpen ? "initial" : "center",
-                "&:hover": {
-                  bgcolor: "#5d87ff20",
-                  color: "#635BFF",
-                },
-              }}
+              sx={listItemStyle}
             >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: isSidebarOpen ? 2 : "auto",
-                  justifyContent: "center",
-                  color: "inherit",
-                }}
-              >
-                {icon}
-              </ListItemIcon>
-              {isSidebarOpen && <ListItemText primary={label} />}
+              {icon}
+              <ListItemText primary={label} sx={{ marginLeft: 2 }} />
             </ListItemButton>
           ))}
         </List>
 
-        <Divider sx={{ my: 1 }} />
+        <Box sx={{ flexGrow: 1 }} />
 
-        {/* Logout Button */}
-        <List disablePadding sx={{ mt: "auto" }}>
+        <Box sx={{ p: 2 }}>
           <ListItemButton
             onClick={handleLogout}
             sx={{
-              px: 2,
-              justifyContent: isSidebarOpen ? "initial" : "center",
-              color: "error.main",
+              borderRadius: 1,
+              color: "#c62828",
               "&:hover": {
-                bgcolor: "error.main",
-                color: "white",
+                backgroundColor: "#ffebee",
+              },
+              "& .MuiSvgIcon-root": {
+                color: "#c62828",
               },
             }}
           >
-            <ListItemIcon
+            <LogoutOutlinedIcon />
+            <ListItemText
+              primary="Logout"
               sx={{
-                minWidth: 0,
-                mr: isSidebarOpen ? 2 : "auto",
-                justifyContent: "center",
-                color: "inherit",
+                marginLeft: 2,
+                "& .MuiTypography-root": { fontWeight: "bold" },
               }}
-            >
-              <LogoutOutlinedIcon />
-            </ListItemIcon>
-            {isSidebarOpen && <ListItemText primary="Logout" />}
+            />
           </ListItemButton>
-        </List>
-      </Box>
+        </Box>
+      </Drawer>
     </>
   );
 };
