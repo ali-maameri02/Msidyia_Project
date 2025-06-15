@@ -403,3 +403,5 @@ def group_class_transactions_stats(request):
             'total_earnings': float(total_earnings),
             'monthly_breakdown': list(monthly_stats)
             }},status=status.HTTP_200_OK)
+
+

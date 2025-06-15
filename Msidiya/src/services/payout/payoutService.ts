@@ -1,6 +1,10 @@
-import axios from "axios";
+import { axiosClient } from "../../assets/lib/axiosClient";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000/api";
+export interface TutorEarnings {
+  total_transactions: number;
+  total_revenue: string;
+  total_earnings: string;
+}
 
 export interface PayoutData {
   date: string;
@@ -8,6 +12,7 @@ export interface PayoutData {
   commission: number;
   balance: number;
   status: "Pending" | "Approved" | "Rejected";
+  tutorEarnings: number;
 }
 
 export interface PayoutStats {
@@ -17,15 +22,21 @@ export interface PayoutStats {
 }
 
 export const payoutService = {
+  // Get tutor earnings
+  getTutorEarnings: async (): Promise<TutorEarnings> => {
+    const response = await axiosClient.get(`/api/tutor/earnings/`);
+    return response.data;
+  },
+
   // Get payout statistics
   getPayoutStats: async (): Promise<PayoutStats> => {
-    const response = await axios.get(`${API_URL}/payouts/stats`);
+    const response = await axiosClient.get(`/api/payouts/stats`);
     return response.data;
   },
 
   // Get payout history
   getPayoutHistory: async (): Promise<PayoutData[]> => {
-    const response = await axios.get(`${API_URL}/payouts/history`);
+    const response = await axiosClient.get(`/api/payouts/history`);
     return response.data;
   },
 
@@ -33,7 +44,7 @@ export const payoutService = {
   requestPayout: async (
     amount: number
   ): Promise<{ success: boolean; message: string }> => {
-    const response = await axios.post(`${API_URL}/payouts/request`, { amount });
+    const response = await axiosClient.post(`/api/payouts/request`, { amount });
     return response.data;
   },
 
@@ -43,8 +54,8 @@ export const payoutService = {
     bankName: string;
     routingNumber: string;
   }): Promise<{ success: boolean; message: string }> => {
-    const response = await axios.post(
-      `${API_URL}/payouts/bank-account`,
+    const response = await axiosClient.post(
+      `/payouts/bank-account`,
       bankDetails
     );
     return response.data;
@@ -55,7 +66,7 @@ export const payoutService = {
     startDate: string,
     endDate: string
   ): Promise<PayoutStats> => {
-    const response = await axios.get(`${API_URL}/payouts/stats/range`, {
+    const response = await axiosClient.get(`/api/payouts/stats/range`, {
       params: { startDate, endDate },
     });
     return response.data;

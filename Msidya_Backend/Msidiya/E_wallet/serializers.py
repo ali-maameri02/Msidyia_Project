@@ -120,3 +120,5 @@ class EnrollClassListSerializer(serializers.Serializer):
         if len(class_ids) != len(set(class_ids)):
             raise serializers.ValidationError("Duplicate class IDs found in the enrollment request.")
         return value
+
+

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { Pie } from "react-chartjs-2";
 import {
-  usePayoutStats,
+  useTutorEarnings,
   usePayoutHistory,
   useRequestPayout,
   useAddBankAccount,
@@ -28,7 +28,7 @@ const PayoutComponent: React.FC = () => {
   const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
   console.log(dateRange);
 
-  const { data: payoutStats, isLoading: statsLoading } = usePayoutStats();
+  const { data: tutorEarnings, isLoading: statsLoading } = useTutorEarnings();
   const { data: payoutHistory, isLoading: historyLoading } = usePayoutHistory();
   const requestPayout = useRequestPayout();
   const addBankAccount = useAddBankAccount();
@@ -38,16 +38,16 @@ const PayoutComponent: React.FC = () => {
     setActiveTab(newValue);
   };
 
+  const totalRevenue = parseFloat(tutorEarnings?.total_revenue || "0");
+  const tutorBalance = parseFloat(tutorEarnings?.total_earnings || "0");
+  const commission = totalRevenue - tutorBalance;
+
   // Prepare pie chart data
   const pieData = {
     labels: ["Commission", "Balance", "Total"],
     datasets: [
       {
-        data: [
-          payoutStats?.commission || 0,
-          payoutStats?.tutorEarnings || 0,
-          payoutStats?.totalEarnings || 0,
-        ],
+        data: [commission, tutorBalance, totalRevenue],
         backgroundColor: ["#27D4EE", "#49C7B4", "#635BFF"],
         hoverBackgroundColor: ["#27D4EE", "#49C7B4", "#635BFF"],
       },
@@ -55,7 +55,7 @@ const PayoutComponent: React.FC = () => {
   };
 
   const handleRequestPayout = () => {
-    requestPayout.mutate(payoutStats?.tutorEarnings || 0);
+    requestPayout.mutate(tutorBalance || 0);
   };
 
   const handleAddBankAccount = () => {
@@ -99,17 +99,11 @@ const PayoutComponent: React.FC = () => {
               <Grid item xs={12} md={4}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="h6">Total Earnings</Typography>
-                  <Typography variant="body1">
-                    ${payoutStats?.totalEarnings || 0}
-                  </Typography>
+                  <Typography variant="body1">${totalRevenue || 0}</Typography>
                   <Typography variant="h6">Commission to the site</Typography>
-                  <Typography variant="body1">
-                    ${payoutStats?.commission || 0}
-                  </Typography>
+                  <Typography variant="body1">${commission || 0}</Typography>
                   <Typography variant="h6">Tutor Earnings</Typography>
-                  <Typography variant="body1">
-                    ${payoutStats?.tutorEarnings || 0}
-                  </Typography>
+                  <Typography variant="body1">${tutorBalance || 0}</Typography>
                 </Paper>
               </Grid>
             </Grid>

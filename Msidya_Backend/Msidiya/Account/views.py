@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from django.utils import timezone
 import json
 from Group_Class.models import GroupClass, StudentAppointment
@@ -402,3 +403,25 @@ def tutor_dashboard_stats(request):
             "growth": round(growth_earnings, 2),
         },
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tutor_earnings(request):
+    tutor = request.user
+    # only “enroll” transactions where the tutor is receiver
+    qs = Transaction.objects.filter(receiver=tutor, type='enroll')
+
+    total_transactions = qs.count()
+    agg = qs.aggregate(sum_amount=Sum('amount'))
+    total_revenue = agg['sum_amount'] or Decimal('0.00')
+
+    # e.g. 10% platform fee
+    total_earnings = (total_revenue * Decimal('0.9')).quantize(Decimal('0.01'))
+
+    serializer = TutorEarningsSerializer({
+        'total_transactions': total_transactions,
+        'total_revenue':      total_revenue,
+        'total_earnings':     total_earnings,
+    })
+    return Response(serializer.data)

@@ -27,6 +27,8 @@ urlpatterns = [
         name='tutor-dashboard-stats'
     ),
 
+    path('tutor/earnings/', tutor_earnings, name='tutor-earnings'),
+
 
     path('tutor/<int:pk>/',TutorDetails.as_view(),name='tutor'),
     path('tutor/<int:tutor_id>/group-classes/', TutorGroupClassView.as_view(), name='tutor-group-classes'),

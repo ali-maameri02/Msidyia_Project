@@ -220,3 +220,8 @@ class TutorslistSerializer(serializers.ModelSerializer):
 
 
 
+
+class TutorEarningsSerializer(serializers.Serializer):
+    total_transactions = serializers.IntegerField()
+    total_revenue      = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_earnings     = serializers.DecimalField(max_digits=12, decimal_places=2)

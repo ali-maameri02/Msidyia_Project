@@ -1,5 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { payoutService, PayoutData, PayoutStats } from "./payoutService";
+import {
+  payoutService,
+  PayoutData,
+  PayoutStats,
+  TutorEarnings,
+} from "./payoutService";
+
+export const useTutorEarnings = () => {
+  return useQuery<TutorEarnings>({
+    queryKey: ["tutorEarnings"],
+    queryFn: payoutService.getTutorEarnings,
+  });
+};
 
 export const usePayoutStats = () => {
   return useQuery<PayoutStats>({
