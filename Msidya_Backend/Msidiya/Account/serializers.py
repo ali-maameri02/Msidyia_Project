@@ -225,3 +225,8 @@ class TutorEarningsSerializer(serializers.Serializer):
     total_transactions = serializers.IntegerField()
     total_revenue      = serializers.DecimalField(max_digits=12, decimal_places=2)
     total_earnings     = serializers.DecimalField(max_digits=12, decimal_places=2)
+
+class TransactionTypeGroupSerializer(serializers.Serializer):
+    type         = serializers.CharField()
+    count        = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=12, decimal_places=2)

@@ -13,6 +13,13 @@ export const useTutorEarnings = () => {
   });
 };
 
+export const useSellerEarnings = () => {
+  return useQuery({
+    queryKey: ["sellerEarnings"],
+    queryFn: payoutService.getSellerEarnings,
+  });
+};
+
 export const usePayoutStats = () => {
   return useQuery<PayoutStats>({
     queryKey: ["payoutStats"],

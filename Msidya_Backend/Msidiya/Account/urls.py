@@ -28,6 +28,7 @@ urlpatterns = [
     ),
 
     path('tutor/earnings/', tutor_earnings, name='tutor-earnings'),
+    path('seller/earnings/', seller_transactions_grouped_by_type, name='seller-earnings'),
 
 
     path('tutor/<int:pk>/',TutorDetails.as_view(),name='tutor'),

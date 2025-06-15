@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -13,39 +13,68 @@ import {
   TableRow,
   Paper,
   Grid,
-} from '@mui/material';
-import { Pie } from 'react-chartjs-2';
+  CircularProgress,
+} from "@mui/material";
+import { Pie } from "react-chartjs-2";
+import { useSellerEarnings } from "../../../services/payout/payoutQueries";
 
 const PayoutComponent: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const { data: sellerEarnings, isLoading } = useSellerEarnings();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event)
+    console.log(event);
     setActiveTab(newValue);
   };
 
+  const enrollData = sellerEarnings?.data.find(
+    (item) => item.type === "enroll"
+  );
+  const receiveData = sellerEarnings?.data.find(
+    (item) => item.type === "receive"
+  );
+  const sendData = sellerEarnings?.data.find((item) => item.type === "send");
+
   // Sample data for the pie chart
   const pieData = {
-    labels: ['Commission', 'Balance', 'Total'],
+    labels: ["Enroll", "Receive", "Send"],
     datasets: [
       {
-        data: [20, 50, 30],
-        backgroundColor: ['#27D4EE', '#49C7B4', '#635BFF'],
-        hoverBackgroundColor: ['#27D4EE', '#49C7B4', '#635BFF'],
+        data: [
+          parseFloat(enrollData?.total_amount || "0"),
+          parseFloat(receiveData?.total_amount || "0"),
+          parseFloat(sendData?.total_amount || "0"),
+        ],
+        backgroundColor: ["#27D4EE", "#49C7B4", "#635BFF"],
+        hoverBackgroundColor: ["#27D4EE", "#49C7B4", "#635BFF"],
       },
     ],
   };
 
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
   // Sample data for the table
-  const tableData = [
-    { date: 'Mar 14, 2024', amount: '$338', commission: '$33.8', balance: '$304.2', status: 'Pending' },
-    { date: 'Mar 16, 2023', amount: '$98', commission: '$9.8', balance: '$88.2', status: 'Rejected' },
-    { date: 'Aug 26, 2022', amount: '$132', commission: '$26.4', balance: '$105.6', status: 'Approved' },
-    { date: 'Apr 4, 2022', amount: '$1,226', commission: '$261.4', balance: '$964.6', status: 'Approved' },
-  ];
+  const tableData =
+    sellerEarnings?.data.map((item) => ({
+      type: item.type,
+      count: item.count,
+      total_amount: item.total_amount,
+    })) || [];
 
   return (
-    <div className='ml-16 mt-16'>
+    <div className="ml-16 mt-16">
       <Box sx={{ p: 3 }}>
         <Tabs value={activeTab} onChange={handleTabChange}>
           <Tab label="Earnings Status" />
@@ -61,12 +90,18 @@ const PayoutComponent: React.FC = () => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <Paper sx={{ p: 2 }}>
-                  <Typography variant="h6">Total Earnings</Typography>
-                  <Typography variant="body1">$268</Typography>
-                  <Typography variant="h6">Commission to the site</Typography>
-                  <Typography variant="body1">$26.8</Typography>
-                  <Typography variant="h6">Tutor Earnings</Typography>
-                  <Typography variant="body1">$241.2</Typography>
+                  <Typography variant="h6">Enroll</Typography>
+                  <Typography variant="body1">
+                    ${enrollData?.total_amount || "0.00"}
+                  </Typography>
+                  <Typography variant="h6">Receive</Typography>
+                  <Typography variant="body1">
+                    ${receiveData?.total_amount || "0.00"}
+                  </Typography>
+                  <Typography variant="h6">Send</Typography>
+                  <Typography variant="body1">
+                    ${sendData?.total_amount || "0.00"}
+                  </Typography>
                 </Paper>
               </Grid>
             </Grid>
@@ -80,35 +115,17 @@ const PayoutComponent: React.FC = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Amount</TableCell>
-                    <TableCell>Commission</TableCell>
-                    <TableCell>Tutor Balance</TableCell>
-                    <TableCell>Status</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Count</TableCell>
+                    <TableCell>Total Amount</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {tableData.map((row, index) => (
                     <TableRow key={index}>
-                      <TableCell>{row.date}</TableCell>
-                      <TableCell>{row.amount}</TableCell>
-                      <TableCell>{row.commission}</TableCell>
-                      <TableCell>{row.balance}</TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color:
-                              row.status === 'Pending'
-                                ? 'orange'
-                                : row.status === 'Rejected'
-                                  ? 'red'
-                                  : 'green',
-                          }}
-                        >
-                          {row.status}
-                        </Typography>
-                      </TableCell>
+                      <TableCell>{row.type}</TableCell>
+                      <TableCell>{row.count}</TableCell>
+                      <TableCell>${row.total_amount}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -118,7 +135,9 @@ const PayoutComponent: React.FC = () => {
         )}
 
         {/* Bottom Controls */}
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Box
+          sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}
+        >
           <Button variant="contained">Stats By Date Range</Button>
           <Button variant="outlined">Send Request</Button>
           <Button variant="contained" color="error">

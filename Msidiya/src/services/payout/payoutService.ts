@@ -6,6 +6,12 @@ export interface TutorEarnings {
   total_earnings: string;
 }
 
+export interface SellerEarning {
+  type: "enroll" | "receive" | "send" | string;
+  count: number;
+  total_amount: string;
+}
+
 export interface PayoutData {
   date: string;
   amount: number;
@@ -28,15 +34,24 @@ export const payoutService = {
     return response.data;
   },
 
+  // Get seller earnings
+  getSellerEarnings: async (): Promise<{
+    success: boolean;
+    data: SellerEarning[];
+  }> => {
+    const response = await axiosClient.get(`/api/seller/earnings/`);
+    return response.data;
+  },
+
   // Get payout statistics
   getPayoutStats: async (): Promise<PayoutStats> => {
-    const response = await axiosClient.get(`/api/payouts/stats`);
+    const response = await axiosClient.get(`/api/payouts/stats/`);
     return response.data;
   },
 
   // Get payout history
   getPayoutHistory: async (): Promise<PayoutData[]> => {
-    const response = await axiosClient.get(`/api/payouts/history`);
+    const response = await axiosClient.get(`/api/payouts/history/`);
     return response.data;
   },
 
@@ -44,7 +59,9 @@ export const payoutService = {
   requestPayout: async (
     amount: number
   ): Promise<{ success: boolean; message: string }> => {
-    const response = await axiosClient.post(`/api/payouts/request`, { amount });
+    const response = await axiosClient.post(`/api/payouts/request/`, {
+      amount,
+    });
     return response.data;
   },
 
@@ -66,7 +83,7 @@ export const payoutService = {
     startDate: string,
     endDate: string
   ): Promise<PayoutStats> => {
-    const response = await axiosClient.get(`/api/payouts/stats/range`, {
+    const response = await axiosClient.get(`/api/payouts/stats/range/`, {
       params: { startDate, endDate },
     });
     return response.data;

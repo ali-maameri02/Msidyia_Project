@@ -5,7 +5,7 @@ import json
 from Group_Class.models import GroupClass, StudentAppointment
 
 from Group_Class.serializers import GroupClassSerializer
-from django.db.models import F, Q, OuterRef, Subquery,Exists,Sum
+from django.db.models import F, Q, OuterRef, Subquery,Exists,Sum,Count
 import requests
 from rest_framework.response import Response
 from rest_framework import generics
@@ -425,3 +425,21 @@ def tutor_earnings(request):
         'total_earnings':     total_earnings,
     })
     return Response(serializer.data)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def seller_transactions_grouped_by_type(request):
+    user = request.user
+
+    # Include any transaction where the user is sender or receiver
+    qs = Transaction.objects.filter(
+        Q(sender=user) | Q(receiver=user)
+    ).values('type').annotate(
+        count=Count('id'),
+        total_amount=Sum('amount')
+    ).order_by('type')
+
+    serializer = TransactionTypeGroupSerializer(qs, many=True)
+    return Response({
+        "success": True,
+        "data": serializer.data
+    })
