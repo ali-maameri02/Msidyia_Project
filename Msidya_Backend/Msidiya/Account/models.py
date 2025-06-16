@@ -25,7 +25,7 @@ class User(AbstractUser):
     Paypal_Email = models.EmailField(max_length=254,null=True)
     Address = models.CharField(max_length=300,null=True)
     Zip_code = models.IntegerField(null=True)
-    Picture = models.ImageField( upload_to='Profiles/', height_field=None, width_field=None, max_length=None)
+    Picture = models.ImageField( upload_to='media/Profiles/', height_field=None, width_field=None, max_length=None)
     def save(self, *args, **kwargs):
         if self.pk is None:  # Only hash the password when creating a new user
             self.password = make_password(self.password)
@@ -43,9 +43,9 @@ class Language(models.Model):
          return self.name
 class Tutor (models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE , null=True , default=None)  # One-to-one relation with User
-    Cover = models.ImageField(upload_to='Cover/', height_field=None, width_field=None, max_length=None)    
+    Cover = models.ImageField(upload_to='media/Cover/', height_field=None, width_field=None, max_length=None)    
     Description = models.CharField(null=True, max_length=50)
-    Intro_video = models.FileField( upload_to='Intro_Videos/', max_length=None )
+    Intro_video = models.FileField( upload_to='media/Intro_Videos/', max_length=None )
     Verification_Id = models.BooleanField(default=False)
     qualifications = models.ManyToManyField(Qualification, blank=True, default=None, related_name='tutors')
     languages = models.ManyToManyField(Language, blank=True, default=None, related_name='tutors')
@@ -66,7 +66,7 @@ class Student (models.Model):
 class Ms_Seller (models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True , default=None)  # One-to-one relation with User
     Description = models.CharField(null=True, max_length=50)
-    Intro_video = models.FileField( upload_to='Intro_Videos/', max_length=None )
+    Intro_video = models.FileField( upload_to='media/Intro_Videos/', max_length=None )
     Verification_Id = models.BooleanField(default=False)
 
 

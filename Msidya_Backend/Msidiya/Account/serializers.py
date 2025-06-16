@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Chat, Language, Notification, Qualification, Transaction, User, Tutor, Student, Ms_Seller
 
 class UserSerializer(serializers.ModelSerializer):
+    Picture = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -19,6 +21,12 @@ class UserSerializer(serializers.ModelSerializer):
             'Picture',
         ]
         read_only_fields = ['id', 'username', 'email', 'Role', 'Picture']
+
+    def get_Picture(self, obj):
+        request = self.context.get('request')
+        if obj.Picture and hasattr(obj.Picture, 'url'):
+            return request.build_absolute_uri(obj.Picture.url) if request else obj.Picture.url
+        return None
         
         
 class UserregisterSerializer(serializers.ModelSerializer):
