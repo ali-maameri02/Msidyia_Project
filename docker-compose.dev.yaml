@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.dev
     working_dir: /app/Msidiya
     volumes:
       - "./Msidya_Backend:/app"
