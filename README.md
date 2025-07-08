@@ -59,7 +59,7 @@
 <p><strong>Why Msidyia?</strong></p>
 <p>This project empowers developers to create robust e-learning systems with ease. The core features include:</p>
 <ul class="list-disc pl-4 my-0">
-<li class="my-0">🛠️ <strong>Modular API Layer:</strong> Comprehensive REST APIs for user, payment, wallet, and class management, ensuring seamless data flow.</li>
+<li class="my-0">🛠️ <strong>Modular API Layer:</strong> Comprehensive Django REST APIs for user, payment, wallet, and class management, ensuring seamless data flow.</li>
 <li class="my-0">🎨 <strong>Modern Frontend:</strong> Built with React, TypeScript, TailwindCSS, and internationalization for a dynamic user experience.</li>
 <li class="my-0">🚀 <strong>Secure Deployment:</strong> Dockerized backend and frontend, Nginx configuration, SSL, and automated certificate management for reliable hosting.</li>
 <li class="my-0">💬 <strong>Real-Time Communication:</strong> Integrated chat and notification systems to enhance user engagement.</li>
@@ -94,7 +94,7 @@
 <pre><code class="language-sh">❯ pip install -r Msidya_Backend/requirements.txt
 </code></pre>
 <p><strong>Using <a href="https://www.npmjs.com/">npm</a>:</strong></p>
-<pre><code class="language-sh">❯ npm install
+<pre><code class="language-sh">❯ npm install -f
 </code></pre>
 <h3>Usage</h3>
 <p>Run the project with:</p>
@@ -102,7 +102,7 @@
 <pre><code class="language-sh">python {entrypoint}
 </code></pre>
 <p><strong>Using <a href="https://www.npmjs.com/">npm</a>:</strong></p>
-<pre><code class="language-sh">npm start
+<pre><code class="language-sh">npm run dev
 </code></pre>
 <h3>Testing</h3>
 <p>Msidyia_project uses the {<strong>test_framework</strong>} test framework. Run the test suite with:</p>
